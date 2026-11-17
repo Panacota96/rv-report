@@ -1,0 +1,973 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rakvor.example/schemas/expert-report.schema.json",
+  "title": "RV Report expert report (reports/expert-report.json)",
+  "description": "One dictamen pericial (co) or rapport d'expertise (fr) assembled from the verified runs of a Rakvor case folder. Language-neutral: quoted wording keeps every language the quoted tool wrote; RV Report's own wording is rendered from its i18n catalogues. Integers and strings only. Frozen model: src/core/src/model.rs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "tool",
+    "run",
+    "jurisdiction",
+    "identification",
+    "evidence",
+    "method",
+    "results",
+    "timeline",
+    "limitations",
+    "annexes",
+    "not_examined",
+    "signals",
+    "totals"
+  ],
+  "properties": {
+    "schema": {
+      "const": "rakvor.expert-report/1"
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "const": "rv-report"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "generated_utc",
+        "actor",
+        "langs",
+        "status",
+        "include_tools",
+        "exclude_tools",
+        "pdf_signed_by",
+        "pdf_signer_certificate_sha256"
+      ],
+      "properties": {
+        "run_id": {
+          "type": "string"
+        },
+        "generated_utc": {
+          "type": "string"
+        },
+        "actor": {
+          "type": "string"
+        },
+        "langs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "en",
+              "es",
+              "fr"
+            ]
+          }
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "final"
+          ]
+        },
+        "include_tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "exclude_tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pdf_signed_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pdf_signer_certificate_sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "jurisdiction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "case_jurisdiction",
+        "sections",
+        "citations"
+      ],
+      "properties": {
+        "code": {
+          "enum": [
+            "co",
+            "fr"
+          ]
+        },
+        "case_jurisdiction": {
+          "type": "string"
+        },
+        "sections": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "key",
+              "reference",
+              "status"
+            ],
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "reference": {
+                "type": "string"
+              },
+              "status": {
+                "const": "to_be_verified"
+              }
+            }
+          }
+        }
+      }
+    },
+    "identification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "case_created_utc",
+        "case_json_sha256",
+        "examiner",
+        "mandate",
+        "case_verification"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string"
+        },
+        "case_created_utc": {
+          "type": "string"
+        },
+        "case_json_sha256": {
+          "type": "string"
+        },
+        "examiner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "examiner_id"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "examiner_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "mandate": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "file_name",
+                "sha256",
+                "bytes",
+                "text"
+              ],
+              "properties": {
+                "file_name": {
+                  "type": "string"
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "bytes": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "text": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "case_verification": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "case_log_entries",
+            "case_log_head",
+            "registry_items",
+            "registry_sha256"
+          ],
+          "properties": {
+            "case_log_entries": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "case_log_head": {
+              "type": "string"
+            },
+            "registry_items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "registry_sha256": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidence_id",
+          "path",
+          "file_name",
+          "size",
+          "hashes",
+          "registered_utc",
+          "registered_by",
+          "custody"
+        ],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^E[0-9]{4,}$"
+          },
+          "path": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "hashes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "registered_utc": {
+            "type": "string"
+          },
+          "registered_by": {
+            "$ref": "#/$defs/run_pointer"
+          },
+          "custody": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/custody_event"
+            }
+          }
+        }
+      }
+    },
+    "method": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tools"
+      ],
+      "properties": {
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tool",
+              "known",
+              "role",
+              "versions",
+              "runs",
+              "algorithms",
+              "langs",
+              "frontends",
+              "items_examined",
+              "findings_quoted"
+            ],
+            "properties": {
+              "tool": {
+                "type": "string"
+              },
+              "known": {
+                "type": "boolean"
+              },
+              "role": {
+                "type": "string"
+              },
+              "versions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "runs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "algorithms": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "langs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "frontends": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "items_examined": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "findings_quoted": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidence_id",
+          "path",
+          "entries"
+        ],
+        "properties": {
+          "evidence_id": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/quoted_run"
+            }
+          }
+        }
+      }
+    },
+    "timeline": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "run_id",
+            "tool_version",
+            "started_utc",
+            "finished_utc",
+            "events",
+            "runs_verified",
+            "runs_excluded",
+            "zone_unknown",
+            "display_zone",
+            "signals_by_severity",
+            "signals_by_code",
+            "source",
+            "timeline_file"
+          ],
+          "properties": {
+            "run_id": {
+              "type": "string"
+            },
+            "tool_version": {
+              "type": "string"
+            },
+            "started_utc": {
+              "type": "string"
+            },
+            "finished_utc": {
+              "type": "string"
+            },
+            "events": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "runs_verified": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "runs_excluded": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "zone_unknown": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "display_zone": {
+              "type": "string"
+            },
+            "signals_by_severity": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "signals_by_code": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "source": {
+              "$ref": "#/$defs/source"
+            },
+            "timeline_file": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/$defs/source"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "limitations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tools",
+        "own"
+      ],
+      "properties": {
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tool",
+              "tool_version",
+              "runs",
+              "items"
+            ],
+            "properties": {
+              "tool": {
+                "type": "string"
+              },
+              "tool_version": {
+                "type": "string"
+              },
+              "runs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "text"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "own": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "annexes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runs"
+      ],
+      "properties": {
+        "runs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tool",
+              "tool_version",
+              "run_id",
+              "run_dir",
+              "status",
+              "reason",
+              "detail",
+              "started_utc",
+              "finished_utc",
+              "audit_entries",
+              "audit_head",
+              "timestamp_status",
+              "timestamps",
+              "outputs_recorded",
+              "outputs_verified",
+              "findings_quoted"
+            ],
+            "properties": {
+              "tool": {
+                "type": "string"
+              },
+              "tool_version": {
+                "type": "string"
+              },
+              "run_id": {
+                "type": "string"
+              },
+              "run_dir": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "verified",
+                  "excluded",
+                  "skipped"
+                ]
+              },
+              "reason": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string"
+              },
+              "started_utc": {
+                "type": "string"
+              },
+              "finished_utc": {
+                "type": "string"
+              },
+              "audit_entries": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "audit_head": {
+                "type": "string"
+              },
+              "timestamp_status": {
+                "type": "string"
+              },
+              "timestamps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "outputs_recorded": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "outputs_verified": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "findings_quoted": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "not_examined": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidence_id",
+          "path",
+          "reason"
+        ],
+        "properties": {
+          "evidence_id": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "severity",
+          "params",
+          "evidence_id",
+          "run_id"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "severity": {
+            "$ref": "#/$defs/severity"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "evidence_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "run_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_items",
+        "runs_found",
+        "runs_verified",
+        "runs_excluded",
+        "runs_skipped",
+        "findings_quoted",
+        "quoted_by_severity",
+        "items_not_examined"
+      ],
+      "properties": {
+        "evidence_items": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "runs_found": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "runs_verified": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "runs_excluded": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "runs_skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "findings_quoted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "quoted_by_severity": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "items_not_examined": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  },
+  "$defs": {
+    "severity": {
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "file",
+        "sha256"
+      ],
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "description": "A run output a quotation comes from (path relative to the case folder; SHA-256 as recorded in the run's audit log)."
+    },
+    "finding_text": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "shows",
+        "does_not_prove"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "shows": {
+          "type": "string"
+        },
+        "does_not_prove": {
+          "type": "string"
+        }
+      }
+    },
+    "quoted_finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "severity",
+        "params",
+        "text",
+        "pointer"
+      ],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/severity"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "text": {
+          "type": "object",
+          "description": "language -> the tool's own wording, verbatim.",
+          "additionalProperties": {
+            "$ref": "#/$defs/finding_text"
+          }
+        },
+        "pointer": {
+          "type": "string",
+          "pattern": "^/findings/[0-9]+$"
+        }
+      },
+      "description": "A finding exactly as the tool wrote it."
+    },
+    "quoted_run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool",
+        "tool_version",
+        "run_id",
+        "item_status",
+        "registry_match",
+        "source",
+        "findings"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string"
+        },
+        "tool_version": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "item_status": {
+          "type": "string"
+        },
+        "registry_match": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/quoted_finding"
+          }
+        }
+      }
+    },
+    "custody_event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action",
+        "case_log_seq",
+        "ts_utc",
+        "actor",
+        "tool",
+        "tool_version",
+        "run_id",
+        "registry_match"
+      ],
+      "properties": {
+        "action": {
+          "enum": [
+            "registered",
+            "examined"
+          ]
+        },
+        "case_log_seq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ts_utc": {
+          "type": "string"
+        },
+        "actor": {
+          "type": "string"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "tool_version": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "registry_match": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    },
+    "run_pointer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool",
+        "version",
+        "run_id"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

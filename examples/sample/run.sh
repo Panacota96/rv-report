@@ -1,32 +1,36 @@
 #!/usr/bin/env sh
-# Runs the sample review and checks the result. Usage: examples/sample/run.sh [path-to-rv-report]
-# Output folder: examples/sample/out (or $RV_SAMPLE_OUT).
-# Fails (non-zero exit) if the self-test, the scan or verify-log fails, or if the tool's hash register
-# (logs/<RUN-ID>/hashes.csv) differs from the independently computed expected_hashes.csv.
+# Assembles the expert report of the sample case and checks the result. Usage: examples/sample/run.sh [path-to-rv-report]
+# Works on a copy of examples/sample/case in examples/sample/out (or $RV_SAMPLE_OUT), so the committed case is
+# never changed. Fails (non-zero exit) if the self-test fails, if `assemble` does not end with exit code 0, if
+# reports/expert-report.json is missing or not listed with its SHA-256 in the run's audit log, or if verify-log or
+# verify-case fails.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 bin=${1:-rv-report}
 out=${RV_SAMPLE_OUT:-"$here/out"}
+rm -rf "$out/case"
+mkdir -p "$out"
+cp -R "$here/case" "$out/case"
 "$bin" self-test
-# Expected exit code 0: one medium finding (extension mismatch) and one duplicate pair, no high finding.
-"$bin" scan --input "$here/evidence" --hash sha256,md5 --lang all --case DEMO-001 --actor "Sample" --out "$out" --progress none
-run=$(ls "$out/logs" | tail -n 1)
-"$bin" verify-log "$out/logs/$run"
-# Compare the tool's hash register with expected_hashes.csv: same files, sizes, SHA-256 and MD5.
-# hashes.csv: index,path,size,<algorithms>,status,error (path may be quoted); fields are read from the right.
-awk -F, '
-  FNR == 1 { if (FILENAME ~ /expected_hashes\.csv$/) { for (i = 1; i <= NF; i++) e[$i] = i } else { for (i = 1; i <= NF; i++) h[$i] = i; hn = NF }; next }
-  FILENAME ~ /expected_hashes\.csv$/ { want[$e["file"]] = $e["size"] "," $e["sha256"] "," $e["md5"]; n++; next }
-  {
-    path = $0; sub(/^[0-9]+,/, "", path); sub(/,[0-9]+,[^,]*,[^,]*,[^,]*,[^,]*$/, "", path)
-    gsub(/"/, "", path); sub(/.*[\/\\]/, "", path)
-    got[path] = $(NF - hn + h["size"]) "," $(NF - hn + h["sha256"]) "," $(NF - hn + h["md5"])
-    m++
-  }
-  END {
-    for (f in want) if (got[f] != want[f]) { print "MISMATCH " f ": tool " got[f] ", expected " want[f]; bad = 1 }
-    if (m != n) { print "MISMATCH: the tool hashed " m " files, expected_hashes.csv lists " n; bad = 1 }
-    if (bad) exit 3
-    print "hashes.csv matches expected_hashes.csv (" n " files: size, SHA-256, MD5)"
-  }' "$here/expected_hashes.csv" "$out/logs/$run/hashes.csv"
-echo "Reports: $out/reports/$run/statistics.en.html"
+# Expected exit code 0: every run verifies; the signals are low (an item no analysis tool examined) and info.
+code=0
+"$bin" assemble --case-dir "$out/case" --hash sha256,md5 --lang all --actor "Sample" --progress none || code=$?
+if [ "$code" -ne 0 ]; then
+  echo "FAIL: assemble exited with $code, expected 0"
+  exit 1
+fi
+run=$(ls "$out/case/runs/rv-report" | tail -n 1)
+dir="$out/case/runs/rv-report/$run"
+if [ ! -s "$dir/reports/expert-report.json" ]; then
+  echo "FAIL: $dir/reports/expert-report.json is missing or empty"
+  exit 1
+fi
+want=$(sha256sum "$dir/reports/expert-report.json" | cut -d' ' -f1)
+if ! grep '"action":"output_written"' "$dir/logs/audit.jsonl" | grep '"file":"expert-report.json"' | grep -q "\"sha256\":\"$want\""; then
+  echo "FAIL: expert-report.json (SHA-256 $want) is not listed in the audit log"
+  exit 1
+fi
+echo "expert-report.json is listed in the audit log (SHA-256 $want)"
+"$bin" verify-log "$dir/logs"
+"$bin" verify-case "$out/case"
+echo "Report: $dir/reports/expert-report.en.html"

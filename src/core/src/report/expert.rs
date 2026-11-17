@@ -314,15 +314,18 @@ fn results_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
             b.push(para(x(c, "no_results")));
         }
         for e in &it.entries {
+            let registry = match e.registry_match {
+                Some(_) => format!(" · {}: {}", x(c, "labels.registry"), yes_no_match(c, e.registry_match)),
+                None => String::new(),
+            };
             b.push(para(format!(
-                "{} {} · {} · {}: {} · {}: {}",
+                "{} {} · {} · {}: {}{}",
                 e.tool,
                 e.tool_version,
                 e.run_id,
                 x(c, "labels.item_status"),
                 or_dash(&e.item_status),
-                x(c, "labels.registry"),
-                yes_no_match(c, e.registry_match)
+                registry
             )));
             b.push(json!({"kind": "source", "text": format!("{}: {} (SHA-256 {})", x(c, "labels.source"), e.source.file, e.source.sha256)}));
             if e.findings.is_empty() {

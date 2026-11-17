@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="{{ lang }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }}</title><style>{{ css|safe }}</style></head>
+<body><div class="band"><div class="inner">{{ logo_svg|safe }}<div><div class="word">RAKVOR</div><div class="desc">{{ brand.descriptor }}</div></div></div></div>
+<main>
+<header><div><h1>{{ title }}</h1><div>{{ subtitle }}</div></div></header>
+<div class="{% if draft %}draft{% else %}final{% endif %}">{{ banner }}</div>
+<p class="note">{{ disclaimer }}</p>
+{% for sec in sections %}<section id="{{ sec.key }}">
+<h2>{{ sec.title }}</h2>
+{% for line in sec.basis %}<p class="basis">{{ legal_basis }}: {{ line }}</p>{% endfor %}
+{% for b in sec.blocks %}{% if b.kind == "para" %}<p>{{ b.text }}</p>
+{% elif b.kind == "note" %}<p class="note"><strong>{{ b.text }}</strong></p>
+{% elif b.kind == "sub" %}<h3>{{ b.text }}</h3>
+{% elif b.kind == "quote" %}<blockquote>{{ b.text }}</blockquote>
+{% elif b.kind == "source" %}<p class="source mono">{{ b.text }}</p>
+{% elif b.kind == "kv" %}<div class="kv">{% for r in b.rows %}<div>{{ r[0] }}</div><div>{{ r[1] }}</div>{% endfor %}</div>
+{% elif b.kind == "bullets" %}<ul>{% for i in b.items %}<li>{{ i }}</li>{% endfor %}</ul>
+{% elif b.kind == "box" %}<div class="finding"><div><span class="badge sev-{{ b.sev }}">{{ b.badge }}</span> <strong>{{ b.title }}</strong>{% if b.code %} <span class="mono">{{ b.code }}</span>{% endif %}</div>
+<div class="kv">{% for r in b.rows %}<div>{{ r[0] }}</div><div>{{ r[1] }}</div>{% endfor %}</div></div>
+{% elif b.kind == "sign" %}<div class="sign">{% for l in b.labels %}<div>{{ l }}</div>{% endfor %}</div>
+{% endif %}{% endfor %}</section>
+{% endfor %}
+<footer><div class="tagline">{{ brand.tagline }}</div>{{ footer }} · {{ signature }}</footer>
+</main></body></html>

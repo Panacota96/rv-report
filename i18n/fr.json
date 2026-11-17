@@ -48,20 +48,20 @@
     "none": "Aucun",
     "unknown": "inconnu",
     "method": "Méthode",
-    "method_text": "Chaque fichier a été ouvert en lecture seule, haché en une seule passe avec les algorithmes choisis et comparé à une table de signatures de fichiers. Chaque action a été inscrite dans un journal d'audit chaîné par empreintes.",
+    "method_text": "RV Report n'a pas ouvert cet élément : il a rassemblé ce que les exécutions vérifiées de l'affaire en ont dit, en citant leurs constats mot pour mot, et a enregistré chaque étape dans un journal d'audit chaîné.",
     "conclusion": "Conclusion",
     "what_we_did": "Ce que nous avons fait",
     "what_we_found": "Ce que nous avons constaté",
     "next_steps": "Prochaine étape recommandée",
-    "next_ok": "Aucune action n'est nécessaire pour ce fichier.",
-    "next_attention": "Examinez les constatations avec votre expert avant de vous appuyer sur ce fichier.",
-    "next_problem": "Ne vous appuyez pas sur ce fichier tant que l'expert n'a pas expliqué le problème.",
+    "next_ok": "Relisez les constats des outils cités dans le rapport d'expertise.",
+    "next_attention": "Examinez les signaux avec l'expert avant de vous fier au rapport pour cet élément.",
+    "next_problem": "Ne vous fiez pas au rapport pour cet élément tant que l'expert n'a pas levé le signal.",
     "status_ok": "Aucun problème",
     "status_attention": "À examiner",
     "status_problem": "Problème détecté",
-    "summary_ok": "Le fichier a été haché et vérifié. Les contrôles appliqués n'ont relevé aucun problème.",
-    "summary_attention": "Le fichier a été haché et vérifié. Certains points méritent attention.",
-    "summary_problem": "Le fichier n'a pas pu être entièrement examiné ou présente un problème sérieux.",
+    "summary_ok": "L'enregistrement de l'affaire sur cet élément s'est vérifié ; RV Report n'a aucun signal à son sujet.",
+    "summary_attention": "L'enregistrement de l'affaire sur cet élément demande attention (voir les signaux).",
+    "summary_problem": "L'enregistrement de l'affaire montre un problème sérieux pour cet élément (voir les signaux).",
     "fingerprint": "Empreinte numérique",
     "fingerprint_text": "Cette empreinte identifie le contenu exact du fichier. Toute modification, même d'un seul caractère, produirait une valeur différente.",
     "timestamp": "Horodatage qualifié (RFC 3161)",
@@ -91,7 +91,8 @@
     "mismatched": "Différents du registre",
     "unregistered": "Absents du registre",
     "intake_date": "Enregistré à la réception (UTC)",
-    "case_dir": "Dossier de l'affaire"
+    "case_dir": "Dossier de l'affaire",
+    "title_expert": "Rapport d'expertise"
   },
   "severity": {
     "high": "Élevée",
@@ -139,13 +140,58 @@
       "title": "Le chemin enregistré contient désormais un autre contenu",
       "shows": "Ce chemin a déjà été enregistré comme %{previous_id} avec un autre contenu ; le contenu actuel reçoit un nouvel ID d'élément.",
       "does_not_prove": "Quelle version est l'originale ni pourquoi le contenu a changé."
+    },
+    "RUN_EXCLUDED": {
+      "title": "Exécution exclue : échec de vérification",
+      "shows": "L'exécution %{run_id} de %{tool} a échoué à la vérification (%{reason}) ; aucun de ses résultats n'est cité dans ce rapport.",
+      "does_not_prove": "Un échec montre que l'enregistrement de l'exécution n'est pas fiable en l'état, pas que l'élément ou l'expert aient mal agi ; l'exécution peut être refaite sur une copie vérifiée."
+    },
+    "REGISTRY_MISMATCH_REPORTED": {
+      "title": "Un outil a examiné une copie différente du registre",
+      "shows": "L'exécution %{run_id} de %{tool} a enregistré que la copie de %{evidence_id} examinée ne correspond pas aux empreintes enregistrées à la réception.",
+      "does_not_prove": "Cela ne montre ni quelle copie est l'originale ni qu'elle a été modifiée ; ses résultats ne décrivent que cette copie."
+    },
+    "ITEM_NOT_EXAMINED": {
+      "title": "Élément enregistré examiné par aucun outil d'analyse",
+      "shows": "%{evidence_id} (%{file}) a été enregistré à la réception mais aucune exécution vérifiée d'un outil d'analyse ne l'a examiné.",
+      "does_not_prove": "Rien n'est connu de son contenu au-delà de ses empreintes ; il n'est pas suspect pour autant."
+    },
+    "TIMELINE_PREDATES_RUNS": {
+      "title": "Chronologie construite avant la fin d'une exécution citée",
+      "shows": "La chronologie %{timeline_run} a commencé avant la fin de l'exécution %{run_id} de %{tool} et peut donc ne pas inclure ses instants.",
+      "does_not_prove": "Cela ne montre pas que la chronologie est fausse ; reconstruisez-la avec RV Timeline pour inclure toutes les exécutions."
+    },
+    "UNKNOWN_TOOL": {
+      "title": "Outil inconnu de RV Report",
+      "shows": "RV Report n'a pas de description de %{tool} ; ses constats vérifiés sont cités tels quels, sans résumé de sa méthode.",
+      "does_not_prove": "Cela ne dit rien de la fiabilité de cet outil ; lisez sa documentation."
+    },
+    "TRANSLATION_UNAVAILABLE": {
+      "title": "Libellé de l'outil indisponible dans cette langue",
+      "shows": "L'exécution %{run_id} de %{tool} n'a écrit ses constats qu'en %{available} ; le rapport en %{lang} montre ce libellé, marqué, sans le traduire.",
+      "does_not_prove": "Cela ne change aucun résultat ; relancez l'outil avec --lang %{lang} pour obtenir son propre libellé."
+    },
+    "TIMELINE_ABSENT": {
+      "title": "Pas de chronologie dans l'affaire",
+      "shows": "Aucune exécution vérifiée de RV Timeline : le rapport n'a pas de chronologie.",
+      "does_not_prove": "Cela ne signifie pas que les instants sont cohérents ou non ; construisez une chronologie avec RV Timeline si le temps compte."
+    },
+    "JURISDICTION_DIFFERS_FROM_CASE": {
+      "title": "Structure du rapport différente de la juridiction de l'affaire",
+      "shows": "Le rapport suit la structure %{requested} ; le dossier de l'affaire est enregistré sous %{case}.",
+      "does_not_prove": "C'est un choix de l'expert, pas un défaut des éléments."
     }
   },
   "limitations": {
     "SIGNATURE_TABLE_LIMITED": "La détection du type repose sur une table limitée de signatures courantes ; les types inconnus sont signalés comme inconnus, non comme suspects.",
     "TIMESTAMPS_FROM_FILESYSTEM": "Les dates de modification proviennent du système de fichiers de la copie examinée et peuvent différer de la source d'origine.",
     "CLEAN_RESULT_IS_NOT_AUTHENTICITY": "Un résultat sans constatation ne prouve pas qu'un fichier est authentique ni qu'il n'a pas été modifié avant son acquisition.",
-    "TIMESTAMP_PROVES_EXISTENCE_ONLY": "Un horodatage qualifié prouve que le journal d'audit existait sous cette forme exacte à l'heure indiquée ; il ne prouve pas que la copie examinée correspond à la source d'origine."
+    "TIMESTAMP_PROVES_EXISTENCE_ONLY": "Un horodatage qualifié prouve que le journal d'audit existait sous cette forme exacte à l'heure indiquée ; il ne prouve pas que la copie examinée correspond à la source d'origine.",
+    "REPORT_DERIVED_CONTENT": "Ce rapport est un contenu dérivé : il reprend ce que les outils ont enregistré, si bien qu'une erreur d'analyse d'un outil y passe telle quelle. Sa valeur repose sur la validation de chaque outil cité et sur la relecture de l'expert.",
+    "REPORT_QUOTES_ONLY_VERIFIED_RUNS": "Seules les exécutions dont la chaîne d'audit, l'ancrage dans le journal de l'affaire, les horodatages et les sorties enregistrées se vérifient sont citées ; les résultats d'une exécution exclue sont absents même s'ils étaient justes.",
+    "REPORT_NO_CONCLUSION": "RV Report ne rédige ni conclusion ni réponse aux questions de la mission : elles relèvent de l'avis de l'expert.",
+    "REPORT_LEGAL_STRUCTURE_UNVERIFIED": "La structure des sections et les références juridiques suivent les notes de recevabilité (projet) de la suite ; chaque référence porte la mention à vérifier jusqu'à relecture par un avocat.",
+    "REPORT_NO_TRANSLATION": "Les libellés cités ne sont jamais traduits : un constat écrit par un outil dans une autre langue est montré dans cette langue, marqué."
   },
   "brand": {
     "descriptor": "INVESTIGATION NUMÉRIQUE | RÉPONSE AUX INCIDENTS | SÉCURITÉ",
@@ -226,5 +272,239 @@
     "case_dir_hint": "facultatif : dossier partagé de l'affaire (relie les outils d'une même affaire)",
     "out_from_case": "Dossier de sortie : fixé par le dossier de l'affaire",
     "evidence_ids": "ID des éléments"
+  },
+  "expert": {
+    "title_co": "Rapport d'expertise (dictamen pericial) — preuve numérique",
+    "title_fr": "Rapport d'expertise — preuve numérique",
+    "subtitle": "Affaire %{case} · assemblage %{run} · %{date} (UTC)",
+    "draft_banner": "PROJET soumis à la relecture de l'expert — non déposé. L'expert relit chaque section, complète l'attestation et signe.",
+    "final_banner": "Version finale marquée par l'expert (--final). L'expert est l'auteur de ce rapport et de ses conclusions.",
+    "disclaimer": "Assemblé par RV Report à partir des résultats vérifiés et audités des outils Rakvor exécutés sur cette affaire. Les résultats sont cités mot pour mot depuis le rapport de chaque outil ; ce sont des signaux techniques, pas des verdicts. Chaque référence juridique porte la mention « à vérifier » et la structure doit être relue par un avocat.",
+    "to_verify": "[à vérifier]",
+    "sections_co": {
+      "identification": "1. Identification de l'expert et de l'affaire",
+      "object": "2. Objet du dictamen",
+      "evidence": "3. Éléments de preuve reçus (EMP/EF) et chaîne de possession",
+      "method": "4. Méthodes, techniques et instruments",
+      "results": "5. Résultats par élément",
+      "timeline": "6. Chronologie",
+      "limitations": "7. Limites",
+      "not_examined": "8. Ce qui n'a pas été examiné",
+      "annexes": "9. Annexes : exécutions des outils et vérification du registre",
+      "declaration": "10. Déclaration et signature de l'expert"
+    },
+    "sections_fr": {
+      "mission": "1. Désignation et mission",
+      "evidence": "2. Scellés reçus",
+      "method": "3. Description des opérations",
+      "results": "4. Constatations par scellé",
+      "timeline": "5. Chronologie",
+      "limitations": "6. Limites de l'examen",
+      "not_examined": "7. Ce qui n'a pas été examiné",
+      "annexes": "8. Annexes : exécutions des outils et vérification du registre",
+      "declaration": "9. Conclusions et attestation de l'expert"
+    },
+    "citations": {
+      "co_906_405": "preuve par expertise dans la procédure pénale",
+      "co_906_413": "présentation des rapports d'expertise par les parties",
+      "co_906_414": "recevabilité du rapport et citation de l'expert",
+      "co_906_415": "fondement de l'avis de l'expert (rapport résumé)",
+      "co_906_417": "interrogatoire de l'expert sur les instruments, principes et méthodes",
+      "co_906_254": "chaîne de possession (cadena de custodia)",
+      "co_cgp_226": "contenu du dictamen hors procédure pénale",
+      "fr_cpp_156": "expertise ordonnée sur une question d'ordre technique",
+      "fr_cpp_157": "experts inscrits sur les listes ; serment des autres experts",
+      "fr_cpp_158": "la mission ne porte que sur des questions techniques",
+      "fr_cpp_163": "ouverture et reconstitution des scellés, mentionnées au rapport",
+      "fr_cpp_166": "rapport décrivant les opérations et les conclusions, signé par l'expert",
+      "fr_cpp_167": "notification des conclusions ; complément ou contre-expertise"
+    },
+    "intro": {
+      "evidence": "Éléments tels qu'enregistrés à la réception dans le registre de l'affaire (evidence/registry.json, vérifié). Les lignes de possession viennent du journal chaîné de l'affaire (enregistrement) et de chaque exécution vérifiée qui a comparé l'élément au registre avant de l'examiner.",
+      "method": "L'examen a été réalisé avec les outils Rakvor ci-dessous. Avant toute citation, RV Report a :",
+      "results": "Pour chaque élément, chaque exécution vérifiée qui l'a examiné, avec ses constats cités mot pour mot depuis le rapport technique de cette exécution (fichier et SHA-256 indiqués). Chaque constat dit ce qu'il montre et ce qu'il ne prouve pas.",
+      "timeline": "Résumé de la dernière exécution vérifiée de RV Timeline sur l'affaire (son propre rapport de statistiques). Ses signaux sur chaque élément sont cités dans les résultats.",
+      "limitations": "Les limites de chaque outil telles que ses exécutions les ont imprimées, puis celles de RV Report.",
+      "not_examined": "Éléments enregistrés qu'aucune exécution vérifiée d'un outil d'analyse n'a examinés (la réception, la chronologie et ce rapport n'examinent pas le contenu).",
+      "annexes": "Chaque exécution trouvée dans le dossier de l'affaire et ce que RV Report en a fait. Les exécutions exclues ont échoué à la vérification et ne sont jamais citées."
+    },
+    "method_steps": {
+      "verify_case": "vérifié le journal de l'affaire (chaîne de hachage), case.json et l'empreinte du registre des éléments ;",
+      "verify_runs": "vérifié chaque exécution : chaîne d'audit intacte, exécution terminée et ancrée dans le journal de l'affaire, jetons d'horodatage, et chaque sortie recalculée contre l'empreinte enregistrée par son audit ; une exécution en échec est exclue et jamais citée ;",
+      "quote": "cité chaque constat et chaque limite mot pour mot depuis le rapport de l'outil, sans reformulation ni traduction ;",
+      "not_examined": "listé les éléments enregistrés qu'aucun outil d'analyse n'a examinés. RV Report n'a jamais ouvert les éléments eux-mêmes."
+    },
+    "tools_note": "« Ce qu'il fait » et « ce qu'il vérifie » résument la documentation de chaque outil ; les versions, exécutions, algorithmes et langues viennent des journaux d'audit et du journal de l'affaire.",
+    "unknown_tool": "RV Report n'a pas de description de cet outil : ses constats sont cités tels qu'il les a écrits ; consultez la documentation de l'outil.",
+    "no_verified_runs": "Aucune exécution vérifiée n'est disponible pour cette affaire.",
+    "case_verification_text": "Vérifié avant toute lecture ; une affaire qui échoue à la vérification est refusée et rien n'y est écrit.",
+    "jurisdiction_differs": "Le rapport suit la structure %{requested}, alors que le dossier de l'affaire est enregistré sous %{case} ; les fiches de possession suivent l'affaire.",
+    "no_mandate": "Aucun texte de mission n'a été fourni (--mandate). L'expert doit indiquer l'objet de l'expertise et les questions posées avant de déposer le rapport.",
+    "mandate_quoted": "Cité mot pour mot depuis le fichier de mission fourni par l'expert :",
+    "custody_of": "Possession de %{id}",
+    "custody_note": "Les transferts physiques, scellés et signatures sur papier ne figurent pas dans l'enregistrement numérique : l'expert les ajoute. Les exécutions en échec de vérification ne servent pas de preuve de possession.",
+    "no_results": "Aucune exécution vérifiée n'a porté sur cet élément.",
+    "no_findings": "L'outil n'a signalé aucun constat pour cet élément. L'absence de constat ne prouve pas l'authenticité.",
+    "no_wording": "Le rapport de l'outil ne donne pas de libellé pour ce constat (code seul).",
+    "quote_note": "[EN], [ES] ou [FR] devant un titre : l'outil n'a écrit ce constat que dans cette langue ; RV Report ne le traduit pas. Relancez l'outil dans la langue du rapport pour obtenir son propre libellé.",
+    "no_timeline": "Aucune exécution vérifiée de RV Timeline dans cette affaire : pas de chronologie.",
+    "timeline_runs": "%{verified} vérifiées, %{excluded} exclues",
+    "timeline_signals_note": "La chronologie ordonne les instants enregistrés par les outils ; ses signaux comparent des sources et ne concluent jamais.",
+    "no_printed_limitation": "aucun libellé imprimé n'a pu être lu dans le rapport de l'exécution",
+    "all_examined": "Chaque élément enregistré a été examiné par au moins une exécution d'analyse vérifiée.",
+    "not_examined_reason": {
+      "no_analysis_run": "seulement enregistré à la réception : aucun outil d'analyse ne l'a examiné"
+    },
+    "not_examined_note": "Rien n'est conclu sur ces éléments. Pour les éléments examinés, chaque outil n'examine que ce que décrit sa documentation.",
+    "outputs_of": "%{verified} sur %{recorded} sorties enregistrées recalculées et identiques",
+    "declaration_co": "Déclaration de l'expert, à compléter par l'expert. RV Report ne rédige aucune conclusion : l'avis, son fondement technique et scientifique et les déclarations exigées par la procédure applicable relèvent de l'expert (Ley 906 de 2004, art. 415 ; CGP art. 226 en matière civile) [à vérifier].",
+    "declaration_fr": "Conclusions et attestation, à rédiger par l'expert. RV Report ne rédige aucune conclusion : le rapport doit décrire les opérations et énoncer les conclusions de l'expert, qui le signe (Code de procédure pénale, art. 166) [à vérifier].",
+    "examiner_adds_co": {
+      "qualifications": "qualifications et compétence de l'expert (idoneidad) et leurs justificatifs ;",
+      "conclusions": "l'avis de l'expert sur les questions de la mission, avec son fondement technique et scientifique ;",
+      "statement": "les déclarations d'indépendance et toute autre exigée par la procédure [à vérifier]."
+    },
+    "examiner_adds_fr": {
+      "qualifications": "l'inscription de l'expert sur une liste ou le serment prêté (CPP art. 157, 160) [à vérifier] ;",
+      "conclusions": "les réponses à chaque question de la mission, avec leur fondement ;",
+      "statement": "l'attestation que l'expert a personnellement accompli ou supervisé les opérations, les noms des personnes qui l'ont assisté, et la signature."
+    },
+    "draft_note": "Ceci est un projet. Tant que l'expert ne l'a pas marqué final (--final) et signé, il ne doit pas être déposé.",
+    "final_note": "Marqué final par l'expert ; ce marquage est enregistré dans le journal d'audit (report_marked_final).",
+    "labels": {
+      "case": "Affaire",
+      "case_created": "Dossier de l'affaire créé (UTC)",
+      "case_json_sha256": "SHA-256 de case.json",
+      "examiner": "Expert",
+      "examiner_id": "Identification de l'expert",
+      "not_given": "non indiquée",
+      "report_run": "Exécution de RV Report",
+      "generated": "Assemblé (UTC)",
+      "status": "Statut",
+      "status_draft": "Projet soumis à la relecture de l'expert",
+      "status_final": "Final (marqué par l'expert)",
+      "structure": "Structure",
+      "structure_co": "Colombie — dictamen pericial (Ley 906 de 2004)",
+      "structure_fr": "France — rapport d'expertise (CPP art. 156–169)",
+      "languages": "Langues",
+      "tool_filter": "Filtre d'outils (inclus / exclus)",
+      "case_verification": "Vérification du dossier de l'affaire",
+      "case_log_entries": "Entrées du journal de l'affaire vérifiées",
+      "case_log_head": "Tête du journal de l'affaire",
+      "registry_items": "Éléments enregistrés",
+      "registry_sha256": "SHA-256 du registre",
+      "file": "Fichier",
+      "sha256": "SHA-256",
+      "bytes": "Octets",
+      "bytes_unit": "octets",
+      "path": "Chemin enregistré",
+      "size": "Taille",
+      "registered": "Enregistré à la réception (UTC)",
+      "registered_by": "Enregistré par",
+      "registry": "conforme au registre",
+      "custody_registered": "enregistré (réception)",
+      "custody_examined": "examiné (copie en lecture seule comparée au registre)",
+      "match_yes": "oui",
+      "match_no": "NON — la copie examinée diffère du registre",
+      "match_unknown": "non enregistré",
+      "tools_used": "Outils utilisés",
+      "what_it_does": "Ce qu'il fait",
+      "what_it_checks": "Ce qu'il vérifie",
+      "runs": "Exécutions",
+      "algorithms": "Algorithmes d'empreinte",
+      "frontends": "Interface",
+      "items_examined": "Éléments examinés",
+      "findings_quoted": "Constats cités",
+      "this_tool": "Ce rapport",
+      "tool": "Outil",
+      "item_status": "statut selon l'outil",
+      "source": "Source",
+      "shows": "Ce que cela montre",
+      "does_not_prove": "Ce que cela ne prouve pas",
+      "pointer": "Emplacement dans la source",
+      "timeline_run": "Exécution de la chronologie",
+      "started": "Début (UTC)",
+      "finished": "Fin (UTC)",
+      "events": "Événements",
+      "timeline_runs": "Exécutions lues par la chronologie",
+      "zone_unknown": "Événements sans fuseau horaire",
+      "display_zone": "Fuseau d'affichage",
+      "signals": "Signaux",
+      "signal_codes": "Codes de signal",
+      "timeline_file": "Fichier de chronologie (Timesketch)",
+      "runs_found": "Exécutions trouvées",
+      "runs_verified": "Vérifiées et utilisées",
+      "runs_excluded": "Exclues (échec de vérification)",
+      "runs_skipped": "Ignorées",
+      "run_dir": "Dossier de l'exécution",
+      "reason": "Motif",
+      "audit_head": "Tête d'audit (entrées)",
+      "outputs_verified": "Sorties vérifiées",
+      "timestamp": "Horodatage qualifié",
+      "timestamp_ok": "obtenu et vérifié",
+      "timestamp_pending": "en attente (TSA injoignable)",
+      "timestamp_off": "non demandé",
+      "timestamp_unknown": "non vérifié",
+      "run_verified": "vérifiée",
+      "run_excluded": "EXCLUE",
+      "run_skipped": "ignorée",
+      "report_signals": "Signaux de RV Report sur l'enregistrement",
+      "none": "Aucun.",
+      "legal_basis": "Fondement juridique",
+      "mission": "Objet de la mission",
+      "date_place": "Date et lieu",
+      "signature": "Signature"
+    }
+  },
+  "tools": {
+    "rv-hashinv": {
+      "role": "Réception et inventaire : enregistre chaque élément dans le registre de l'affaire avec une ou deux empreintes et détecte le type de fichier.",
+      "checks": "Empreintes, type de fichier par rapport à l'extension, doublons, fichiers vides ou illisibles."
+    },
+    "rv-pdfauth": {
+      "role": "Signaux d'authenticité des PDF : lit la structure du document et l'historique de ses révisions.",
+      "checks": "Mises à jour incrémentales et révisions, dates des métadonnées, logiciel producteur, polices, signatures numériques et modifications après signature, différences visuelles entre révisions."
+    },
+    "rv-imgauth": {
+      "role": "Signaux d'authenticité des images JPEG, PNG, WebP et HEIC.",
+      "checks": "Structure du fichier, métadonnées EXIF/XMP et traces de logiciels de retouche, tables de quantification, double compression, et aides visuelles (niveau d'erreur, bruit) pour l'expert."
+    },
+    "rv-mailauth": {
+      "role": "Signaux d'authenticité des courriels .eml et .mbox.",
+      "checks": "Signatures DKIM avec les clés fournies, en-têtes Received et leur ordre, dates, cohérence de l'expéditeur et heuristiques d'usurpation."
+    },
+    "rv-rsmf": {
+      "role": "Convertit des exports de discussion (WhatsApp, …) en RSMF pour les plateformes de revue, avec une trace de chaque message.",
+      "checks": "Lecture de l'export et conversion fidèle ; n'authentifie pas le contenu de l'export."
+    },
+    "rv-certcheck": {
+      "role": "Validation de certificats et d'horodatages à une date donnée.",
+      "checks": "Chaînes de certificats, périodes de validité, révocation avec les CRL/OCSP fournies, jetons RFC 3161."
+    },
+    "rv-timeline": {
+      "role": "Construit une chronologie citée de l'affaire à partir des sorties vérifiées des autres outils.",
+      "checks": "Ordonne en UTC chaque instant enregistré et compare les sources (dates postérieures à la réception, décalage d'horloge, dates futures) ; n'ouvre aucun élément."
+    },
+    "rv-avauth": {
+      "role": "Signaux d'authenticité audio et vidéo.",
+      "checks": "Structure du conteneur (MP4/MOV, OGG/Opus, WAV, MP3) et traces de l'encodeur."
+    },
+    "rv-triage": {
+      "role": "Triage Windows à chaud : collecte des données volatiles et des artefacts système dans un paquet haché enregistré à la réception.",
+      "checks": "Ce qu'il a collecté et l'empreinte de chaque fichier ; il n'analyse pas les artefacts."
+    }
+  },
+  "exclusion": {
+    "unreadable": "illisible ou dossier d'exécution non valide",
+    "chain_broken": "chaîne d'audit rompue ou non ancrée dans le journal de l'affaire",
+    "not_finished": "l'exécution n'est pas terminée (pas de run_finished complet)",
+    "digest_mismatch": "une sortie diffère de l'empreinte enregistrée dans son audit",
+    "timestamp_invalid": "un jeton d'horodatage ne se vérifie pas"
+  },
+  "skip": {
+    "self": "une exécution de RV Report lui-même",
+    "verification": "une exécution de vérification de RV Hub (aucun constat sur les éléments)",
+    "tool_filter": "écartée par --include-tool / --exclude-tool",
+    "superseded": "une chronologie plus ancienne : seule la dernière vérifiée est utilisée"
   }
 }

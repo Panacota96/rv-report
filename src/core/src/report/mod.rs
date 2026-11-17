@@ -3,6 +3,7 @@
 //!
 //! HTML and PDF are rendered from the same view model (`*_context`), so they never disagree.
 
+pub mod expert;
 pub mod pdf;
 
 use crate::analyzer::{Finding, Severity};
@@ -21,12 +22,7 @@ pub const SCHEMA_TECHNICAL: &str = "rakvor.item-technical/1";
 pub const SCHEMA_SUMMARY: &str = "rakvor.item-summary/1";
 
 /// Run-level limitations, always printed (what this tool cannot tell you).
-pub const LIMITATIONS: [&str; 4] = [
-    "SIGNATURE_TABLE_LIMITED",
-    "TIMESTAMPS_FROM_FILESYSTEM",
-    "CLEAN_RESULT_IS_NOT_AUTHENTICITY",
-    "TIMESTAMP_PROVES_EXISTENCE_ONLY",
-];
+pub const LIMITATIONS: [&str; 7] = crate::assemble::OWN_LIMITATIONS;
 pub const SCHEMA_CUSTODY: &str = "rakvor.item-custody/1";
 const BLANK_TRANSFER_ROWS: usize = 6;
 
@@ -107,6 +103,8 @@ pub struct ItemResult {
     /// registered | already_registered | verified | mismatch | not_in_registry
     pub case_status: Option<String>,
     pub intake_utc: Option<String>,
+    /// RV Report: the quoted results about this item (`model::ItemResults` as JSON), shown in the technical report.
+    pub quoted: Option<Value>,
 }
 
 impl ItemResult {

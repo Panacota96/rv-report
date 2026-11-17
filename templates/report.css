@@ -30,3 +30,10 @@ th { color: var(--muted); font-weight: 600; background: var(--soft); }
 footer { margin-top: 36px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
 @media (max-width: 640px) { .kv { grid-template-columns: 1fr; } .meta { text-align:left; } }
 @media print { main { padding: 0; } .band { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+.draft { background:#FEF0C7; border:1px solid #B54708; color:#7A2E0E; border-radius:8px; padding:10px 14px; font-weight:700; margin: 0 0 16px; }
+.final { background:#ECFDF3; border:1px solid #067647; color:#054F31; border-radius:8px; padding:10px 14px; font-weight:700; margin: 0 0 16px; }
+.basis { font-size: 12px; color: var(--muted); margin: 2px 0; }
+.basis em { color:#B54708; font-style: normal; font-weight: 600; }
+blockquote { margin: 6px 0; padding: 4px 12px; border-left: 3px solid var(--accent); background: var(--soft); white-space: pre-wrap; }
+.source { font-size: 12px; color: var(--muted); }
+h3 { font-size: 14px; margin: 18px 0 6px; }

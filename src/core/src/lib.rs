@@ -9,6 +9,7 @@
 //! ```
 
 pub mod analyzer;
+pub mod assemble;
 pub mod audit;
 pub mod case;
 pub mod env;
@@ -16,9 +17,11 @@ pub mod events;
 pub mod hash;
 pub mod i18n;
 pub mod input;
+pub mod model;
 pub mod outputs;
 pub mod report;
 pub mod run;
+pub mod sources;
 pub mod time;
 pub mod trust;
 pub mod verify;

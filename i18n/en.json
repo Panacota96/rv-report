@@ -48,20 +48,20 @@
     "none": "None",
     "unknown": "unknown",
     "method": "Method",
-    "method_text": "Each file was opened read-only, hashed in a single pass with the selected algorithms, and checked against a table of file signatures. Every action was written to a hash-chained audit log.",
+    "method_text": "RV Report did not open this item: it gathered what the verified tool runs of the case reported about it, quoting their findings verbatim, and recorded every step in a hash-chained audit log.",
     "conclusion": "Conclusion",
     "what_we_did": "What we did",
     "what_we_found": "What we found",
     "next_steps": "Recommended next step",
-    "next_ok": "No action needed for this file.",
-    "next_attention": "Review the findings below with your examiner before relying on this file.",
-    "next_problem": "Do not rely on this file until the examiner has explained the problem.",
+    "next_ok": "Review the tools' findings quoted in the expert report.",
+    "next_attention": "Review the signals with the examiner before relying on the expert report for this item.",
+    "next_problem": "Do not rely on the expert report for this item until the examiner has resolved the signal.",
     "status_ok": "No issues found",
     "status_attention": "Needs attention",
     "status_problem": "Problem found",
-    "summary_ok": "The file was hashed and checked. The checks applied found no issues.",
-    "summary_attention": "The file was hashed and checked. Some points need attention.",
-    "summary_problem": "The file could not be fully examined or shows a serious problem.",
+    "summary_ok": "The case record about this item verified; RV Report has no signal about it.",
+    "summary_attention": "The case record about this item needs attention (see the signals).",
+    "summary_problem": "The case record shows a serious problem for this item (see the signals).",
     "fingerprint": "Digital fingerprint",
     "fingerprint_text": "This fingerprint identifies the exact content of the file. Any change, even of one character, would produce a different value.",
     "timestamp": "Trusted timestamp (RFC 3161)",
@@ -91,7 +91,8 @@
     "mismatched": "Different from the registry",
     "unregistered": "Not in the registry",
     "intake_date": "Registered at intake (UTC)",
-    "case_dir": "Case folder"
+    "case_dir": "Case folder",
+    "title_expert": "Expert report"
   },
   "severity": {
     "high": "High",
@@ -139,13 +140,58 @@
       "title": "Registered path now holds different content",
       "shows": "This path was registered earlier as %{previous_id} with other content; the current content gets a new evidence ID.",
       "does_not_prove": "Which version is the original or why the content changed."
+    },
+    "RUN_EXCLUDED": {
+      "title": "Tool run excluded: failed verification",
+      "shows": "The %{tool} run %{run_id} failed verification (%{reason}); none of its results is quoted in this report.",
+      "does_not_prove": "A failed check shows the run's record cannot be relied on as written, not that the evidence or the examiner did anything wrong; the run can be repeated on a verified copy."
+    },
+    "REGISTRY_MISMATCH_REPORTED": {
+      "title": "A tool examined a copy that differs from the registry",
+      "shows": "The %{tool} run %{run_id} recorded that the copy of %{evidence_id} it examined does not match the hash values registered at intake.",
+      "does_not_prove": "It does not show which copy is the original or that anyone altered it; its results describe that copy only."
+    },
+    "ITEM_NOT_EXAMINED": {
+      "title": "Registered item not examined by any analysis tool",
+      "shows": "%{evidence_id} (%{file}) was registered at intake but no verified run of an analysis tool examined it.",
+      "does_not_prove": "Nothing is known about its content beyond its hash values; it is not suspicious for that reason."
+    },
+    "TIMELINE_PREDATES_RUNS": {
+      "title": "Timeline built before a quoted run finished",
+      "shows": "The timeline run %{timeline_run} started before the %{tool} run %{run_id} finished, so it may not include that run's times.",
+      "does_not_prove": "It does not show that the timeline is wrong; rebuild it with RV Timeline to include every run."
+    },
+    "UNKNOWN_TOOL": {
+      "title": "Tool unknown to RV Report",
+      "shows": "RV Report has no description of %{tool}; its verified findings are quoted as written, without a summary of its method.",
+      "does_not_prove": "It says nothing about the reliability of that tool; read its own documentation."
+    },
+    "TRANSLATION_UNAVAILABLE": {
+      "title": "Tool wording not available in this language",
+      "shows": "The %{tool} run %{run_id} wrote its findings in %{available} only; the %{lang} report shows that wording, marked, without translating it.",
+      "does_not_prove": "It does not change any result; re-run the tool with --lang %{lang} for its own wording."
+    },
+    "TIMELINE_ABSENT": {
+      "title": "No timeline in the case",
+      "shows": "No verified RV Timeline run was found: the report has no timeline section content.",
+      "does_not_prove": "It does not mean the times are consistent or inconsistent; build a timeline with RV Timeline if time matters."
+    },
+    "JURISDICTION_DIFFERS_FROM_CASE": {
+      "title": "Report structure differs from the case's jurisdiction",
+      "shows": "The report follows the %{requested} structure; the case folder is registered under %{case}.",
+      "does_not_prove": "It is a choice of the examiner, not a defect of the evidence."
     }
   },
   "limitations": {
     "SIGNATURE_TABLE_LIMITED": "Type detection uses a limited table of common file signatures; unknown types are reported as unknown, not as suspicious.",
     "TIMESTAMPS_FROM_FILESYSTEM": "Modification times come from the file system of the examined copy and may differ from the original source.",
     "CLEAN_RESULT_IS_NOT_AUTHENTICITY": "A result without findings does not prove that a file is authentic or unaltered before acquisition.",
-    "TIMESTAMP_PROVES_EXISTENCE_ONLY": "A trusted timestamp proves the audit log existed in this exact form at the stated time; it does not prove that the examined copy matches the original source."
+    "TIMESTAMP_PROVES_EXISTENCE_ONLY": "A trusted timestamp proves the audit log existed in this exact form at the stated time; it does not prove that the examined copy matches the original source.",
+    "REPORT_DERIVED_CONTENT": "This report is derived content: it repeats what the tools recorded, so an error in a tool's analysis passes into it unchanged. Its weight rests on each quoted tool's validation and on the examiner's review.",
+    "REPORT_QUOTES_ONLY_VERIFIED_RUNS": "Only runs whose audit chain, case-log anchor, timestamps and recorded outputs verify are quoted; an excluded run's results are absent even if they were correct.",
+    "REPORT_NO_CONCLUSION": "RV Report writes no conclusion and no answer to the mandate's questions: those are the expert's opinion.",
+    "REPORT_LEGAL_STRUCTURE_UNVERIFIED": "The section structure and the legal references follow the suite's draft admissibility notes; every reference is marked to be verified until counsel has reviewed it.",
+    "REPORT_NO_TRANSLATION": "Quoted wording is never translated: a finding written by a tool in another language is shown in that language, marked."
   },
   "brand": {
     "descriptor": "FORENSICS | INCIDENT RESPONSE | SECURITY",
@@ -226,5 +272,239 @@
     "case_dir_hint": "optional: shared case folder (links the tools of one case)",
     "out_from_case": "Output folder: set by the case folder",
     "evidence_ids": "Evidence IDs"
+  },
+  "expert": {
+    "title_co": "Expert report (dictamen pericial) — digital evidence",
+    "title_fr": "Expert report (rapport d'expertise) — digital evidence",
+    "subtitle": "Case %{case} · assembly %{run} · %{date} (UTC)",
+    "draft_banner": "DRAFT for the examiner's review — not issued. The examiner reviews every section, completes the declaration and signs.",
+    "final_banner": "Final version marked by the examiner (--final). The examiner is the author of this report and of its conclusions.",
+    "disclaimer": "Assembled by RV Report from the verified, audited outputs of the Rakvor tools that ran on this case. Results are quoted verbatim from each tool's own report; they are technical signals, not verdicts. Every legal reference is marked \"to be verified\" and the structure must be reviewed by counsel.",
+    "to_verify": "[to be verified]",
+    "sections_co": {
+      "identification": "1. Identification of the expert and of the case",
+      "object": "2. Object of the expert opinion",
+      "evidence": "3. Evidence received (EMP/EF) and chain of custody",
+      "method": "4. Methods, techniques and instruments",
+      "results": "5. Results per evidence item",
+      "timeline": "6. Timeline",
+      "limitations": "7. Limitations",
+      "not_examined": "8. What was not examined",
+      "annexes": "9. Annexes: tool runs and record checks",
+      "declaration": "10. Declaration and signature of the expert"
+    },
+    "sections_fr": {
+      "mission": "1. Appointment and mission",
+      "evidence": "2. Seals (scellés) received",
+      "method": "3. Description of the operations",
+      "results": "4. Findings per seal",
+      "timeline": "5. Timeline",
+      "limitations": "6. Limits of the examination",
+      "not_examined": "7. What was not examined",
+      "annexes": "8. Annexes: tool runs and record checks",
+      "declaration": "9. Conclusions and attestation of the expert"
+    },
+    "citations": {
+      "co_906_405": "expert evidence in criminal proceedings",
+      "co_906_413": "presentation of expert reports by the parties",
+      "co_906_414": "admissibility of the report and summoning of the expert",
+      "co_906_415": "basis of the expert opinion (summary report)",
+      "co_906_417": "examination of the expert on instruments, principles and methods",
+      "co_906_254": "chain of custody",
+      "co_cgp_226": "contents of a dictamen in non-criminal proceedings",
+      "fr_cpp_156": "ordering an expert examination on a technical question",
+      "fr_cpp_157": "experts on official lists; oath of other experts",
+      "fr_cpp_158": "the mission is limited to technical questions",
+      "fr_cpp_163": "opening and re-sealing of seals, mentioned in the report",
+      "fr_cpp_166": "report describing the operations and the conclusions, signed by the expert",
+      "fr_cpp_167": "notification of the conclusions; further or counter-expertise"
+    },
+    "intro": {
+      "evidence": "Items as registered at intake in the case registry (evidence/registry.json, verified). Custody rows come from the hash-chained case log (registration) and from every verified tool run that compared the item with the registry before examining it.",
+      "method": "The examination was performed with the Rakvor tools listed below. Before anything was quoted, RV Report:",
+      "results": "For each evidence item, every verified tool run that reported on it, with its findings quoted verbatim from that run's own technical report (file and SHA-256 given). A finding states what it shows and what it does not prove.",
+      "timeline": "Summary of the latest verified RV Timeline run of the case (its own statistics report). Its signals about each item are quoted under the results.",
+      "limitations": "Each tool's limitations as its runs printed them, then RV Report's own.",
+      "not_examined": "Registered items that no verified run of an analysis tool examined (the intake, the timeline and this report do not examine content).",
+      "annexes": "Every tool run found in the case folder and what RV Report did with it. Excluded runs failed verification and are never quoted."
+    },
+    "method_steps": {
+      "verify_case": "verified the case log (hash chain), case.json and the evidence registry digest;",
+      "verify_runs": "verified every tool run: audit chain intact, run finished and anchored in the case log, timestamp tokens, and every output re-hashed against the digest its audit log recorded; a run that fails is excluded and never quoted;",
+      "quote": "quoted each finding and limitation verbatim from the tool's own report, without rewording or translating it;",
+      "not_examined": "listed the registered items that no analysis tool examined. RV Report never opened the evidence itself."
+    },
+    "tools_note": "\"What it does\" and \"what it checks\" are RV Report's summary of each tool's documentation; the versions, runs, algorithms and languages come from the runs' audit logs and the case log.",
+    "unknown_tool": "RV Report has no description of this tool: its findings are quoted as the tool wrote them; consult that tool's own documentation.",
+    "no_verified_runs": "No verified tool run is available in this case.",
+    "case_verification_text": "Verified before anything was read; a case that fails verification is refused and nothing is written to it.",
+    "jurisdiction_differs": "The report follows the %{requested} structure, while the case folder is registered under %{case}; the custody forms follow the case.",
+    "no_mandate": "No mandate text was given (--mandate). The examiner must state the object of the expertise and the questions asked before issuing the report.",
+    "mandate_quoted": "Quoted verbatim from the mandate file given by the examiner:",
+    "custody_of": "Custody of %{id}",
+    "custody_note": "Physical transfers, seals and signatures on paper are not in the digital record: the examiner adds them. Runs that failed verification are not used as custody evidence.",
+    "no_results": "No verified tool run reported on this item.",
+    "no_findings": "The tool reported no finding for this item. No finding is not proof of authenticity.",
+    "no_wording": "The tool's report gives no wording for this finding (code only).",
+    "quote_note": "[EN], [ES] or [FR] before a title: the tool wrote this finding only in that language; RV Report does not translate it. Re-run the tool with the report language to obtain its own wording.",
+    "no_timeline": "No verified RV Timeline run in this case: no timeline is included.",
+    "timeline_runs": "%{verified} verified, %{excluded} excluded",
+    "timeline_signals_note": "The timeline orders the times the tools recorded; its signals compare sources and never conclude.",
+    "no_printed_limitation": "no printed wording could be read from the run's report",
+    "all_examined": "Every registered item was examined by at least one verified analysis run.",
+    "not_examined_reason": {
+      "no_analysis_run": "only registered at intake: no analysis tool examined it"
+    },
+    "not_examined_note": "Nothing is concluded about these items. Within the items examined, each tool examines only what its documentation describes.",
+    "outputs_of": "%{verified} of %{recorded} recorded outputs re-hashed and identical",
+    "declaration_co": "Declaration of the expert, to be completed by the examiner. RV Report writes no conclusion: the opinion, its technical-scientific basis and the statements the applicable procedure requires are the examiner's own (Ley 906 de 2004, art. 415; CGP art. 226 in civil matters) [to be verified].",
+    "declaration_fr": "Conclusions and attestation, to be written by the expert. RV Report writes no conclusion: the report must describe the operations and state the expert's conclusions, and the expert signs it (Code de procédure pénale, art. 166) [to be verified].",
+    "examiner_adds_co": {
+      "qualifications": "qualifications and competence of the expert (idoneidad) and their supporting documents;",
+      "conclusions": "the expert's opinion on the questions of the mandate, with its technical-scientific basis;",
+      "statement": "the statements of independence and any others the procedure requires [to be verified]."
+    },
+    "examiner_adds_fr": {
+      "qualifications": "the expert's registration on a list or the oath taken (CPP arts. 157, 160) [to be verified];",
+      "conclusions": "the answers to each question of the mission, with their basis;",
+      "statement": "the attestation that the expert personally carried out or supervised the operations, the names of any persons who assisted, and the signature."
+    },
+    "draft_note": "This is a draft. Until the examiner marks it final (--final) and signs it, it must not be filed.",
+    "final_note": "Marked final by the examiner; the marking is recorded in the audit log (report_marked_final).",
+    "labels": {
+      "case": "Case",
+      "case_created": "Case folder created (UTC)",
+      "case_json_sha256": "case.json SHA-256",
+      "examiner": "Expert",
+      "examiner_id": "Expert identification",
+      "not_given": "not given",
+      "report_run": "RV Report run",
+      "generated": "Assembled (UTC)",
+      "status": "Status",
+      "status_draft": "Draft for the examiner's review",
+      "status_final": "Final (marked by the examiner)",
+      "structure": "Structure",
+      "structure_co": "Colombia — dictamen pericial (Ley 906 de 2004)",
+      "structure_fr": "France — rapport d'expertise (CPP arts. 156–169)",
+      "languages": "Languages",
+      "tool_filter": "Tool filter (included / excluded)",
+      "case_verification": "Verification of the case folder",
+      "case_log_entries": "Case-log entries verified",
+      "case_log_head": "Case-log head",
+      "registry_items": "Registered items",
+      "registry_sha256": "Registry SHA-256",
+      "file": "File",
+      "sha256": "SHA-256",
+      "bytes": "Bytes",
+      "bytes_unit": "bytes",
+      "path": "Registered path",
+      "size": "Size",
+      "registered": "Registered at intake (UTC)",
+      "registered_by": "Registered by",
+      "registry": "matches the registry",
+      "custody_registered": "registered (intake)",
+      "custody_examined": "examined (read-only copy compared with the registry)",
+      "match_yes": "yes",
+      "match_no": "NO — the copy examined differs from the registry",
+      "match_unknown": "not recorded",
+      "tools_used": "Tools used",
+      "what_it_does": "What it does",
+      "what_it_checks": "What it checks",
+      "runs": "Runs",
+      "algorithms": "Hash algorithms",
+      "frontends": "Interface",
+      "items_examined": "Items examined",
+      "findings_quoted": "Findings quoted",
+      "this_tool": "This report",
+      "tool": "Tool",
+      "item_status": "tool's status",
+      "source": "Source",
+      "shows": "What it shows",
+      "does_not_prove": "What it does not prove",
+      "pointer": "Place in the source",
+      "timeline_run": "Timeline run",
+      "started": "Started (UTC)",
+      "finished": "Finished (UTC)",
+      "events": "Events",
+      "timeline_runs": "Runs read by the timeline",
+      "zone_unknown": "Events without a time zone",
+      "display_zone": "Display zone",
+      "signals": "Signals",
+      "signal_codes": "Signal codes",
+      "timeline_file": "Timeline file (Timesketch)",
+      "runs_found": "Runs found",
+      "runs_verified": "Verified and used",
+      "runs_excluded": "Excluded (failed verification)",
+      "runs_skipped": "Skipped",
+      "run_dir": "Run folder",
+      "reason": "Reason",
+      "audit_head": "Audit head (entries)",
+      "outputs_verified": "Outputs verified",
+      "timestamp": "Trusted timestamp",
+      "timestamp_ok": "obtained and verified",
+      "timestamp_pending": "pending (TSA unreachable)",
+      "timestamp_off": "not requested",
+      "timestamp_unknown": "not verified",
+      "run_verified": "verified",
+      "run_excluded": "EXCLUDED",
+      "run_skipped": "skipped",
+      "report_signals": "RV Report signals about the record",
+      "none": "None.",
+      "legal_basis": "Legal basis",
+      "mission": "Object of the mission",
+      "date_place": "Date and place",
+      "signature": "Signature"
+    }
+  },
+  "tools": {
+    "rv-hashinv": {
+      "role": "Evidence intake and inventory: registers each item in the case registry with one or two hash values and detects the file type.",
+      "checks": "Hash values, file type against the extension, duplicates, empty or unreadable files."
+    },
+    "rv-pdfauth": {
+      "role": "PDF authenticity signals: reads the document's structure and revision history.",
+      "checks": "Incremental updates and revisions, metadata dates, producer software, fonts, digital signatures and changes made after signing, visual differences between revisions."
+    },
+    "rv-imgauth": {
+      "role": "Image authenticity signals for JPEG, PNG, WebP and HEIC files.",
+      "checks": "File structure, EXIF/XMP metadata and editing software traces, quantization tables, double compression, and visual aids (error level, noise) for the examiner."
+    },
+    "rv-mailauth": {
+      "role": "E-mail authenticity signals for .eml and .mbox messages.",
+      "checks": "DKIM signatures against the keys supplied, Received headers and their order, dates, sender consistency and impersonation heuristics."
+    },
+    "rv-rsmf": {
+      "role": "Converts chat exports (WhatsApp, …) into RSMF for review platforms, with a trace of every message.",
+      "checks": "Parsing of the export and faithful conversion; it does not authenticate the content of the export."
+    },
+    "rv-certcheck": {
+      "role": "Certificate and trusted-timestamp validation at a given date.",
+      "checks": "Certificate chains, validity periods, revocation against the CRL/OCSP supplied, RFC 3161 tokens."
+    },
+    "rv-timeline": {
+      "role": "Builds one cited timeline of the case from the other tools' verified outputs.",
+      "checks": "Orders every recorded time in UTC and compares sources (dates after intake, clock skew, dates in the future); it opens no evidence."
+    },
+    "rv-avauth": {
+      "role": "Audio and video authenticity signals.",
+      "checks": "Container structure (MP4/MOV, OGG/Opus, WAV, MP3) and encoder traces."
+    },
+    "rv-triage": {
+      "role": "Live Windows triage: collects volatile data and system artefacts into a hashed package registered at intake.",
+      "checks": "What it collected and the hash of every collected file; it does not analyse the artefacts."
+    }
+  },
+  "exclusion": {
+    "unreadable": "unreadable or not a valid run folder",
+    "chain_broken": "audit chain broken or not anchored in the case log",
+    "not_finished": "the run did not finish (no completed run_finished)",
+    "digest_mismatch": "an output differs from the digest recorded in its audit log",
+    "timestamp_invalid": "a timestamp token does not verify"
+  },
+  "skip": {
+    "self": "a run of RV Report itself",
+    "verification": "an RV Hub verification run (no findings about the evidence)",
+    "tool_filter": "left out by --include-tool / --exclude-tool",
+    "superseded": "an older timeline run: only the latest verified one is used"
   }
 }

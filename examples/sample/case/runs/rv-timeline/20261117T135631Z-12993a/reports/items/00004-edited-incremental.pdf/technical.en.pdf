@@ -1,0 +1,184 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [7 0 R 9 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Title (Technical review) /Producer (rv-timeline 0.2.1) /Creator (rv-timeline 0.2.1) /CreationDate (D:20261117135631Z) >>
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 6341 >>
+stream
+0.051 0.067 0.090 rg 0 780.00 595 62 re f
+0.165 0.361 1.000 rg 0.00 777.80 198.33 2.2 re f
+0.420 0.000 1.000 rg 198.33 777.80 198.33 2.2 re f
+0.000 0.898 1.000 rg 396.67 777.80 198.33 2.2 re f
+0.102 0.122 0.149 rg 0.165 0.361 1.000 RG 1.6 w 50 790 42 42 re B
+0.902 0.902 0.902 rg BT /F2 17 Tf 58.50 805.00 Td (RV) Tj ET
+0.000 0.898 1.000 rg 60.00 798.00 22 2 re f
+0.902 0.902 0.902 rg BT /F2 13 Tf 4 Tc 106.00 812.00 Td (RAKVOR) Tj ET 0 Tc
+0.000 0.898 1.000 rg BT /F1 7.5 Tf 106.00 799.00 Td (FORENSICS | INCIDENT RESPONSE | SECURITY) Tj ET
+0.051 0.067 0.090 rg BT /F2 18 Tf 50.00 719.70 Td (Technical review) Tj ET
+0.278 0.329 0.404 rg BT /F1 10 Tf 50.00 706.20 Td (Item #4 \267 edited-incremental.pdf \267 Run ID: 20261117T135631Z-12993a) Tj ET
+0.165 0.361 1.000 RG 2 w 50 698.20 m 545 698.20 l S
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 676.05 Td (Path) Tj ET
+0.051 0.067 0.090 rg BT /F3 8 Tf 215.00 676.05 Td (R:\\evidence\\pdf\\edited-incremental.pdf) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 660.90 Td (Size \(bytes\)) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 660.90 Td (3613) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 645.75 Td (Status) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 645.75 Td (No issues found) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 630.60 Td (Display zone) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 630.60 Td (UTC) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 615.45 Td (Events) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 615.45 Td (9 events from rv-hashinv, rv-pdfauth, from 2026-03-02T14:15:00Z to) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 603.30 Td (2026-11-17T13:56:24Z \(UTC\).) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 588.15 Td (Case) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 588.15 Td (RV-REPORT-SAMPLE) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 573.00 Td (Evidence ID) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 573.00 Td (E0004) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 557.85 Td (Case registry) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 557.85 Td () Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 542.70 Td (Registered at intake \(UTC\)) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 542.70 Td (2026-11-17T13:56:24.635Z) Tj ET
+0.051 0.067 0.090 rg BT /F2 12 Tf 50.00 513.50 Td (Hashes) Tj ET
+0.894 0.906 0.925 RG 0.6 w 50 509.50 m 545 509.50 l S
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 493.35 Td (md5) Tj ET
+0.051 0.067 0.090 rg BT /F3 8 Tf 215.00 493.35 Td (b28a97d821a22ccdf5726426c16b8fed) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 478.20 Td (sha256) Tj ET
+0.051 0.067 0.090 rg BT /F3 8 Tf 215.00 478.20 Td (2ada8845654ce455968242d3aa211e26339943fa82cb69e07f610915485d93b0) Tj ET
+0.051 0.067 0.090 rg BT /F2 12 Tf 50.00 449.00 Td (Findings) Tj ET
+0.894 0.906 0.925 RG 0.6 w 50 445.00 m 545 445.00 l S
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 50.00 430.17 Td (None) Tj ET
+0.051 0.067 0.090 rg BT /F2 12 Tf 50.00 400.97 Td (Events) Tj ET
+0.894 0.906 0.925 RG 0.6 w 50 396.97 m 545 396.97 l S
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 380.82 Td (2026-03-02T14:15:00Z) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 380.82 Td (2026-03-02 14:15:00 UTC \267 PDF created \(Info CreationDate\):) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 368.67 Td (D:20260302091500-05'00' \(rv-pdfauth,) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 356.52 Td (reports/items/00001-edited-incremental.pdf/objects.json) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 344.37 Td (/revisions/0/objects/5/dict/CreationDate\)) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 329.22 Td (2026-03-02T14:15:00Z) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 329.22 Td (2026-03-02 14:15:00 UTC \267 PDF modified \(Info ModDate\):) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 317.07 Td (D:20260302091500-05'00' \(rv-pdfauth,) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 304.92 Td (reports/items/00001-edited-incremental.pdf/objects.json) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 292.77 Td (/revisions/0/objects/5/dict/ModDate\)) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 277.62 Td (2026-03-02T14:15:00Z) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 277.62 Td (2026-03-02 14:15:00 UTC \267 PDF created \(Info CreationDate\):) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 265.47 Td (D:20260302091500-05'00' \(rv-pdfauth,) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 253.32 Td (reports/items/00001-edited-incremental.pdf/objects.json) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 241.17 Td (/revisions/1/objects/1/dict/CreationDate\)) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 226.02 Td (2026-03-02T14:15:00Z) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 226.02 Td (2026-03-02 14:15:00 UTC \267 PDF created \(Info CreationDate\):) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 213.87 Td (D:20260302091500-05'00' \(rv-pdfauth,) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 201.72 Td (reports/items/00001-edited-incremental.pdf/objects.json) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 189.57 Td (/revisions/2/objects/1/dict/CreationDate\)) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 174.42 Td (2026-03-04T17:15:00Z) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 174.42 Td (2026-03-04 17:15:00 UTC \267 PDF modified \(Info ModDate\):) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 162.27 Td (D:20260304121500-05'00' \(rv-pdfauth,) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 150.12 Td (reports/items/00001-edited-incremental.pdf/objects.json) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 137.97 Td (/revisions/1/objects/1/dict/ModDate\)) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 122.82 Td (2026-03-11T14:15:00Z) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 122.82 Td (2026-03-11 14:15:00 UTC \267 PDF modified \(Info ModDate\):) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 110.67 Td (D:20260311091500-05'00' \(rv-pdfauth,) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 98.52 Td (reports/items/00001-edited-incremental.pdf/objects.json) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 86.37 Td (/revisions/2/objects/1/dict/ModDate\)) Tj ET
+0.894 0.906 0.925 RG 0.6 w 50 44 m 545 44 l S
+0.278 0.329 0.404 rg BT /F1 7.5 Tf 50 32 Td (Generated by rv-timeline 0.2.1 \267 20261117T135631Z-12993a \267 Display zone: UTC  \227  Page 1 of 2) Tj ET
+0.278 0.329 0.404 rg BT /F1 6.8 Tf 50 22 Td (We uncover the hidden. We reconstruct what happened. We protect what matters.) Tj ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 10 0 R >>
+endobj
+10 0 obj
+<< /Length 5375 >>
+stream
+0.051 0.067 0.090 rg 0 780.00 595 62 re f
+0.165 0.361 1.000 rg 0.00 777.80 198.33 2.2 re f
+0.420 0.000 1.000 rg 198.33 777.80 198.33 2.2 re f
+0.000 0.898 1.000 rg 396.67 777.80 198.33 2.2 re f
+0.102 0.122 0.149 rg 0.165 0.361 1.000 RG 1.6 w 50 790 42 42 re B
+0.902 0.902 0.902 rg BT /F2 17 Tf 58.50 805.00 Td (RV) Tj ET
+0.000 0.898 1.000 rg 60.00 798.00 22 2 re f
+0.902 0.902 0.902 rg BT /F2 13 Tf 4 Tc 106.00 812.00 Td (RAKVOR) Tj ET 0 Tc
+0.000 0.898 1.000 rg BT /F1 7.5 Tf 106.00 799.00 Td (FORENSICS | INCIDENT RESPONSE | SECURITY) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 737.85 Td (2026-11-12T06:00:00Z) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 737.85 Td (2026-11-12 06:00:00 UTC \267 File modified \(file system\): 2026-11-12T06:00:00Z) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 725.70 Td (\(rv-hashinv, logs/audit.jsonl line:14/details/modified_utc\)) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 710.55 Td (2026-11-12T06:00:00Z) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 710.55 Td (2026-11-12 06:00:00 UTC \267 File modified \(file system\): 2026-11-12T06:00:00Z) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 698.40 Td (\(rv-pdfauth, logs/audit.jsonl line:5/details/modified_utc\)) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 683.25 Td (2026-11-17T13:56:24.635Z) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 683.25 Td (2026-11-17 13:56:24.635 UTC \267 Evidence registered in the case:) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 671.10 Td (2026-11-17T13:56:24.635Z \(rv-hashinv,) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 658.95 Td (reports/items/00004-edited-incremental.pdf/technical.json /case/intake_utc\)) Tj ET
+0.051 0.067 0.090 rg BT /F2 12 Tf 50.00 629.75 Td (Method) Tj ET
+0.894 0.906 0.925 RG 0.6 w 50 625.75 m 545 625.75 l S
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 50.00 610.92 Td (The runs of the other Rakvor tools in the case folder were checked \(audit chain, digests of their outputs\) before any) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 50.00 598.10 Td (output was read. Each time they recorded was placed on one timeline in UTC, keeping its original wording and offset;) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 50.00 585.27 Td (times without a zone were flagged, never converted. The times were then compared across sources. Every action) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 50.00 572.45 Td (was written to a hash-chained audit log.) Tj ET
+0.051 0.067 0.090 rg BT /F2 12 Tf 50.00 543.25 Td (Audit trail) Tj ET
+0.894 0.906 0.925 RG 0.6 w 50 539.25 m 545 539.25 l S
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 523.10 Td (Audit entries) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 523.10 Td (#19 \226 #19) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 507.95 Td (Log folder) Tj ET
+0.051 0.067 0.090 rg BT /F3 8 Tf 215.00 507.95 Td (R:\\case\\runs\\rv-timeline\\20261117T135631Z-12993a\\logs) Tj ET
+0.278 0.329 0.404 rg BT /F1 9 Tf 50.00 492.80 Td (Digital signature) Tj ET
+0.051 0.067 0.090 rg BT /F1 9 Tf 215.00 492.80 Td (This PDF is not digitally signed.) Tj ET
+0.051 0.067 0.090 rg BT /F2 12 Tf 50.00 463.60 Td (Limitations) Tj ET
+0.894 0.906 0.925 RG 0.6 w 50 459.60 m 545 459.60 l S
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 52.00 444.77 Td (\225) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 64.00 444.77 Td (Times recorded without a time zone are placed as if they were UTC and shown as written; they are never) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 64.00 431.95 Td (converted, so their true instant may differ by up to 14 hours.) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 52.00 419.12 Td (\225) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 64.00 419.12 Td (Cross-source comparisons tolerate 300 s of difference; smaller disagreements between clocks are not reported.) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 52.00 406.30 Td (\225) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 64.00 406.30 Td (In this version the only sources are the audited outputs of Rakvor tool runs in the case folder; times those tools did) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 64.00 393.47 Td (not extract \(other logs, other devices\) are not in the timeline.) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 52.00 380.65 Td (\225) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 64.00 380.65 Td (Each reader supports the tool output versions it was written for; runs of other versions are left out and listed, never) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 64.00 367.82 Td (guessed.) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 52.00 355.00 Td (\225) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 64.00 355.00 Td (A timeline without signals does not prove that the times are true; it shows that the sources read agree within the) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 64.00 342.17 Td (tolerance.) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 52.00 329.35 Td (\225) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 64.00 329.35 Td (A trusted timestamp proves the audit log existed in this exact form at the stated time; it does not prove that the) Tj ET
+0.051 0.067 0.090 rg BT /F1 9.5 Tf 64.00 316.52 Td (examined copy matches the original source.) Tj ET
+0.894 0.906 0.925 RG 0.6 w 50 44 m 545 44 l S
+0.278 0.329 0.404 rg BT /F1 7.5 Tf 50 32 Td (Generated by rv-timeline 0.2.1 \267 20261117T135631Z-12993a \267 Display zone: UTC  \227  Page 2 of 2) Tj ET
+0.278 0.329 0.404 rg BT /F1 6.8 Tf 50 22 Td (We uncover the hidden. We reconstruct what happened. We protect what matters.) Tj ET
+endstream
+endobj
+xref
+0 11
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000127 00000 n 
+0000000224 00000 n 
+0000000326 00000 n 
+0000000421 00000 n 
+0000000561 00000 n 
+0000000707 00000 n 
+0000007099 00000 n 
+0000007246 00000 n 
+trailer
+<< /Size 11 /Root 1 0 R /Info 6 0 R >>
+startxref
+12673
+%%EOF

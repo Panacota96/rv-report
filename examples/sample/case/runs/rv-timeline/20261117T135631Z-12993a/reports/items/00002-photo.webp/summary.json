@@ -1,0 +1,24 @@
+{
+  "case_id": "RV-REPORT-SAMPLE",
+  "findings": [],
+  "fingerprint": {
+    "algorithm": "md5",
+    "value": "0cc0974ebdee1b253f056ed91e3e529b"
+  },
+  "item": {
+    "evidence_id": "E0002",
+    "file_name": "photo.webp",
+    "index": 2
+  },
+  "run_id": "20261117T135631Z-12993a",
+  "schema": "rakvor.item-summary/1",
+  "status": "ok",
+  "text": {
+    "en": {
+      "next_step": "No action needed for this item.",
+      "status": "No issues found",
+      "summary": "The timeline of this item shows no time signal under the checks applied.",
+      "timeline": "3 events from rv-hashinv, rv-imgauth, from 2026-11-12T06:00:00Z to 2026-11-17T13:56:24Z (UTC)."
+    }
+  }
+}

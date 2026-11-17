@@ -1,0 +1,113 @@
+{
+  "audit": {
+    "entries": 16,
+    "head": "25427b55688801d8aac5b40c610b24d8885dcff2b26f3a0f1e095f24dae241d8",
+    "log_dir": "R:\\case\\runs\\rv-pdfauth\\20261117T135627Z-939b2f\\logs"
+  },
+  "case": {
+    "case_dir": "R:\\case",
+    "case_id": "RV-REPORT-SAMPLE",
+    "counts": {
+      "added": 0,
+      "mismatched": 0,
+      "registered": 0,
+      "unregistered": 0,
+      "verified": 1
+    },
+    "role": "analysis"
+  },
+  "duplicate_groups": [],
+  "findings_by_code": {
+    "EDITOR_FINGERPRINT": 1,
+    "FONT_ADDED_IN_LATER_REVISION": 1,
+    "INCREMENTAL_UPDATES": 1,
+    "PRODUCER_CHANGED_BETWEEN_REVISIONS": 1,
+    "REVISION_TIME_GAP": 2,
+    "VISUAL_DIFF_SKIPPED": 1
+  },
+  "findings_by_severity": {
+    "high": 0,
+    "info": 3,
+    "low": 1,
+    "medium": 3
+  },
+  "items": [
+    {
+      "evidence_id": "E0004",
+      "findings": [
+        "PRODUCER_CHANGED_BETWEEN_REVISIONS",
+        "EDITOR_FINGERPRINT",
+        "FONT_ADDED_IN_LATER_REVISION",
+        "INCREMENTAL_UPDATES",
+        "REVISION_TIME_GAP",
+        "REVISION_TIME_GAP",
+        "VISUAL_DIFF_SKIPPED"
+      ],
+      "index": 1,
+      "path": "R:\\evidence\\pdf\\edited-incremental.pdf",
+      "report_folder": "items/00001-edited-incremental.pdf",
+      "reports_written": true,
+      "size": 3613,
+      "status": "attention"
+    }
+  ],
+  "items_by_status": {
+    "attention": 1
+  },
+  "items_by_type": {
+    "PDF document": 1
+  },
+  "limitations": [
+    "SIGNATURE_TABLE_LIMITED",
+    "TIMESTAMPS_FROM_FILESYSTEM",
+    "CLEAN_RESULT_IS_NOT_AUTHENTICITY",
+    "TIMESTAMP_PROVES_EXISTENCE_ONLY",
+    "NO_FINDING_IS_NOT_AUTHENTICITY",
+    "FLATTENED_OR_REGENERATED_PDF_LOSES_HISTORY",
+    "FINGERPRINT_DB_COVERAGE",
+    "SIGNATURE_TRUST_NOT_VALIDATED",
+    "RENDERING_PAGE_CAP"
+  ],
+  "pdf_overview": {
+    "item_reports": "all",
+    "item_reports_skipped": 0,
+    "multi_revision": 1,
+    "online_editor": 0,
+    "pdfs": 1,
+    "signed": 0
+  },
+  "run": {
+    "actor": "Sample Examiner",
+    "algorithms": [
+      "sha256",
+      "md5"
+    ],
+    "cancelled": false,
+    "case_id": "RV-REPORT-SAMPLE",
+    "elapsed_ms": 916,
+    "finished_utc": "2026-11-17T13:56:28.926Z",
+    "frontend": "cli",
+    "jurisdiction": "co",
+    "langs": [
+      "en",
+      "es",
+      "fr"
+    ],
+    "pdf_signed_by": null,
+    "run_id": "20261117T135627Z-939b2f",
+    "started_utc": "2026-11-17T13:56:28.009Z"
+  },
+  "schema": "rakvor.statistics/1",
+  "timestamp": {
+    "status": "off"
+  },
+  "tool": {
+    "name": "rv-pdfauth",
+    "version": "0.4.1"
+  },
+  "totals": {
+    "bytes": 3613,
+    "errors": 0,
+    "items": 1
+  }
+}

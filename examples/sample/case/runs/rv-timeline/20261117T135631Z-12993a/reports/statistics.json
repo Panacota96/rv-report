@@ -1,0 +1,213 @@
+{
+  "audit": {
+    "entries": 23,
+    "head": "0a88c42ed6f6ee95761fe294fbbbc1f002e7fbeb36ef398816b776cf0e21de49",
+    "log_dir": "R:\\case\\runs\\rv-timeline\\20261117T135631Z-12993a\\logs"
+  },
+  "case": {
+    "case_dir": "R:\\case",
+    "case_id": "RV-REPORT-SAMPLE",
+    "counts": {
+      "added": 0,
+      "mismatched": 0,
+      "registered": 0,
+      "unregistered": 0,
+      "verified": 0
+    },
+    "role": "analysis"
+  },
+  "duplicate_groups": [],
+  "findings_by_code": {},
+  "findings_by_severity": {
+    "high": 0,
+    "info": 0,
+    "low": 0,
+    "medium": 0
+  },
+  "items": [
+    {
+      "evidence_id": "E0001",
+      "findings": [],
+      "index": 1,
+      "path": "R:\\evidence\\images\\edited-gimp.jpg",
+      "report_folder": "items/00001-edited-gimp.jpg",
+      "size": 105483,
+      "status": "ok"
+    },
+    {
+      "evidence_id": "E0002",
+      "findings": [],
+      "index": 2,
+      "path": "R:\\evidence\\images\\photo.webp",
+      "report_folder": "items/00002-photo.webp",
+      "size": 8294,
+      "status": "ok"
+    },
+    {
+      "evidence_id": "E0003",
+      "findings": [],
+      "index": 3,
+      "path": "R:\\evidence\\notes\\acta.txt",
+      "report_folder": "items/00003-acta.txt",
+      "size": 61,
+      "status": "ok"
+    },
+    {
+      "evidence_id": "E0004",
+      "findings": [],
+      "index": 4,
+      "path": "R:\\evidence\\pdf\\edited-incremental.pdf",
+      "report_folder": "items/00004-edited-incremental.pdf",
+      "size": 3613,
+      "status": "ok"
+    }
+  ],
+  "items_by_status": {
+    "ok": 4
+  },
+  "items_by_type": {
+    "unknown": 4
+  },
+  "limitation_params": {
+    "TIMESTAMP_PROVES_EXISTENCE_ONLY": {
+      "skew_s": "300"
+    },
+    "TL_CLEAN_IS_NOT_PROOF": {
+      "skew_s": "300"
+    },
+    "TL_CLOCK_SKEW": {
+      "skew_s": "300"
+    },
+    "TL_READER_VERSIONS": {
+      "skew_s": "300"
+    },
+    "TL_TOOL_OUTPUTS_ONLY": {
+      "skew_s": "300"
+    },
+    "TL_ZONE_UNKNOWN": {
+      "skew_s": "300"
+    }
+  },
+  "limitations": [
+    "TL_ZONE_UNKNOWN",
+    "TL_CLOCK_SKEW",
+    "TL_TOOL_OUTPUTS_ONLY",
+    "TL_READER_VERSIONS",
+    "TL_CLEAN_IS_NOT_PROOF",
+    "TIMESTAMP_PROVES_EXISTENCE_ONLY"
+  ],
+  "run": {
+    "actor": "Sample Examiner",
+    "algorithms": [
+      "sha256",
+      "md5"
+    ],
+    "cancelled": false,
+    "case_id": "RV-REPORT-SAMPLE",
+    "elapsed_ms": 68,
+    "finished_utc": "2026-11-17T13:56:31.083Z",
+    "frontend": "cli",
+    "jurisdiction": "co",
+    "langs": [
+      "en"
+    ],
+    "pdf_signed_by": null,
+    "pdf_signer_certificate_sha256": null,
+    "run_id": "20261117T135631Z-12993a",
+    "started_utc": "2026-11-17T13:56:31.015Z"
+  },
+  "schema": "rakvor.statistics/1",
+  "timeline": {
+    "clock_skew_s": 300,
+    "display_zone": "UTC",
+    "events": 30,
+    "events_by_kind": {
+      "exif.digitized": 1,
+      "exif.modify": 1,
+      "exif.original": 1,
+      "fs.modified": 7,
+      "intake.registered": 4,
+      "pdf.info.created": 3,
+      "pdf.info.modified": 3,
+      "run.finished": 3,
+      "run.started": 3,
+      "xmp.history": 2,
+      "xmp.metadata": 1,
+      "xmp.modify": 1
+    },
+    "events_by_tool": {
+      "rv-hashinv": 10,
+      "rv-imgauth": 11,
+      "rv-pdfauth": 9
+    },
+    "events_filtered_out": 0,
+    "events_zone_unknown": 0,
+    "from_s": null,
+    "max_events": 5000000,
+    "max_events_reached": false,
+    "runs": [
+      {
+        "events": 10,
+        "exclusion": null,
+        "run_dir": "runs/rv-hashinv/20261117T135624Z-e74fa7",
+        "run_id": "20261117T135624Z-e74fa7",
+        "status": "verified",
+        "tool": "rv-hashinv",
+        "tool_version": "0.4.1"
+      },
+      {
+        "events": 11,
+        "exclusion": null,
+        "run_dir": "runs/rv-imgauth/20261117T135629Z-6e0abc",
+        "run_id": "20261117T135629Z-6e0abc",
+        "status": "verified",
+        "tool": "rv-imgauth",
+        "tool_version": "0.3.1"
+      },
+      {
+        "events": 9,
+        "exclusion": null,
+        "run_dir": "runs/rv-pdfauth/20261117T135627Z-939b2f",
+        "run_id": "20261117T135627Z-939b2f",
+        "status": "verified",
+        "tool": "rv-pdfauth",
+        "tool_version": "0.4.1"
+      }
+    ],
+    "runs_excluded": 0,
+    "runs_verified": 3,
+    "signals": [],
+    "signals_by_severity": {
+      "high": 0,
+      "info": 0,
+      "low": 0,
+      "medium": 0
+    },
+    "skipped": [
+      {
+        "reason": "self",
+        "run_dir": "runs/rv-timeline/20261117T135631Z-12993a",
+        "run_id": "20261117T135631Z-12993a",
+        "tool": "rv-timeline",
+        "version": "0.2.1"
+      }
+    ],
+    "sort_spilled_chunks": 0,
+    "timeline_file": "timeline.jsonl",
+    "times_skipped": 0,
+    "to_s": null,
+    "tools": []
+  },
+  "timestamp": {
+    "status": "off"
+  },
+  "tool": {
+    "name": "rv-timeline",
+    "version": "0.2.1"
+  },
+  "totals": {
+    "bytes": 0,
+    "errors": 0,
+    "items": 4
+  }
+}

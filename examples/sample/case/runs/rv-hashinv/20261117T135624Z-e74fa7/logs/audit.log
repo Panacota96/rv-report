@@ -1,0 +1,27 @@
+2026-11-17T13:56:24.489Z  #00001  run_started          algorithms=sha256+md5 case_dir=R:\case case_id=RV-REPORT-SAMPLE evidence_ids= frontend=cli input_list=null inputs=R:\evidence jurisdiction=co langs=en out_dir=rakvor-out recursive=true sign_cert=null tool=rv-hashinv tsa_url=null version=0.4.1
+2026-11-17T13:56:24.490Z  #00002  case_linked          case_created=true case_dir=R:\case case_id=RV-REPORT-SAMPLE case_log_head_at_start=a9bc2ce077e22040fc07d638c35d83a18899cbb3e49e03e66f0a25c62cf80c3b case_log_seq_at_start=2 jurisdiction=co registry_items=0 registry_sha256=null requested_jurisdiction=co role=intake run_dir=runs/rv-hashinv/20261117T135624Z-e74fa7
+2026-11-17T13:56:24.517Z  #00003  environment_recorded environment.json  md5=722b6d28c8de1f284a606604c4be8f97 sha256=0b0943828909036db5910ddf5bbcf536d5002373b32523d16fad393c77c85e66
+2026-11-17T13:56:24.548Z  #00004  inputs_resolved      bytes=117451 items=4
+2026-11-17T13:56:24.548Z  #00005  item_started         R:\evidence\images\edited-gimp.jpg  index=1 modified_utc=2026-11-12T06:00:00Z size=105483
+2026-11-17T13:56:24.549Z  #00006  item_hashed          R:\evidence\images\edited-gimp.jpg  bytes_read=105483 index=1 mtime_unchanged=true
+2026-11-17T13:56:24.549Z  #00007  item_analyzed        R:\evidence\images\edited-gimp.jpg  detected_type=JPEG image extension=jpg findings= index=1 status=ok
+2026-11-17T13:56:24.549Z  #00008  item_started         R:\evidence\images\photo.webp  index=2 modified_utc=2026-11-12T06:00:00Z size=8294
+2026-11-17T13:56:24.550Z  #00009  item_hashed          R:\evidence\images\photo.webp  bytes_read=8294 index=2 mtime_unchanged=true
+2026-11-17T13:56:24.631Z  #00010  item_analyzed        R:\evidence\images\photo.webp  detected_type=null extension=webp findings= index=2 status=ok
+2026-11-17T13:56:24.631Z  #00011  item_started         R:\evidence\notes\acta.txt  index=3 modified_utc=2026-11-12T06:00:00Z size=61
+2026-11-17T13:56:24.632Z  #00012  item_hashed          R:\evidence\notes\acta.txt  bytes_read=61 index=3 mtime_unchanged=true
+2026-11-17T13:56:24.632Z  #00013  item_analyzed        R:\evidence\notes\acta.txt  detected_type=null extension=txt findings= index=3 status=ok
+2026-11-17T13:56:24.632Z  #00014  item_started         R:\evidence\pdf\edited-incremental.pdf  index=4 modified_utc=2026-11-12T06:00:00Z size=3613
+2026-11-17T13:56:24.633Z  #00015  item_hashed          R:\evidence\pdf\edited-incremental.pdf  bytes_read=3613 index=4 mtime_unchanged=true
+2026-11-17T13:56:24.633Z  #00016  item_analyzed        R:\evidence\pdf\edited-incremental.pdf  detected_type=PDF document extension=pdf findings= index=4 status=ok
+2026-11-17T13:56:24.767Z  #00017  evidence_registered  R:\evidence\images\edited-gimp.jpg  case_log_seq=3 evidence_id=E0001 index=1 new=true registry_sha256=d9a22c5ec0dcf8bf5ab3da0e424c368f02d50f37827cd3799ba57e978592b209
+2026-11-17T13:56:24.767Z  #00018  evidence_registered  R:\evidence\images\photo.webp  case_log_seq=3 evidence_id=E0002 index=2 new=true registry_sha256=d9a22c5ec0dcf8bf5ab3da0e424c368f02d50f37827cd3799ba57e978592b209
+2026-11-17T13:56:24.767Z  #00019  evidence_registered  R:\evidence\notes\acta.txt  case_log_seq=3 evidence_id=E0003 index=3 new=true registry_sha256=d9a22c5ec0dcf8bf5ab3da0e424c368f02d50f37827cd3799ba57e978592b209
+2026-11-17T13:56:24.767Z  #00020  evidence_registered  R:\evidence\pdf\edited-incremental.pdf  case_log_seq=3 evidence_id=E0004 index=4 new=true registry_sha256=d9a22c5ec0dcf8bf5ab3da0e424c368f02d50f37827cd3799ba57e978592b209
+2026-11-17T13:56:24.768Z  #00021  hash_register_written hashes.csv  md5=5bff97a298b2cc3e0b8a161eb9e942ad sha256=75bb0d608fcef04f1a26f258474cd30515111b270ac7e3b04085f87529064462
+2026-11-17T13:56:24.821Z  #00022  item_reports_written R:\evidence\images\edited-gimp.jpg  folder=items/00001-edited-gimp.jpg
+2026-11-17T13:56:24.865Z  #00023  item_reports_written R:\evidence\images\photo.webp  folder=items/00002-photo.webp
+2026-11-17T13:56:24.963Z  #00024  item_reports_written R:\evidence\notes\acta.txt  folder=items/00003-acta.txt
+2026-11-17T13:56:25.102Z  #00025  item_reports_written R:\evidence\pdf\edited-incremental.pdf  folder=items/00004-edited-incremental.pdf
+2026-11-17T13:56:25.277Z  #00026  statistics_report_written 
+2026-11-17T13:56:25.277Z  #00027  run_finished         bytes=117451 cancelled=false elapsed_ms=788 errors=0 high=0 info=0 items=4 low=0 medium=0

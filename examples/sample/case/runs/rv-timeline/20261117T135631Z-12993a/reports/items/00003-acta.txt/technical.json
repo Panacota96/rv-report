@@ -1,0 +1,150 @@
+{
+  "audit": {
+    "first_seq": 18,
+    "last_seq": 18
+  },
+  "case": {
+    "case_dir": "R:\\case",
+    "case_id": "RV-REPORT-SAMPLE",
+    "intake_utc": "2026-11-17T13:56:24.635Z",
+    "role": "analysis",
+    "status": null
+  },
+  "findings": [],
+  "hashes": {
+    "md5": "0e28a7c8c9ca4e4ed287099007f18759",
+    "sha256": "80e089ad6704c831e386b430adf92c5f5b72ec4428566d3580660e103c183c3c"
+  },
+  "item": {
+    "detected_type": null,
+    "error": null,
+    "evidence_id": "E0003",
+    "extension": null,
+    "file_name": "acta.txt",
+    "index": 3,
+    "modified_utc": null,
+    "path": "R:\\evidence\\notes\\acta.txt",
+    "size": 61,
+    "status": "ok"
+  },
+  "limitation_params": {
+    "TIMESTAMP_PROVES_EXISTENCE_ONLY": {
+      "skew_s": "300"
+    },
+    "TL_CLEAN_IS_NOT_PROOF": {
+      "skew_s": "300"
+    },
+    "TL_CLOCK_SKEW": {
+      "skew_s": "300"
+    },
+    "TL_READER_VERSIONS": {
+      "skew_s": "300"
+    },
+    "TL_TOOL_OUTPUTS_ONLY": {
+      "skew_s": "300"
+    },
+    "TL_ZONE_UNKNOWN": {
+      "skew_s": "300"
+    }
+  },
+  "limitations": [
+    "TL_ZONE_UNKNOWN",
+    "TL_CLOCK_SKEW",
+    "TL_TOOL_OUTPUTS_ONLY",
+    "TL_READER_VERSIONS",
+    "TL_CLEAN_IS_NOT_PROOF",
+    "TIMESTAMP_PROVES_EXISTENCE_ONLY"
+  ],
+  "run": {
+    "actor": "Sample Examiner",
+    "algorithms": [
+      "sha256",
+      "md5"
+    ],
+    "cancelled": false,
+    "case_id": "RV-REPORT-SAMPLE",
+    "elapsed_ms": 68,
+    "finished_utc": "2026-11-17T13:56:31.083Z",
+    "frontend": "cli",
+    "jurisdiction": "co",
+    "langs": [
+      "en"
+    ],
+    "pdf_signed_by": null,
+    "pdf_signer_certificate_sha256": null,
+    "run_id": "20261117T135631Z-12993a",
+    "started_utc": "2026-11-17T13:56:31.015Z"
+  },
+  "schema": "rakvor.item-technical/1",
+  "timeline": {
+    "display_zone": "UTC",
+    "events": [
+      {
+        "details": {},
+        "id": "rv-hashinv:20261117T135624Z-e74fa7:E0003:fs.modified:0",
+        "item": {
+          "evidence_id": "E0003",
+          "path": "R:\\evidence\\notes\\acta.txt",
+          "sha256": "80e089ad6704c831e386b430adf92c5f5b72ec4428566d3580660e103c183c3c",
+          "sub": ""
+        },
+        "kind": "fs.modified",
+        "offset_min": 0,
+        "original": "2026-11-12T06:00:00Z",
+        "precision": "second",
+        "source": {
+          "file": "logs/audit.jsonl",
+          "file_sha256": "8001ba46d4b296b86c1415cc9b2958e247be79de6b4e7251312140fd09bf1438",
+          "pointer": "line:11/details/modified_utc",
+          "run_dir": "runs/rv-hashinv/20261117T135624Z-e74fa7",
+          "run_id": "20261117T135624Z-e74fa7",
+          "tool": "rv-hashinv",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1794463200,
+        "zone": "explicit"
+      },
+      {
+        "details": {
+          "tool": "rv-hashinv"
+        },
+        "id": "rv-hashinv:20261117T135624Z-e74fa7:E0003:intake.registered:0",
+        "item": {
+          "evidence_id": "E0003",
+          "path": "R:\\evidence\\notes\\acta.txt",
+          "sha256": "80e089ad6704c831e386b430adf92c5f5b72ec4428566d3580660e103c183c3c",
+          "sub": ""
+        },
+        "kind": "intake.registered",
+        "offset_min": 0,
+        "original": "2026-11-17T13:56:24.635Z",
+        "precision": "millisecond",
+        "source": {
+          "file": "reports/items/00003-acta.txt/technical.json",
+          "file_sha256": "27fcb3563a0f7e814fe08babe6ac1e2d153e7430fadd50bf68b4fd3893c27d1b",
+          "pointer": "/case/intake_utc",
+          "run_dir": "runs/rv-hashinv/20261117T135624Z-e74fa7",
+          "run_id": "20261117T135624Z-e74fa7",
+          "tool": "rv-hashinv",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 635000000,
+        "utc_s": 1794923784,
+        "zone": "explicit"
+      }
+    ],
+    "events_listed": 2,
+    "events_total": 2,
+    "first_utc": "2026-11-12T06:00:00Z",
+    "last_utc": "2026-11-17T13:56:24Z",
+    "signals": [],
+    "tools": [
+      "rv-hashinv"
+    ]
+  },
+  "tool": {
+    "name": "rv-timeline",
+    "version": "0.2.1"
+  }
+}

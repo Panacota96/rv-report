@@ -1,0 +1,351 @@
+{
+  "audit": {
+    "first_seq": 19,
+    "last_seq": 19
+  },
+  "case": {
+    "case_dir": "R:\\case",
+    "case_id": "RV-REPORT-SAMPLE",
+    "intake_utc": "2026-11-17T13:56:24.635Z",
+    "role": "analysis",
+    "status": null
+  },
+  "findings": [],
+  "hashes": {
+    "md5": "b28a97d821a22ccdf5726426c16b8fed",
+    "sha256": "2ada8845654ce455968242d3aa211e26339943fa82cb69e07f610915485d93b0"
+  },
+  "item": {
+    "detected_type": null,
+    "error": null,
+    "evidence_id": "E0004",
+    "extension": null,
+    "file_name": "edited-incremental.pdf",
+    "index": 4,
+    "modified_utc": null,
+    "path": "R:\\evidence\\pdf\\edited-incremental.pdf",
+    "size": 3613,
+    "status": "ok"
+  },
+  "limitation_params": {
+    "TIMESTAMP_PROVES_EXISTENCE_ONLY": {
+      "skew_s": "300"
+    },
+    "TL_CLEAN_IS_NOT_PROOF": {
+      "skew_s": "300"
+    },
+    "TL_CLOCK_SKEW": {
+      "skew_s": "300"
+    },
+    "TL_READER_VERSIONS": {
+      "skew_s": "300"
+    },
+    "TL_TOOL_OUTPUTS_ONLY": {
+      "skew_s": "300"
+    },
+    "TL_ZONE_UNKNOWN": {
+      "skew_s": "300"
+    }
+  },
+  "limitations": [
+    "TL_ZONE_UNKNOWN",
+    "TL_CLOCK_SKEW",
+    "TL_TOOL_OUTPUTS_ONLY",
+    "TL_READER_VERSIONS",
+    "TL_CLEAN_IS_NOT_PROOF",
+    "TIMESTAMP_PROVES_EXISTENCE_ONLY"
+  ],
+  "run": {
+    "actor": "Sample Examiner",
+    "algorithms": [
+      "sha256",
+      "md5"
+    ],
+    "cancelled": false,
+    "case_id": "RV-REPORT-SAMPLE",
+    "elapsed_ms": 68,
+    "finished_utc": "2026-11-17T13:56:31.083Z",
+    "frontend": "cli",
+    "jurisdiction": "co",
+    "langs": [
+      "en"
+    ],
+    "pdf_signed_by": null,
+    "pdf_signer_certificate_sha256": null,
+    "run_id": "20261117T135631Z-12993a",
+    "started_utc": "2026-11-17T13:56:31.015Z"
+  },
+  "schema": "rakvor.item-technical/1",
+  "timeline": {
+    "display_zone": "UTC",
+    "events": [
+      {
+        "details": {
+          "object": "6 0",
+          "producer": "ReportLab PDF Library - (opensource)"
+        },
+        "id": "rv-pdfauth:20261117T135627Z-939b2f:E0004/r1:pdf.info.created:0",
+        "item": {
+          "evidence_id": "E0004",
+          "path": "R:\\evidence\\pdf\\edited-incremental.pdf",
+          "sha256": "2ada8845654ce455968242d3aa211e26339943fa82cb69e07f610915485d93b0",
+          "sub": "r1"
+        },
+        "kind": "pdf.info.created",
+        "offset_min": -300,
+        "original": "D:20260302091500-05'00'",
+        "precision": "second",
+        "source": {
+          "file": "reports/items/00001-edited-incremental.pdf/objects.json",
+          "file_sha256": "f8611a6cf73fd612730d8e91e38292ce843cd03ebc6ea622d21fd71fd4f3f11c",
+          "pointer": "/revisions/0/objects/5/dict/CreationDate",
+          "run_dir": "runs/rv-pdfauth/20261117T135627Z-939b2f",
+          "run_id": "20261117T135627Z-939b2f",
+          "tool": "rv-pdfauth",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1772460900,
+        "zone": "explicit"
+      },
+      {
+        "details": {
+          "object": "6 0",
+          "producer": "ReportLab PDF Library - (opensource)"
+        },
+        "id": "rv-pdfauth:20261117T135627Z-939b2f:E0004/r1:pdf.info.modified:0",
+        "item": {
+          "evidence_id": "E0004",
+          "path": "R:\\evidence\\pdf\\edited-incremental.pdf",
+          "sha256": "2ada8845654ce455968242d3aa211e26339943fa82cb69e07f610915485d93b0",
+          "sub": "r1"
+        },
+        "kind": "pdf.info.modified",
+        "offset_min": -300,
+        "original": "D:20260302091500-05'00'",
+        "precision": "second",
+        "source": {
+          "file": "reports/items/00001-edited-incremental.pdf/objects.json",
+          "file_sha256": "f8611a6cf73fd612730d8e91e38292ce843cd03ebc6ea622d21fd71fd4f3f11c",
+          "pointer": "/revisions/0/objects/5/dict/ModDate",
+          "run_dir": "runs/rv-pdfauth/20261117T135627Z-939b2f",
+          "run_id": "20261117T135627Z-939b2f",
+          "tool": "rv-pdfauth",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1772460900,
+        "zone": "explicit"
+      },
+      {
+        "details": {
+          "object": "6 0",
+          "producer": "Foxit PDF Editor Version 13.0.0"
+        },
+        "id": "rv-pdfauth:20261117T135627Z-939b2f:E0004/r2:pdf.info.created:0",
+        "item": {
+          "evidence_id": "E0004",
+          "path": "R:\\evidence\\pdf\\edited-incremental.pdf",
+          "sha256": "2ada8845654ce455968242d3aa211e26339943fa82cb69e07f610915485d93b0",
+          "sub": "r2"
+        },
+        "kind": "pdf.info.created",
+        "offset_min": -300,
+        "original": "D:20260302091500-05'00'",
+        "precision": "second",
+        "source": {
+          "file": "reports/items/00001-edited-incremental.pdf/objects.json",
+          "file_sha256": "f8611a6cf73fd612730d8e91e38292ce843cd03ebc6ea622d21fd71fd4f3f11c",
+          "pointer": "/revisions/1/objects/1/dict/CreationDate",
+          "run_dir": "runs/rv-pdfauth/20261117T135627Z-939b2f",
+          "run_id": "20261117T135627Z-939b2f",
+          "tool": "rv-pdfauth",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1772460900,
+        "zone": "explicit"
+      },
+      {
+        "details": {
+          "object": "6 0",
+          "producer": "Foxit PDF Editor Version 13.0.0"
+        },
+        "id": "rv-pdfauth:20261117T135627Z-939b2f:E0004/r3:pdf.info.created:0",
+        "item": {
+          "evidence_id": "E0004",
+          "path": "R:\\evidence\\pdf\\edited-incremental.pdf",
+          "sha256": "2ada8845654ce455968242d3aa211e26339943fa82cb69e07f610915485d93b0",
+          "sub": "r3"
+        },
+        "kind": "pdf.info.created",
+        "offset_min": -300,
+        "original": "D:20260302091500-05'00'",
+        "precision": "second",
+        "source": {
+          "file": "reports/items/00001-edited-incremental.pdf/objects.json",
+          "file_sha256": "f8611a6cf73fd612730d8e91e38292ce843cd03ebc6ea622d21fd71fd4f3f11c",
+          "pointer": "/revisions/2/objects/1/dict/CreationDate",
+          "run_dir": "runs/rv-pdfauth/20261117T135627Z-939b2f",
+          "run_id": "20261117T135627Z-939b2f",
+          "tool": "rv-pdfauth",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1772460900,
+        "zone": "explicit"
+      },
+      {
+        "details": {
+          "object": "6 0",
+          "producer": "Foxit PDF Editor Version 13.0.0"
+        },
+        "id": "rv-pdfauth:20261117T135627Z-939b2f:E0004/r2:pdf.info.modified:0",
+        "item": {
+          "evidence_id": "E0004",
+          "path": "R:\\evidence\\pdf\\edited-incremental.pdf",
+          "sha256": "2ada8845654ce455968242d3aa211e26339943fa82cb69e07f610915485d93b0",
+          "sub": "r2"
+        },
+        "kind": "pdf.info.modified",
+        "offset_min": -300,
+        "original": "D:20260304121500-05'00'",
+        "precision": "second",
+        "source": {
+          "file": "reports/items/00001-edited-incremental.pdf/objects.json",
+          "file_sha256": "f8611a6cf73fd612730d8e91e38292ce843cd03ebc6ea622d21fd71fd4f3f11c",
+          "pointer": "/revisions/1/objects/1/dict/ModDate",
+          "run_dir": "runs/rv-pdfauth/20261117T135627Z-939b2f",
+          "run_id": "20261117T135627Z-939b2f",
+          "tool": "rv-pdfauth",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1772644500,
+        "zone": "explicit"
+      },
+      {
+        "details": {
+          "object": "6 0",
+          "producer": "Foxit PDF Editor Version 13.0.0"
+        },
+        "id": "rv-pdfauth:20261117T135627Z-939b2f:E0004/r3:pdf.info.modified:0",
+        "item": {
+          "evidence_id": "E0004",
+          "path": "R:\\evidence\\pdf\\edited-incremental.pdf",
+          "sha256": "2ada8845654ce455968242d3aa211e26339943fa82cb69e07f610915485d93b0",
+          "sub": "r3"
+        },
+        "kind": "pdf.info.modified",
+        "offset_min": -300,
+        "original": "D:20260311091500-05'00'",
+        "precision": "second",
+        "source": {
+          "file": "reports/items/00001-edited-incremental.pdf/objects.json",
+          "file_sha256": "f8611a6cf73fd612730d8e91e38292ce843cd03ebc6ea622d21fd71fd4f3f11c",
+          "pointer": "/revisions/2/objects/1/dict/ModDate",
+          "run_dir": "runs/rv-pdfauth/20261117T135627Z-939b2f",
+          "run_id": "20261117T135627Z-939b2f",
+          "tool": "rv-pdfauth",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1773238500,
+        "zone": "explicit"
+      },
+      {
+        "details": {},
+        "id": "rv-hashinv:20261117T135624Z-e74fa7:E0004:fs.modified:0",
+        "item": {
+          "evidence_id": "E0004",
+          "path": "R:\\evidence\\pdf\\edited-incremental.pdf",
+          "sha256": "2ada8845654ce455968242d3aa211e26339943fa82cb69e07f610915485d93b0",
+          "sub": ""
+        },
+        "kind": "fs.modified",
+        "offset_min": 0,
+        "original": "2026-11-12T06:00:00Z",
+        "precision": "second",
+        "source": {
+          "file": "logs/audit.jsonl",
+          "file_sha256": "8001ba46d4b296b86c1415cc9b2958e247be79de6b4e7251312140fd09bf1438",
+          "pointer": "line:14/details/modified_utc",
+          "run_dir": "runs/rv-hashinv/20261117T135624Z-e74fa7",
+          "run_id": "20261117T135624Z-e74fa7",
+          "tool": "rv-hashinv",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1794463200,
+        "zone": "explicit"
+      },
+      {
+        "details": {},
+        "id": "rv-pdfauth:20261117T135627Z-939b2f:E0004:fs.modified:0",
+        "item": {
+          "evidence_id": "E0004",
+          "path": "R:\\evidence\\pdf\\edited-incremental.pdf",
+          "sha256": "2ada8845654ce455968242d3aa211e26339943fa82cb69e07f610915485d93b0",
+          "sub": ""
+        },
+        "kind": "fs.modified",
+        "offset_min": 0,
+        "original": "2026-11-12T06:00:00Z",
+        "precision": "second",
+        "source": {
+          "file": "logs/audit.jsonl",
+          "file_sha256": "ac977c1a7491686e3876f87c27437e18c79a071f1212984719a5887e1b0a1cb7",
+          "pointer": "line:5/details/modified_utc",
+          "run_dir": "runs/rv-pdfauth/20261117T135627Z-939b2f",
+          "run_id": "20261117T135627Z-939b2f",
+          "tool": "rv-pdfauth",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1794463200,
+        "zone": "explicit"
+      },
+      {
+        "details": {
+          "tool": "rv-hashinv"
+        },
+        "id": "rv-hashinv:20261117T135624Z-e74fa7:E0004:intake.registered:0",
+        "item": {
+          "evidence_id": "E0004",
+          "path": "R:\\evidence\\pdf\\edited-incremental.pdf",
+          "sha256": "2ada8845654ce455968242d3aa211e26339943fa82cb69e07f610915485d93b0",
+          "sub": ""
+        },
+        "kind": "intake.registered",
+        "offset_min": 0,
+        "original": "2026-11-17T13:56:24.635Z",
+        "precision": "millisecond",
+        "source": {
+          "file": "reports/items/00004-edited-incremental.pdf/technical.json",
+          "file_sha256": "9f6d59ad40609b0d8b262e92270cd078c898c8872bdcf6533cb32b369e6f5881",
+          "pointer": "/case/intake_utc",
+          "run_dir": "runs/rv-hashinv/20261117T135624Z-e74fa7",
+          "run_id": "20261117T135624Z-e74fa7",
+          "tool": "rv-hashinv",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 635000000,
+        "utc_s": 1794923784,
+        "zone": "explicit"
+      }
+    ],
+    "events_listed": 9,
+    "events_total": 9,
+    "first_utc": "2026-03-02T14:15:00Z",
+    "last_utc": "2026-11-17T13:56:24Z",
+    "signals": [],
+    "tools": [
+      "rv-hashinv",
+      "rv-pdfauth"
+    ]
+  },
+  "tool": {
+    "name": "rv-timeline",
+    "version": "0.2.1"
+  }
+}

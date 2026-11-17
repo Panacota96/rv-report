@@ -1,0 +1,177 @@
+{
+  "audit": {
+    "first_seq": 17,
+    "last_seq": 17
+  },
+  "case": {
+    "case_dir": "R:\\case",
+    "case_id": "RV-REPORT-SAMPLE",
+    "intake_utc": "2026-11-17T13:56:24.635Z",
+    "role": "analysis",
+    "status": null
+  },
+  "findings": [],
+  "hashes": {
+    "md5": "0cc0974ebdee1b253f056ed91e3e529b",
+    "sha256": "68a1b049108b5f459446a6c6a203b363a68bd123c7d91f0cba7f538cc206238d"
+  },
+  "item": {
+    "detected_type": null,
+    "error": null,
+    "evidence_id": "E0002",
+    "extension": null,
+    "file_name": "photo.webp",
+    "index": 2,
+    "modified_utc": null,
+    "path": "R:\\evidence\\images\\photo.webp",
+    "size": 8294,
+    "status": "ok"
+  },
+  "limitation_params": {
+    "TIMESTAMP_PROVES_EXISTENCE_ONLY": {
+      "skew_s": "300"
+    },
+    "TL_CLEAN_IS_NOT_PROOF": {
+      "skew_s": "300"
+    },
+    "TL_CLOCK_SKEW": {
+      "skew_s": "300"
+    },
+    "TL_READER_VERSIONS": {
+      "skew_s": "300"
+    },
+    "TL_TOOL_OUTPUTS_ONLY": {
+      "skew_s": "300"
+    },
+    "TL_ZONE_UNKNOWN": {
+      "skew_s": "300"
+    }
+  },
+  "limitations": [
+    "TL_ZONE_UNKNOWN",
+    "TL_CLOCK_SKEW",
+    "TL_TOOL_OUTPUTS_ONLY",
+    "TL_READER_VERSIONS",
+    "TL_CLEAN_IS_NOT_PROOF",
+    "TIMESTAMP_PROVES_EXISTENCE_ONLY"
+  ],
+  "run": {
+    "actor": "Sample Examiner",
+    "algorithms": [
+      "sha256",
+      "md5"
+    ],
+    "cancelled": false,
+    "case_id": "RV-REPORT-SAMPLE",
+    "elapsed_ms": 68,
+    "finished_utc": "2026-11-17T13:56:31.083Z",
+    "frontend": "cli",
+    "jurisdiction": "co",
+    "langs": [
+      "en"
+    ],
+    "pdf_signed_by": null,
+    "pdf_signer_certificate_sha256": null,
+    "run_id": "20261117T135631Z-12993a",
+    "started_utc": "2026-11-17T13:56:31.015Z"
+  },
+  "schema": "rakvor.item-technical/1",
+  "timeline": {
+    "display_zone": "UTC",
+    "events": [
+      {
+        "details": {},
+        "id": "rv-hashinv:20261117T135624Z-e74fa7:E0002:fs.modified:0",
+        "item": {
+          "evidence_id": "E0002",
+          "path": "R:\\evidence\\images\\photo.webp",
+          "sha256": "68a1b049108b5f459446a6c6a203b363a68bd123c7d91f0cba7f538cc206238d",
+          "sub": ""
+        },
+        "kind": "fs.modified",
+        "offset_min": 0,
+        "original": "2026-11-12T06:00:00Z",
+        "precision": "second",
+        "source": {
+          "file": "logs/audit.jsonl",
+          "file_sha256": "8001ba46d4b296b86c1415cc9b2958e247be79de6b4e7251312140fd09bf1438",
+          "pointer": "line:8/details/modified_utc",
+          "run_dir": "runs/rv-hashinv/20261117T135624Z-e74fa7",
+          "run_id": "20261117T135624Z-e74fa7",
+          "tool": "rv-hashinv",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1794463200,
+        "zone": "explicit"
+      },
+      {
+        "details": {},
+        "id": "rv-imgauth:20261117T135629Z-6e0abc:E0002:fs.modified:0",
+        "item": {
+          "evidence_id": "E0002",
+          "path": "R:\\evidence\\images\\photo.webp",
+          "sha256": "68a1b049108b5f459446a6c6a203b363a68bd123c7d91f0cba7f538cc206238d",
+          "sub": ""
+        },
+        "kind": "fs.modified",
+        "offset_min": 0,
+        "original": "2026-11-12T06:00:00Z",
+        "precision": "second",
+        "source": {
+          "file": "logs/audit.jsonl",
+          "file_sha256": "61298a047be297edcb8aa1d695c7a898f792fdc3adf7cc9d1bcfc58fd5e387b1",
+          "pointer": "line:14/details/modified_utc",
+          "run_dir": "runs/rv-imgauth/20261117T135629Z-6e0abc",
+          "run_id": "20261117T135629Z-6e0abc",
+          "tool": "rv-imgauth",
+          "tool_version": "0.3.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1794463200,
+        "zone": "explicit"
+      },
+      {
+        "details": {
+          "tool": "rv-hashinv"
+        },
+        "id": "rv-hashinv:20261117T135624Z-e74fa7:E0002:intake.registered:0",
+        "item": {
+          "evidence_id": "E0002",
+          "path": "R:\\evidence\\images\\photo.webp",
+          "sha256": "68a1b049108b5f459446a6c6a203b363a68bd123c7d91f0cba7f538cc206238d",
+          "sub": ""
+        },
+        "kind": "intake.registered",
+        "offset_min": 0,
+        "original": "2026-11-17T13:56:24.635Z",
+        "precision": "millisecond",
+        "source": {
+          "file": "reports/items/00002-photo.webp/technical.json",
+          "file_sha256": "2450df8eafc2af545507e2a7588d8e6225ea91846f08971ba5736bf7e74d2849",
+          "pointer": "/case/intake_utc",
+          "run_dir": "runs/rv-hashinv/20261117T135624Z-e74fa7",
+          "run_id": "20261117T135624Z-e74fa7",
+          "tool": "rv-hashinv",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 635000000,
+        "utc_s": 1794923784,
+        "zone": "explicit"
+      }
+    ],
+    "events_listed": 3,
+    "events_total": 3,
+    "first_utc": "2026-11-12T06:00:00Z",
+    "last_utc": "2026-11-17T13:56:24Z",
+    "signals": [],
+    "tools": [
+      "rv-hashinv",
+      "rv-imgauth"
+    ]
+  },
+  "tool": {
+    "name": "rv-timeline",
+    "version": "0.2.1"
+  }
+}

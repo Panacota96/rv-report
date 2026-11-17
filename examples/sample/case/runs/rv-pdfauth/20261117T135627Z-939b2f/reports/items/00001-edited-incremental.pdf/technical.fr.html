@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revue technique — edited-incremental.pdf</title><style>:root { --ink:#0D1117; --muted:#475467; --line:#E4E7EC; --accent:#2A5CFF; --violet:#6B00FF; --cyan:#00E5FF; --night:#0D1117; --night2:#1A1F26; --mist:#E6E6E6; --soft:#F5F7FB; --bg:#FFFFFF; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.55 "Segoe UI", "Inter", system-ui, sans-serif; }
+main { max-width: 920px; margin: 0 auto; padding: 32px 16px 56px; }
+.band { background: linear-gradient(135deg, var(--night) 0%, var(--night2) 70%); color: var(--mist); border-bottom: 3px solid; border-image: linear-gradient(90deg, var(--accent), var(--violet), var(--cyan)) 1; }
+.band .inner { max-width: 920px; margin: 0 auto; padding: 14px 16px; display:flex; align-items:center; gap:14px; }
+.band .word { font-weight:800; letter-spacing:.22em; font-size:15px; }
+.band .desc { font-size:10.5px; letter-spacing:.14em; color: var(--cyan); }
+header { border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 22px; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.mark { font-weight:800; letter-spacing:.18em; color:var(--accent); font-size:12px; }
+.tagline { font-style: italic; color: var(--muted); }
+.sign { margin-top: 28px; display:grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.sign div { border-top: 1px solid var(--ink); padding-top: 6px; font-size: 12px; color: var(--muted); min-height: 40px; }
+table.blank td { height: 34px; }
+h1 { font-size: 22px; margin: 6px 0 2px; }
+h2 { font-size: 16px; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.meta { font-size: 13px; color: var(--muted); text-align:right; }
+table { width:100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+th, td { text-align:left; vertical-align:top; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 600; background: var(--soft); }
+.mono { font-family: "Cascadia Mono", Consolas, ui-monospace, monospace; font-size: 12px; word-break: break-all; }
+.badge { color:#fff; border-radius: 999px; padding: 1px 9px; font-size: 11px; font-weight: 700; }
+.sev-high { background:#B42318; } .sev-medium { background:#B54708; } .sev-low { background:#2A5CFF; } .sev-info { background:#475467; }
+.finding { border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin:10px 0; break-inside: avoid; }
+.kv { display:grid; grid-template-columns: 210px 1fr; gap: 4px 12px; font-size: 13px; }
+.kv div:nth-child(odd) { color: var(--muted); }
+.status { font-size: 20px; font-weight: 700; padding: 14px 16px; border-left: 5px solid var(--accent); background: var(--soft); }
+.status-problem { border-color:#B42318; } .status-attention { border-color:#B54708; } .status-ok { border-color:#067647; }
+.note { padding: 10px 12px; background:#FFFAEB; border:1px solid #FEDF89; border-radius:8px; }
+footer { margin-top: 36px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+h3 { font-size: 14px; margin: 18px 0 6px; }
+.small { font-size: 12px; color: var(--muted); }
+.scroll { overflow-x: auto; }
+table.dense { font-size: 12px; } table.dense th, table.dense td { padding: 4px 6px; }
+.timeline { position: relative; height: 128px; margin: 8px 0 4px; }
+.tl-axis { position: absolute; left: 0; right: 0; top: 62px; height: 3px; background: linear-gradient(90deg, var(--accent), var(--violet), var(--cyan)); border-radius: 2px; }
+.tl-pt { position: absolute; top: 56px; transform: translateX(-50%); }
+.tl-dot { display: block; width: 15px; height: 15px; border-radius: 50%; background: var(--bg); border: 3px solid var(--accent); }
+.tl-lbl { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 11px; line-height: 1.3; text-align: center; white-space: nowrap; color: var(--muted); }
+.tl-up .tl-lbl { top: auto; bottom: 20px; }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 10px 0; }
+.thumbs a { display: block; border: 1px solid var(--line); border-radius: 8px; padding: 6px; text-decoration: none; color: var(--ink); }
+.thumbs img { display: block; width: 100%; height: auto; border-radius: 4px; background: var(--soft); }
+@media (max-width: 640px) { .kv { grid-template-columns: 1fr; } .meta { text-align:left; } }
+@media print { main { padding: 0; } .band { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head>
+<body><div class="band"><div class="inner"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="44" height="44" role="img" aria-label="RV">
+  <defs><linearGradient id="rvg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2A5CFF"/><stop offset=".55" stop-color="#4D23FF"/><stop offset="1" stop-color="#6B00FF"/></linearGradient></defs>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#0D1117" stroke="url(#rvg)" stroke-width="4"/>
+  <text x="32" y="41" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-weight="800" font-size="26" fill="#E6E6E6">RV</text>
+  <rect x="18" y="47" width="28" height="3" rx="1.5" fill="#00E5FF"/>
+</svg>
+<div><div class="word">RAKVOR</div><div class="desc">INVESTIGATION NUMÉRIQUE | RÉPONSE AUX INCIDENTS | SÉCURITÉ</div></div></div></div>
+<main>
+<header>
+  <div><h1>Revue technique</h1><div>edited-incremental.pdf</div></div>
+  <div class="meta">
+    <div>ID d&#x27;exécution: <strong>20261117T135627Z-939b2f</strong></div>
+    <div>Élément #1</div>
+    <div>ID de l&#x27;élément: <strong>E0004</strong></div>
+    <div>Dossier: RV-REPORT-SAMPLE</div>
+  </div>
+</header>
+
+<div class="kv">
+  <div>Chemin</div><div class="mono">R:\evidence\pdf\edited-incremental.pdf</div>
+  <div>Taille (octets)</div><div>3613</div>
+  <div>Dernière modification (UTC)</div><div>2026-11-12T06:00:00Z</div>
+  <div>Extension</div><div>.pdf</div>
+  <div>Type détecté (signature)</div><div>PDF document</div>
+  <div>Statut</div><div>À examiner</div>
+  <div>Dossier</div><div>RV-REPORT-SAMPLE</div>
+  <div>ID de l&#x27;élément</div><div class="mono">E0004</div>
+  <div>Registre de l&#x27;affaire</div><div>Vérifié : identique à l&#x27;élément enregistré</div>
+  <div>Enregistré à la réception (UTC)</div><div>2026-11-17T13:56:24.635Z</div>
+</div>
+
+<h2>Empreintes</h2>
+<table><tr><th>Algorithmes de hachage</th><th>Hex</th></tr>
+<tr><td>sha256</td><td class="mono">2ada8845654ce455968242d3aa211e26339943fa82cb69e07f610915485d93b0</td></tr><tr><td>md5</td><td class="mono">b28a97d821a22ccdf5726426c16b8fed</td></tr>
+</table>
+
+<h2>Constatations</h2>
+
+<div class="finding">
+  <div><span class="badge sev-medium">Moyenne</span> <strong>Logiciel différent d&#x27;une révision à l&#x27;autre</strong> <span class="mono">PRODUCER_CHANGED_BETWEEN_REVISIONS</span></div>
+  <div class="kv"><div>Ce que cela montre</div><div>Le producteur passe de « ReportLab PDF Library - (opensource) » dans la révision 1 à « Foxit PDF Editor Version 13.0.0 » dans la révision 2.</div><div>Ce que cela ne prouve pas</div><div>Un document passe couramment par plusieurs logiciels (par exemple un outil de signature ou de formulaires) ; cela montre un changement d&#x27;outil, ni qui l&#x27;a utilisé ni pourquoi.</div></div>
+</div>
+<div class="finding">
+  <div><span class="badge sev-medium">Moyenne</span> <strong>Empreinte d&#x27;un éditeur PDF</strong> <span class="mono">EDITOR_FINGERPRINT</span></div>
+  <div class="kv"><div>Ce que cela montre</div><div>La révision 2 porte l&#x27;empreinte d&#x27;un éditeur PDF : Foxit PDF Editor &#x2f; PhantomPDF (métadonnée producer : « Foxit PDF Editor Version 13.0.0 »).</div><div>Ce que cela ne prouve pas</div><div>Les éditeurs servent aussi à des tâches légitimes : remplir, signer, faire pivoter ou compresser un document ; l&#x27;empreinte indique quel logiciel a enregistré le fichier, pas ce qui a été modifié.</div></div>
+</div>
+<div class="finding">
+  <div><span class="badge sev-medium">Moyenne</span> <strong>Police ajoutée dans une révision ultérieure</strong> <span class="mono">FONT_ADDED_IN_LATER_REVISION</span></div>
+  <div class="kv"><div>Ce que cela montre</div><div>La police Courier-Bold apparaît pour la première fois dans la révision 3, où le contenu des pages l&#x27;utilise.</div><div>Ce que cela ne prouve pas</div><div>Les outils d&#x27;édition ajoutent des polices lors du remplissage d&#x27;un formulaire, de l&#x27;ajout d&#x27;un tampon ou d&#x27;un commentaire, ou d&#x27;une correction légitime ; cela montre que du texte a été écrit dans cette révision, non qu&#x27;il falsifie le document.</div></div>
+</div>
+<div class="finding">
+  <div><span class="badge sev-low">Faible</span> <strong>Mises à jour incrémentales</strong> <span class="mono">INCREMENTAL_UPDATES</span></div>
+  <div class="kv"><div>Ce que cela montre</div><div>Le fichier contient 3 révisions : l&#x27;enregistrement d&#x27;origine et des mises à jour ajoutées ensuite à la fin du fichier. Chaque version antérieure peut être extraite et comparée.</div><div>Ce que cela ne prouve pas</div><div>L&#x27;enregistrement incrémental est normal lorsqu&#x27;un PDF est rempli, signé, annoté ou réenregistré par de nombreux logiciels ; il n&#x27;indique ni qui a modifié le fichier ni que la modification était irrégulière.</div></div>
+</div>
+<div class="finding">
+  <div><span class="badge sev-info">Information</span> <strong>Écart de temps entre révisions</strong> <span class="mono">REVISION_TIME_GAP</span></div>
+  <div class="kv"><div>Ce que cela montre</div><div>La révision 2 est datée 2 d 3 h 0 min après la révision 1 (d&#x27;après leurs dates de modification).</div><div>Ce que cela ne prouve pas</div><div>Les dates des métadonnées sont écrites par le logiciel d&#x27;édition à partir de l&#x27;horloge de l&#x27;ordinateur et peuvent être fixées librement ; l&#x27;écart ne prouve ni quand les modifications ont réellement eu lieu ni qui les a faites.</div></div>
+</div>
+<div class="finding">
+  <div><span class="badge sev-info">Information</span> <strong>Écart de temps entre révisions</strong> <span class="mono">REVISION_TIME_GAP</span></div>
+  <div class="kv"><div>Ce que cela montre</div><div>La révision 3 est datée 6 d 21 h 0 min après la révision 2 (d&#x27;après leurs dates de modification).</div><div>Ce que cela ne prouve pas</div><div>Les dates des métadonnées sont écrites par le logiciel d&#x27;édition à partir de l&#x27;horloge de l&#x27;ordinateur et peuvent être fixées librement ; l&#x27;écart ne prouve ni quand les modifications ont réellement eu lieu ni qui les a faites.</div></div>
+</div>
+<div class="finding">
+  <div><span class="badge sev-info">Information</span> <strong>Comparaison visuelle non effectuée</strong> <span class="mono">VISUAL_DIFF_SKIPPED</span></div>
+  <div class="kv"><div>Ce que cela montre</div><div>La comparaison visuelle page par page des révisions n&#x27;a pas pu être faite : PDFium library not found or not loadable: R:\bin\pdfium.dll (not found); R:\pdfium.dll (not found).</div><div>Ce que cela ne prouve pas</div><div>Cela ne montre pas que les révisions sont identiques ou différentes à l&#x27;écran ; l&#x27;analyse structurelle des révisions n&#x27;est pas affectée.</div></div>
+</div>
+
+
+<h2>Historique des révisions</h2>
+<div class="scroll"><table class="dense"><tr><th>#</th><th>Plage d’octets</th><th>Enregistré (Info)</th><th>Enregistré (XMP)</th><th>Producteur</th><th>Délai depuis la précédente</th><th>Objets ajoutés &#x2f; modifiés &#x2f; supprimés</th><th>Pages modifiées</th><th>Signée par (champ)</th></tr>
+<tr><td>1</td><td class="mono">0–1646 (1646 B)</td><td>2026-03-02T14:15:00Z</td><td>—</td><td>ReportLab PDF Library - (opensource)</td><td>—</td><td>8 &#x2f; 0 &#x2f; 0</td><td>—</td><td>—</td></tr><tr><td>2</td><td class="mono">1646–2621 (975 B)</td><td>2026-03-04T17:15:00Z</td><td>—</td><td>Foxit PDF Editor Version 13.0.0</td><td>2 jours</td><td>1 &#x2f; 2 &#x2f; 0</td><td>1</td><td>—</td></tr><tr><td>3</td><td class="mono">2621–3613 (992 B)</td><td>2026-03-11T14:15:00Z</td><td>—</td><td>Foxit PDF Editor Version 13.0.0</td><td>6 jours</td><td>2 &#x2f; 2 &#x2f; 0</td><td>1</td><td>—</td></tr>
+</table></div>
+
+<h3>Chronologie</h3>
+<div class="timeline" role="img" aria-label="Chronologie"><div class="tl-axis"></div>
+<div class="tl-pt" style="left: 4.0%"><span class="tl-dot"></span><span class="tl-lbl"><strong>R1</strong><br>2026-03-02 14:15:00<br>—</span></div><div class="tl-pt tl-up" style="left: 25.7%"><span class="tl-dot"></span><span class="tl-lbl"><strong>R2</strong><br>2026-03-04 17:15:00<br>2 jours</span></div><div class="tl-pt" style="left: 96.0%"><span class="tl-dot"></span><span class="tl-lbl"><strong>R3</strong><br>2026-03-11 14:15:00<br>6 jours</span></div>
+</div>
+<p class="small">Les dates sont celles enregistrées dans le fichier (dictionnaire Info, sinon XMP) ; le logiciel qui l’a enregistré peut les fixer librement. Sans dates exploitables, les révisions sont espacées régulièrement.</p>
+
+<h2>Signatures</h2>
+<p>Aucun</p>
+<p class="small">Le certificat du signataire, sa chaîne et son statut de révocation n’ont pas été validés : une signature mathématiquement valide ne montre pas qui contrôlait la clé.</p>
+
+<h2>Polices</h2>
+<table class="dense"><tr><th>Police</th><th>Préfixe de sous-ensemble</th><th>Incorporée</th><th>Première révision</th><th>Objet</th></tr>
+<tr><td>Helvetica</td><td class="mono">—</td><td>non</td><td>1</td><td class="mono">2 0</td></tr><tr><td>Helvetica-Bold</td><td class="mono">—</td><td>non</td><td>1</td><td class="mono">3 0</td></tr><tr><td>Courier-Bold</td><td class="mono">—</td><td>non</td><td>3</td><td class="mono">10 0</td></tr>
+</table>
+
+<h2>Empreintes de producteur</h2>
+<div class="scroll"><table class="dense"><tr><th>Rôle</th><th>Base de données</th><th>Version</th><th>Entrées</th><th>État</th><th>SHA-256</th></tr>
+<tr><td>starter</td><td>rakvor-starter</td><td>2026.10.21</td><td>37</td><td>loaded</td><td class="mono">0b8df17b3ba7f33932cfc072932f198cdfdba98ad1332b33ac84c5c2f9068795</td></tr><tr><td>local</td><td>—</td><td>—</td><td>—</td><td>absent</td><td class="mono">—</td></tr>
+</table></div>
+<div class="scroll"><table class="dense"><tr><th>#</th><th>Outil</th><th>Catégorie</th><th>Correspondance sur</th><th>Valeur trouvée</th><th>Traits non conformes</th></tr>
+<tr><td>1</td><td>ReportLab PDF Library</td><td>pdf_library</td><td>producer</td><td>ReportLab PDF Library - (opensource)</td><td>—</td></tr><tr><td>2</td><td>Foxit PDF Editor &#x2f; PhantomPDF</td><td>pdf_editor</td><td>producer</td><td>Foxit PDF Editor Version 13.0.0</td><td>—</td></tr>
+</table></div>
+
+<h2>Comparaison visuelle</h2>
+<div class="kv">
+  <div>Statut</div><div>Ignorée</div>
+  <div>Motif</div><div>PDFium library not found or not loadable: R:\bin\pdfium.dll (not found); R:\pdfium.dll (not found)</div>
+  <div>Pages modifiées</div><div>0</div>
+</div>
+<p>Aucune image de différences n’a été écrite.</p>
+<p class="note">La comparaison visuelle n&#x27;a pas pu être faite pour tout ou partie des révisions de cet élément (moteur de rendu PDF absent ou incapable d&#x27;ouvrir une révision) ; ces révisions n&#x27;ont été comparées que structurellement, et les fichiers de révision extraits peuvent être comparés à l&#x27;œil.</p>
+
+
+<h2>Avertissements de l’analyseur</h2>
+<p>Aucun</p>
+<p class="small">La liste complète des avertissements de l’analyseur se trouve dans warnings.json, dans le dossier de cet élément (son empreinte figure dans le journal d’audit et dans le tableau des fichiers extraits).</p>
+
+
+<h2>Fichiers extraits</h2>
+<div class="scroll"><table class="dense"><tr><th>Fichier</th><th>Catégorie</th><th>Octets</th><th>Empreintes</th></tr>
+<tr><td class="mono"><a href="warnings.json">warnings.json</a></td><td>parser_warnings</td><td>123</td><td class="mono"><div>md5: 251720985f0ba1c888116538bc3da921</div><div>sha256: 9dfdca46175986eda2dbcd6912894e5d123f4f0d267ee0e0b018d8d96fc149ae</div></td></tr><tr><td class="mono"><a href="revisions&#x2f;rev-01.pdf">revisions&#x2f;rev-01.pdf</a></td><td>revision</td><td>1646</td><td class="mono"><div>md5: 3888271753ea795369e203baab8ac540</div><div>sha256: 48d340c09a7c6d8cfd3a6f963f56272366b26d3e983d6c1e7a5cce06fa29caa1</div></td></tr><tr><td class="mono"><a href="revisions&#x2f;rev-02.pdf">revisions&#x2f;rev-02.pdf</a></td><td>revision</td><td>2621</td><td class="mono"><div>md5: dabe107d30c9e9f4da6245fb1c6e6b71</div><div>sha256: 2fd584534f39164bedfc6cdbfd9b5ed2622724f16e4da40d9481917a88046943</div></td></tr><tr><td class="mono"><a href="revisions&#x2f;rev-03.pdf">revisions&#x2f;rev-03.pdf</a></td><td>revision</td><td>3613</td><td class="mono"><div>md5: b28a97d821a22ccdf5726426c16b8fed</div><div>sha256: 2ada8845654ce455968242d3aa211e26339943fa82cb69e07f610915485d93b0</div></td></tr><tr><td class="mono"><a href="objects.json">objects.json</a></td><td>objects_dump</td><td>6231</td><td class="mono"><div>md5: 46e7ce3e240514f2b0062f5668657b52</div><div>sha256: f8611a6cf73fd612730d8e91e38292ce843cd03ebc6ea622d21fd71fd4f3f11c</div></td></tr>
+</table></div>
+
+<h2>Méthode</h2>
+<p>Chaque fichier a été ouvert en lecture seule et haché en une seule passe avec les algorithmes choisis. Les PDF ont ensuite été analysés sans être modifiés : chaque révision enregistrée, ses dates et son logiciel producteur, les signatures numériques, les polices et les empreintes de producteur ont été relevés, et les pages des révisions successives ont été comparées visuellement. Chaque action a été inscrite dans un journal d’audit chaîné par hachage.</p>
+
+<h2>Journal d&#x27;audit</h2>
+<div class="kv">
+  <div>Entrées d&#x27;audit</div><div>#5 – #14</div>
+  <div>Dossier des journaux</div><div class="mono">R:\case\runs\rv-pdfauth\20261117T135627Z-939b2f\logs</div>
+</div>
+
+<h2>Limites</h2>
+<ul><li>La détection du type repose sur une table limitée de signatures courantes ; les types inconnus sont signalés comme inconnus, non comme suspects.</li><li>Les dates de modification proviennent du système de fichiers de la copie examinée et peuvent différer de la source d&#x27;origine.</li><li>Un résultat sans constatation ne prouve pas qu&#x27;un fichier est authentique ni qu&#x27;il n&#x27;a pas été modifié avant son acquisition.</li><li>Un horodatage qualifié prouve que le journal d&#x27;audit existait sous cette forme exacte à l&#x27;heure indiquée ; il ne prouve pas que la copie examinée correspond à la source d&#x27;origine.</li><li>L&#x27;absence de constatation ne prouve pas qu&#x27;un PDF est authentique ou non modifié : un document peut être falsifié avant d&#x27;être enregistré, ou recréé sans laisser de trace.</li><li>Lorsqu&#x27;un PDF est imprimé en PDF, aplati, optimisé ou régénéré, ses révisions antérieures et la plupart des traces d&#x27;édition disparaissent ; seul son dernier état peut être examiné.</li><li>Les empreintes de producteurs proviennent d&#x27;une base limitée (documentation des éditeurs et fichiers générés par Rakvor) ; le producteur peut être saisi à la main, et les valeurs inconnues ou usurpées ne peuvent pas être reconnues.</li><li>Les signatures électroniques ne sont contrôlées que pour la couverture des octets et l&#x27;intégrité cryptographique ; la chaîne de certificats, la révocation et l&#x27;identité du signataire ne sont pas validées.</li><li>La comparaison visuelle entre révisions ne rend qu&#x27;un nombre limité de pages par révision ; au-delà, les pages ne sont comparées que structurellement.</li><li>La comparaison visuelle n&#x27;a pas pu être faite pour tout ou partie des révisions de cet élément (moteur de rendu PDF absent ou incapable d&#x27;ouvrir une révision) ; ces révisions n&#x27;ont été comparées que structurellement, et les fichiers de révision extraits peuvent être comparés à l&#x27;œil.</li></ul>
+<footer><div class="tagline">Nous révélons ce qui est caché. Nous reconstituons ce qui s&#x27;est passé. Nous protégeons ce qui compte.</div>Généré par rv-pdfauth 0.4.1 · 20261117T135627Z-939b2f · Ce PDF n&#x27;est pas signé électroniquement.</footer>
+</main></body></html>

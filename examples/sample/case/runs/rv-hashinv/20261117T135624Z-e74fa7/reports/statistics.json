@@ -1,0 +1,112 @@
+{
+  "audit": {
+    "entries": 25,
+    "head": "ce9845d2af602dc3ce9bb87f1374722c4dc1ecd97bb4d182990e977fd5bf002f",
+    "log_dir": "R:\\case\\runs\\rv-hashinv\\20261117T135624Z-e74fa7\\logs"
+  },
+  "case": {
+    "case_dir": "R:\\case",
+    "case_id": "RV-REPORT-SAMPLE",
+    "counts": {
+      "added": 4,
+      "mismatched": 0,
+      "registered": 4,
+      "unregistered": 0,
+      "verified": 0
+    },
+    "role": "intake"
+  },
+  "duplicate_groups": [],
+  "findings_by_code": {},
+  "findings_by_severity": {
+    "high": 0,
+    "info": 0,
+    "low": 0,
+    "medium": 0
+  },
+  "items": [
+    {
+      "evidence_id": "E0001",
+      "findings": [],
+      "index": 1,
+      "path": "R:\\evidence\\images\\edited-gimp.jpg",
+      "report_folder": "items/00001-edited-gimp.jpg",
+      "size": 105483,
+      "status": "ok"
+    },
+    {
+      "evidence_id": "E0002",
+      "findings": [],
+      "index": 2,
+      "path": "R:\\evidence\\images\\photo.webp",
+      "report_folder": "items/00002-photo.webp",
+      "size": 8294,
+      "status": "ok"
+    },
+    {
+      "evidence_id": "E0003",
+      "findings": [],
+      "index": 3,
+      "path": "R:\\evidence\\notes\\acta.txt",
+      "report_folder": "items/00003-acta.txt",
+      "size": 61,
+      "status": "ok"
+    },
+    {
+      "evidence_id": "E0004",
+      "findings": [],
+      "index": 4,
+      "path": "R:\\evidence\\pdf\\edited-incremental.pdf",
+      "report_folder": "items/00004-edited-incremental.pdf",
+      "size": 3613,
+      "status": "ok"
+    }
+  ],
+  "items_by_status": {
+    "ok": 4
+  },
+  "items_by_type": {
+    "JPEG image": 1,
+    "PDF document": 1,
+    "unknown": 2
+  },
+  "limitations": [
+    "SIGNATURE_TABLE_LIMITED",
+    "TIMESTAMPS_FROM_FILESYSTEM",
+    "CLEAN_RESULT_IS_NOT_AUTHENTICITY",
+    "TIMESTAMP_PROVES_EXISTENCE_ONLY"
+  ],
+  "run": {
+    "actor": "Sample Examiner",
+    "algorithms": [
+      "sha256",
+      "md5"
+    ],
+    "cancelled": false,
+    "case_id": "RV-REPORT-SAMPLE",
+    "elapsed_ms": 279,
+    "finished_utc": "2026-11-17T13:56:24.768Z",
+    "frontend": "cli",
+    "jurisdiction": "co",
+    "langs": [
+      "en"
+    ],
+    "pdf_signed_by": null,
+    "pdf_signer_certificate_sha256": null,
+    "run_id": "20261117T135624Z-e74fa7",
+    "started_utc": "2026-11-17T13:56:24.488Z"
+  },
+  "schema": "rakvor.statistics/1",
+  "timestamp": {
+    "status": "off"
+  },
+  "tool": {
+    "name": "rv-hashinv",
+    "version": "0.4.1"
+  },
+  "totals": {
+    "bytes": 117451,
+    "errors": 0,
+    "items": 4
+  }
+}

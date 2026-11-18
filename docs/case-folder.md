@@ -1,101 +1,111 @@
 # Case folder
 
-Every Rakvor tool can work alone (`--out DIR`). In a real engagement the tools share **one case folder**
-(`--case-dir`): rv-report, the **intake** tool, registers each evidence file once and gives it an evidence id
-(`E0001`, `E0002`, …); every later **analysis** tool re-hashes each file, compares it with that registry and links
-its own audit chain to the case. A reviewer can then follow one item from intake to the last report, across tools,
-and check that nothing changed in between.
+RV Report is an analysis-role tool of a special kind: its input is the case folder itself. It **reads** what the
+other Rakvor tools recorded there — the case log, the evidence registry and every tool run — verifies each run before
+using it, and writes **one** expert report in its own run folder, `runs/rv-report/<RUN-ID>/`. It never opens the
+evidence and never writes the registry.
 
 ```mermaid
 flowchart LR
-    E[(Evidence<br/>read-only)] --> H["rv-report (intake)<br/>--case-dir CASE"]
-    H --> R[["evidence/registry.json<br/>E0001…: path, size, hashes"]]
-    H --> CL[["case-log.jsonl<br/>hash-chained"]]
-    R --> P["analysis tool<br/>--case-dir CASE"]
-    P -->|re-hash + compare| R
-    P --> CL
-    H --> RH["runs/rv-report/RUN-ID/"]
-    P --> RP["runs/&lt;tool&gt;/RUN-ID/"]
+    E[(Evidence<br/>never opened by rv-report)] --> H["rv-hashinv (intake)"]
+    H --> R[["evidence/registry.json"]]
+    H --> CL[["case-log.jsonl"]]
+    R --> A["rv-pdfauth, rv-imgauth, ...<br/>(analysis)"]
+    A --> RA["runs/TOOL/RUN-ID/"]
+    RA --> T["rv-timeline build"]
+    T --> RT["runs/rv-timeline/RUN-ID/"]
+    CL -. verified .-> P["rv-report assemble"]
+    R -. verified .-> P
+    RA -. "each run verified,<br/>then quoted" .-> P
+    RT -. "latest verified" .-> P
+    P --> RP["runs/rv-report/RUN-ID/<br/>expert-report.*"]
+    P -->|run_started, run_finished| CL
 ```
-
-The contract (schemas, events, rules) is the same in the Rust and Python profiles, and a case written by one is
-read and extended by the other (tested in CI when both are present).
 
 ## Layout (`rakvor.case/1`)
 
 ```text
 <CASE>/
-  case.json                   {"schema":"rakvor.case/1","case_id","jurisdiction","created_utc",
-                               "created_by":{"tool","version","run_id","actor"}}       (written once)
-  case-log.jsonl              hash-chained case log (same algorithm as audit.jsonl), append-only
-  case-log.lock               exists only while a tool appends (created exclusively, then removed)
-  evidence/registry.json      {"schema":"rakvor.registry/1","items":[{"evidence_id","path","size","hashes",
-                               "registered_by":{"tool","version","run_id","audit_seq"},"registered_utc"}]}
-  evidence/registry.csv       evidence_id,path,size,<algorithms>,run_id
-  runs/<tool>/<RUN-ID>/logs/     audit.jsonl, audit.log, hashes.csv, environment.json, timestamp-*.tsr|.json
+  case.json                    case id, jurisdiction, creation (written once by the first tool)
+  case-log.jsonl               hash-chained log of every run (run_started / run_finished, registrations)
+  evidence/registry.json       E0001…: path, size, hashes, registered_by, registered_utc (+ registry.csv)
+  runs/<tool>/<RUN-ID>/logs/     audit.jsonl, audit.log, hashes.csv, environment.json, timestamps
   runs/<tool>/<RUN-ID>/reports/  statistics.*, items/<NNNNN>-<NAME>/{technical,summary,custody}.*
+  runs/rv-report/<RUN-ID>/reports/expert-report.json|.<LANG>.html|.<LANG>.pdf   this tool's report
 ```
 
-JSON schemas: [case.schema.json](../schemas/case.schema.json) and [registry.schema.json](../schemas/registry.schema.json).
+JSON schemas: [case.schema.json](../schemas/case.schema.json), [registry.schema.json](../schemas/registry.schema.json),
+[expert-report.schema.json](../schemas/expert-report.schema.json).
+
+## What rv-report reads, and what it writes
+
+| Path | Read (verified first) | Written |
+| --- | --- | --- |
+| `case.json` | case id, jurisdiction, creation; its SHA-256 against `case_created` | — |
+| `case-log.jsonl` | chain; `run_started` / `run_finished` of every run (version, role, folder, status, `audit_entries`, `audit_head`, timestamp status); `evidence_registered` (custody rows) | `run_started` and `run_finished` of the assembly, under the lock |
+| `evidence/registry.json` | its SHA-256 against the case log; every item (evidence received) | — |
+| `runs/<tool>/<RUN-ID>/logs/audit.jsonl` | chain, `run_finished`, case-log anchor, timestamp tokens, the digest of every recorded output; items examined and their registry comparison | — |
+| `runs/<tool>/<RUN-ID>/reports/` | `items/*/technical.json` (findings, quoted), `statistics.json` (limitation codes, RV Timeline's summary), `statistics.<lang>.html` (printed limitations) — each re-checked against its recorded digest when read | — |
+| `runs/rv-report/<RUN-ID>/` | — | everything the assembly produces ([reports.md](reports.md)) |
+
+`hashes.csv` of the assembly lists every file read (and the mandate file), with the run's algorithms. The case log
+is left out: the assembly appends to it. The validator and `src/cli/tests/cli.rs` check that, after an assembly,
+nothing in the case folder outside `runs/rv-report/` and `case-log.jsonl` changed.
 
 ## Using it
 
 ```bash
-# 1. Open the case and register the evidence (creates case.json; --case and --jurisdiction are needed only now)
-rv-report scan -i D:\evidence -r --case-dir E:\CASE-014 --case CASE-014 --jurisdiction fr
-# 2. Re-examine some registered items later (or run an analysis tool with the same --case-dir)
-rv-report scan --case-dir E:\CASE-014 --evidence E0001,E0002
-# 3. Check the whole case before handing it over
+# 1. Intake and analyses with the other tools (same --case-dir), optionally a timeline
+rv-hashinv scan -i D:\evidence -r --case-dir E:\CASE-014 --case CASE-014 --jurisdiction co
+rv-pdfauth analyze -i D:\evidence\pdf --case-dir E:\CASE-014 --lang es
+rv-timeline build --case-dir E:\CASE-014 --lang es
+# 2. The draft expert report
+rv-report assemble --case-dir E:\CASE-014 --lang es --mandate E:\CASE-014\mandato.txt
+# 3. After review: the final, signed version, then check the whole case
+rv-report assemble --case-dir E:\CASE-014 --lang es --final --sign-cert C:\certs\perito.p12
 rv-report verify-case E:\CASE-014
 ```
 
-In the GUI, fill **Case folder** in section 1. The output folder is then derived (`<case>/runs/rv-report/<RUN-ID>`)
-and locked, the change is audited (`ui_case_dir_changed`), and the result panel lists the evidence id of every
-item.
+Every assembly is a new run folder; earlier assemblies stay, and are never quoted (skipped as `self`).
 
-| Option | Meaning |
+## Which runs are used
+
+```mermaid
+stateDiagram-v2
+    [*] --> Found: run_started in the case log, or a folder under runs/
+    Found --> Skipped: own run, RV Hub, --include/--exclude-tool
+    Found --> Checking
+    Checking --> Excluded: unreadable, chain_broken, not_finished, digest_mismatch, timestamp_invalid
+    Checking --> Verified
+    Verified --> Skipped: older RV Timeline run (superseded)
+    Verified --> Quoted
+    Excluded --> [*]: annex + RUN_EXCLUDED, never quoted
+    Skipped --> [*]: annex
+    Quoted --> [*]: method, results, custody, limitations
+```
+
+| Check (in order) | Exclusion reason |
 | --- | --- |
-| `--case-dir DIR` | Work in this case folder (created when it has no `case.json`). `--out` is not used. |
-| `--case ID` | Names the case at creation; afterwards it must match `case.json` (or be left out). |
-| `--jurisdiction co\|fr` | Set at creation; later runs use the case's jurisdiction for custody forms. |
-| `--evidence E0001,E0007` | Examine these registered items (no `--input` needed). |
-| no `--input` | Every registered item is examined. |
+| folder is `runs/<tool>/<run>` and resolves inside the case; `logs/audit.jsonl` readable and non-empty | `unreadable` |
+| audit chain intact | `chain_broken` |
+| `run_finished` in the audit log, not cancelled | `not_finished` |
+| case log intact, announces the run, `run_finished` with status `completed` | `chain_broken` / `not_finished` |
+| entry `#audit_entries` of the audit log has the `audit_head` the case log recorded; only `timestamp_*` after it | `chain_broken` |
+| the version in the case log is the one in the audit log | `unreadable` |
+| `verify-log`: timestamp tokens, truncation, **every** recorded output re-hashed (`outputs.rs`) | `timestamp_invalid` / `digest_mismatch` / `chain_broken` |
+
+A run of a tool RV Report does not know is verified the same way and quoted when it wrote `rakvor.item-technical/1`
+reports (`UNKNOWN_TOOL`, info).
 
 ## Roles
 
-The role is one constant: `CASE_ROLE` (`src/core/src/lib.rs`) and `"case_role"` in `.forge.json`. The reference
-rv-report is `intake`; a tool scaffolded from it is `analysis`. Both behaviours live in the shared code and are
-tested in both profiles.
+The role is one constant: `CASE_ROLE` (`src/core/src/lib.rs`) and `"case_role"` in `.forge.json`: **analysis**.
+`.forge.json` also declares `"input_mode": "case"` and `"sample_case": "examples/sample/case"`: the main verb reads a
+whole case folder, so the evidence-input options (`--input`, `--recursive`, `--evidence`) do not exist. `--out` is
+accepted for script compatibility and ignored. `--case ID`, when given, must match `case.json` (exit 2).
 
-| | Intake (rv-report) | Analysis (later tools) |
-| --- | --- | --- |
-| Registry | Registers every successfully hashed item | Never writes it |
-| Same path, same content | Keeps the existing id (`already_registered`) | `evidence_verified_against_case` (match) |
-| Same path, other content | New id + finding `REGISTRY_PATH_CONTENT_CHANGED` (medium) | Finding `EVIDENCE_HASH_MISMATCH_WITH_CASE` (**high**); the analysis still runs |
-| Not in the registry | Registered (new id) | Finding `EVIDENCE_NOT_IN_CASE_REGISTRY` (medium) |
-| Matching order | — | `--evidence` id, else same path, else same content |
-
-**Hash algorithms.** A case run always includes at least one algorithm present in every registered item. If the
-user picked a disjoint set, SHA-256 (or the registry's algorithm) is added — or replaces the second choice, since
-the two-algorithm limit still holds — and the change is audited as `case_algorithm_added`.
-
-### Called by an analysis tool
-
-An analysis tool can run the intake for the examiner: `rv-pdfauth analyze … --case-dir CASE --intake hashinv`
-starts this executable as `rv-report scan … --case-dir CASE --progress jsonl` with the same evidence and settings,
-then analyses. Nothing changes on this side: the hash inventory, reports, registry and audit log are rv-report's own,
-and its run is an ordinary entry in the case log. The calling tool records this executable's path, version and
-SHA-256 in its own audit log. The interface it relies on — `--version` printing `rv-report X.Y.Z`, the
-`scan` options, the JSON Lines events (`run_started`, `progress`, `run_finished`) and exit codes 0/3 meaning
-"finished" — is therefore a compatibility promise: change it only with a major version.
-
-```mermaid
-flowchart LR
-    P["rv-pdfauth<br/>--intake hashinv"] -->|"scan --case-dir … --progress jsonl"| H["rv-report"]
-    H -->|"registry + hash reports"| C[("Case folder")]
-    H -->|"progress, run id, exit code"| P
-    P -->|"analysis, verified against the registry"| C
-```
+The forge template's per-item evidence pipeline (`run::run`, intake/analysis of evidence files) stays in the core
+with its tests as the reference for the shared code; no front-end calls it.
 
 ## Events
 

@@ -1,11 +1,4 @@
-<!--
-  Template note for the docs agent of a tool scaffolded from rv-report: sections 1, 2.3, 3 (shared rows), 6, 7,
-  8 and the shared troubleshooting tables apply to every Rakvor tool. Rewrite the parts between forge:domain
-  markers: the walkthrough steps that show what THIS tool does in the case (intake here; analysis in a new tool),
-  the domain outputs, the findings table and the domain messages.
--->
-
-# Usage guide: from intake to a verified case
+# Usage guide: from a case folder to a signed expert report
 
 This is the end-to-end guide for an examiner. It walks through one case, explains every output, says how to read
 each finding, and how to prove afterwards that nothing changed. Option lists are not repeated here:
@@ -20,21 +13,20 @@ each finding, and how to prove afterwards that nothing changed. Option lists are
 sequenceDiagram
     autonumber
     actor X as Examiner
-    participant H as rv-report (intake)
+    participant O as Other Rakvor tools
     participant C as Case folder
-    participant P as Analysis tool (e.g. rv-pdfauth)
+    participant R as rv-report
     participant T as TSA
-    X->>H: scan --case-dir CASE --case ID -i E:\export
-    H->>C: case.json, registry E0001…, case-log run_started / evidence_registered
-    H->>T: audit chain head
-    T-->>H: RFC 3161 token
-    H->>C: runs/rv-report/RUN-ID, case-log run_finished
-    X->>P: analyze --case-dir CASE
-    P->>C: re-hash every item, compare with the registry
-    P->>C: runs/rv-pdfauth/RUN-ID, case-log run_started / run_finished
-    X->>H: verify-case CASE
-    H-->>X: OK, case-log entries, registered items, runs verified
-    X->>X: OpenSSL token check, report re-hash, sign and file
+    X->>O: intake, analyses, timeline (--case-dir CASE)
+    O->>C: registry, runs/TOOL/RUN-ID, case-log entries
+    X->>R: assemble --case-dir CASE --lang es --mandate mandato.txt
+    R->>C: verify case, verify every run, quote verified ones
+    R->>T: audit chain head
+    T-->>R: RFC 3161 token
+    R->>C: runs/rv-report/RUN-ID (draft report), case-log run_finished
+    X->>X: review, write the opinion
+    X->>R: assemble --final --sign-cert
+    X->>R: verify-case CASE
 ```
 
 ## 1. Before you start
@@ -53,59 +45,62 @@ sequenceDiagram
 ## 2. Case walkthrough
 
 The example case: `CASE-2026-014`, Colombian jurisdiction, examiner Ana Ruiz, a client export on `E:\export`
-(here: the three sample files). Command outputs below come from a real run of the sample against the local test
-TSA (`tests/fake_tsa.py`); paths are shortened.
+(the sample case reproduces this with synthetic files). Outputs below come from real runs; paths are shortened.
 
 <!-- forge:domain -->
-### 2.1 Intake: register the evidence
+### 2.1 The tools' runs (intake, analyses, timeline)
+
+RV Report quotes what the other tools recorded, so the case is first built with them, all on the same `--case-dir`
+(their own usage guides give the details):
 
 ```powershell
-rv-report scan --case-dir D:\cases\CASE-2026-014 --case CASE-2026-014 --jurisdiction co `
-    -i E:\export -r --hash sha256,md5 --actor "Ana Ruiz" --sign-cert C:\certs\ana-ruiz.p12
+rv-hashinv scan --case-dir D:\cases\CASE-2026-014 --case CASE-2026-014 --jurisdiction co -i E:\export -r --lang es
+rv-pdfauth analyze --case-dir D:\cases\CASE-2026-014 -i E:\export\pdf --lang es
+rv-imgauth analyze --case-dir D:\cases\CASE-2026-014 -i E:\export\images --lang es
+rv-timeline build --case-dir D:\cases\CASE-2026-014 --lang es
 ```
+
+Run every tool with the report's language (`--lang es` for a Colombian filing, `fr` for a French one): RV Report
+quotes each tool's own wording and never translates it.
+
+### 2.2 Assemble the draft
+
+```powershell
+rv-report assemble --case-dir D:\cases\CASE-2026-014 --lang es --actor "Ana Ruiz" `
+    --examiner-id "TP 12345" --mandate D:\cases\CASE-2026-014\mandato.txt
+```
+
+Output on the sample case (`examples/sample/case`, `--lang es`, no mandate; paths shortened):
 
 ```text
-DONE  run 20261021T154339Z-6e298b
-  items: 3  bytes: 234  errors: 0  elapsed: 1.2 s
-  findings: high 0, medium 1, low 0, info 2
-  timestamp: ok 2026-10-21T15:43:40Z
-  report: D:\cases\CASE-2026-014\runs\rv-report\20261021T154339Z-6e298b\reports\statistics.en.html
-  logs:   D:\cases\CASE-2026-014\runs\rv-report\20261021T154339Z-6e298b\logs
-  case:   CASE-2026-014 (intake) registered 3 (new 3), verified 0, mismatched 0, not in registry 0
+DONE  run 20261118T114444Z-ad8a02
+  case:      RV-REPORT-SAMPLE
+  report:    <CASE>\runs\rv-report\20261118T114444Z-ad8a02\reports\expert-report.es.html (draft for the examiner's review)
+  runs:      verified 4, excluded 0, skipped 1
+  quoted:    14 findings  items: 4  elapsed: 1.2 s
+  signals:   high 0, medium 0, low 1, info 3
+  timestamp: off
+  logs:      <CASE>\runs\rv-report\20261118T114444Z-ad8a02\logs
 ```
 
-What happened, in order: the case folder did not exist, so `case.json` was written once (`--case` and
-`--jurisdiction` are needed only now) and `case_created` opened the case log; `run_started` was appended to the
-case log; every file was hashed once with SHA-256 and MD5 and typed by its first bytes; the three files were
-registered as `E0001` (`acta-copia.txt`), `E0002` (`acta.txt`) and `E0003` (`foto-vacaciones.jpg`) — sorted by
-path — in `evidence\registry.json` / `.csv`, and `evidence_registered` recorded the new registry SHA-256 in the
-case log; reports and the custody form of each item now carry its evidence id; the audit chain head was
-timestamped; `run_finished` in the case log recorded the run's final audit head.
+In order: the case log, `case.json` and the registry were verified, and `run_started` was appended; every run of
+the case was verified (4) or skipped (1: the assembly itself, `self`); each verified run's findings (14) and
+limitations were quoted verbatim; the latest RV Timeline run was summarised; E0003 (`notes/acta.txt`) was listed as
+not examined (`ITEM_NOT_EXAMINED`, low); three runs wrote English only, so their wording appears marked `[EN]` in the
+Spanish report (`TRANSLATION_UNAVAILABLE`, info). Exit code 0.
 
-Re-running the same intake on unchanged files keeps the ids (`registered 3 (new 0)`). A changed file at a
-registered path gets a new id and `REGISTRY_PATH_CONTENT_CHANGED`. Use `-i` repeatedly, `-r` for subfolders, or
-`--input-list files.txt` (one path per line, `#` comments, relative paths from the list's folder).
+### 2.3 Review, then the final version
 
-### 2.2 Analysis: later tools re-verify every item
-
-Every Rakvor analysis tool (any tool scaffolded from this template, where `CASE_ROLE` is `analysis`) takes the same
-`--case-dir`. Without `-i` it examines every registered item; `--evidence E0001,E0003` selects some.
+Read the draft section by section (the GUI preview shows the same text). Check the annex for excluded runs, re-run
+tools where a language is missing, write the opinion and the declaration in your own document or on the printed
+draft, then:
 
 ```powershell
-rv-pdfauth analyze --case-dir D:\cases\CASE-2026-014 --actor "Ana Ruiz" --sign-cert C:\certs\ana-ruiz.p12
+rv-report assemble --case-dir D:\cases\CASE-2026-014 --lang es --final --sign-cert C:\certs\ana-ruiz.p12
 ```
 
-Before analysing each file, the tool re-hashes it (adding SHA-256 if your selection shares no algorithm with the
-registry, logged as `case_algorithm_added`) and compares it with the registry — by `--evidence` id, else by path,
-else by content. Its summary ends with a line such as
-`case: CASE-2026-014 (analysis) registered 0 (new 0), verified 3, mismatched 0, not in registry 0`. A file that no
-longer matches raises `EVIDENCE_HASH_MISMATCH_WITH_CASE` (high, exit code 3) and **is still analysed**, so the
-examiner can decide; a file never registered raises `EVIDENCE_NOT_IN_CASE_REGISTRY` (medium).
-
-> **rv-pdfauth at its current commit does not implement `--case-dir` yet** (its admissibility page lists this as
-> gap G24). Until it does, run it with `--out D:\cases\CASE-2026-014\runs\rv-pdfauth` and compare its `hashes.csv`
-> with `evidence\registry.csv` by SHA-256, as described in rv-pdfauth's own usage guide. Keep that output with the
-> case file.
+`--final` only changes the banner and is recorded (`report_marked_final`); the signature comes from your
+certificate. Every assembly is a new run folder; the earlier drafts stay in the case.
 <!-- /forge:domain -->
 
 ### 2.3 Verify the whole case
@@ -164,10 +159,10 @@ file. It relies on two entry points of RV Report:
 | --- | --- |
 | `schema` | `rakvor.describe/1` |
 | `tool`, `title`, `version` | `rv-report`, `RV Report`, the product version (`version.txt`) |
-| `role` | `intake` (registers evidence in the case folder) |
-| `main_verb` | `scan`: the command that does the main work |
+| `role` | `analysis` (reads the case folder; never writes the registry) |
+| `main_verb` | `assemble`: the command that does the main work |
 | `accepts` | `extensions` (lower case, no dot) and content `signatures` (`format` + `match`: hex bytes at an offset); `"*"` = any file |
-| `case_formats`, `log_formats` | `rakvor.case/1`; `rakvor.audit/1` = `logs/audit.jsonl`, `rakvor.review/1` = `logs/review.jsonl` |
+| `case_formats`, `log_formats` | `rakvor.case/1`; `rakvor.audit/1` = `logs/audit.jsonl` |
 | `cli_exe`, `gui_exe` | `rv-report.exe`, `rv-report-gui.exe` |
 | `exit_codes` | The meaning of 0, 1, 2, 3 and 130 (table in section 9) |
 
@@ -179,35 +174,26 @@ rv-report describe --json
 
 ```mermaid
 flowchart TB
-    CASE["&lt;CASE&gt;/"] --> CJ["case.json · case-log.jsonl"]
-    CASE --> EV["evidence/registry.json · registry.csv"]
-    CASE --> RUN["runs/rv-report/&lt;RUN-ID&gt;/"]
-    RUN --> L["logs/<br/>audit.jsonl · audit.log · hashes.csv<br/>environment.json · timestamp-NNNNN.tsr/.json"]
-    RUN --> R["reports/<br/>statistics.json/.LANG.html/.LANG.pdf"]
-    R --> I["items/NNNNN-name/"]
-    I --> T["technical.* — examiner, opposing expert"]
-    I --> S["summary.* — client"]
-    I --> K["custody.* — custody record"]
+    RUN["&lt;CASE&gt;/runs/rv-report/&lt;RUN-ID&gt;/"] --> L["logs/<br/>audit.jsonl · audit.log · hashes.csv<br/>environment.json · timestamp-NNNNN.tsr/.json"]
+    RUN --> R["reports/"]
+    R --> E["expert-report.json · .LANG.html · .LANG.pdf"]
+    R --> S["statistics.*"]
+    R --> I["items/NNNNN-name/ technical · summary · custody"]
 ```
-
-Without `--case-dir`, `logs\<RUN-ID>\` and `reports\<RUN-ID>\` are created under `--out` (default `.\rakvor-out`).
 
 | Output | For | What to use it for |
 | --- | --- | --- |
-| `statistics.*` | Examiner, lawyer | Run overview: who, when, interface, algorithms, totals and throughput, findings by severity and code, items by detected type, duplicate groups (paths), the case-folder section (registered / added / verified / mismatched / not registered), timestamp status, signer, audit chain head and entry count at the time it was written |
-| `technical.*` | Examiner, opposing expert | One file: path, size, modification time, extension, detected type, status, evidence id and intake date (case folder), all digests, findings with *what it shows / what it does not prove*, method, audit entries `#first–#last`, limitations |
-| `summary.*` | Client | Plain-language status, the primary fingerprint, the findings in one sentence each, the next step |
-| `custody.*` | Custody record | Jurisdiction form (Spanish for `co`, French for `fr`) + English copy, pre-filled from the run, with 6 blank transfer rows to sign. An internal record, used **alongside** the official form ([admissibility.md](admissibility.md#consolidated-gap-list) G9) |
-| `audit.jsonl` / `audit.log` | Verification | Every action, hash-chained / the same, readable (not authoritative) |
-| `hashes.csv` | Verification | Hash register: `index,path,size,<algo1>[,<algo2>],status,error` |
-| `environment.json` | Reproducibility | Tool, compiler, every dependency version, OS, host, user, command line (or GUI settings) |
-| `timestamp-NNNNN.tsr` / `.json` | Verification | RFC 3161 response for audit entry NNNNN, and its summary |
-| `case.json`, `case-log.jsonl` | Verification | Case identity (written once); every tool run on the case, registry changes, final audit heads |
-| `evidence\registry.json` / `.csv` | Everyone | The evidence list of the case: id, path at intake, size, digests, which run registered it and when |
+| `expert-report.<lang>.html/.pdf` | Examiner, court | The report, section by section ([reports.md](reports.md)); draft until `--final` |
+| `expert-report.json` | Scripts, opposing expert | The model: every quotation with its source file, SHA-256 and pointer |
+| `statistics.*` | Examiner | RV Report's signals, items, timestamp, audit head |
+| `items/*/technical.*` | Examiner | Per registered item: RV Report's signals and the quoted results |
+| `items/*/custody.*` | Custody record | Form in the case's jurisdiction + English, blank transfer rows |
+| `audit.jsonl` / `audit.log` | Verification | Every action, hash-chained (runs verified, excluded, quoted) |
+| `hashes.csv` | Verification | Every file the report was built from, with the run's digests |
+| `environment.json` | Reproducibility | Tool, compiler, dependencies, OS, host, user, command line (or GUI settings) |
 
-**Status and next step per item:** `problem` (a high finding: do not rely on the file until explained),
-`attention` (medium or low: review with the examiner), `ok` (informational only). **Exit code 3** means
-"completed, at least one high-severity finding" — a normal outcome for evidence, not an error.
+**Exit code 3** means at least one run was excluded or a medium/high RV Report signal: review the annex before
+relying on the report.
 
 ## 4. Interpreting each finding
 
@@ -217,32 +203,26 @@ conclude" is the overreach to avoid in a report. The exact wording printed in re
 <!-- forge:domain -->
 | Code | Check next | Do not conclude |
 | --- | --- | --- |
-| `EXTENSION_MISMATCH` (medium) | The detected type; open the file with a tool for that type; ask how the file was named at the source | Intent to hide anything — exports, downloads and messaging apps rename files |
-| `EXECUTABLE_CONTENT` (high) | Confirm with a PE/ELF parser (a 2-byte `MZ` match can be a false positive); treat as hostile; analyse in a sandbox | That the program is malicious, or that anyone ran it |
-| `EMPTY_FILE` (info) | Whether the source holds the file with content; the size at acquisition | That it was emptied on purpose |
-| `DUPLICATE` (info) | The group in `statistics.*` (paths) and `hashes.csv`; check the primary algorithm is SHA-256 | Who copied the file, when, or which copy is the original |
-| `UNREADABLE` (high) | The OS error (permissions, locks, path length); re-acquire and re-run; unreadable items are **not** registered | That the file is damaged or was hidden |
-| `REGISTRY_PATH_CONTENT_CHANGED` (medium) | Both evidence ids in `registry.csv`; which run registered each; how the source changed between intakes | Which version is the original, or why it changed |
+| `RUN_EXCLUDED` (medium) | The reason in the annex (`chain_broken`, `digest_mismatch`, `not_finished`, …); `verify-log` on that run; repeat the run on a verified copy | That the evidence or the examiner did anything wrong |
+| `REGISTRY_MISMATCH_REPORTED` (high) | The quoting run's `EVIDENCE_HASH_MISMATCH_WITH_CASE` finding; `verify-case --rehash`; storage and transfers since intake | Which copy is the original, or that anyone altered it |
+| `ITEM_NOT_EXAMINED` (low) | Whether the mandate covers the item; run the right analysis tool | That the item is suspicious |
+| `TIMELINE_PREDATES_RUNS` (low) | Rebuild the timeline with RV Timeline, then assemble again | That the timeline is wrong |
+| `TRANSLATION_UNAVAILABLE` (info) | Re-run that tool with the report's `--lang` | Any change of result |
+| `UNKNOWN_TOOL` / `TIMELINE_ABSENT` / `JURISDICTION_DIFFERS_FROM_CASE` (info) | That tool's documentation / whether a timeline is needed / the structure you want | Anything about the evidence |
+
+Quoted findings keep the meaning their own tool gives them; see that tool's usage guide.
 <!-- /forge:domain -->
 
-| Code (case folder, analysis tools) | Check next | Do not conclude |
-| --- | --- | --- |
-| `EVIDENCE_HASH_MISMATCH_WITH_CASE` (high) | Expected and actual digest in the finding; re-hash the file and the intake copy by hand; check storage, transfers and who had access since intake (case log) | Who changed it, when, or that it was deliberate |
-| `EVIDENCE_NOT_IN_CASE_REGISTRY` (medium) | Whether the file should have gone through intake; register it (intake run) if it is new evidence | That the file is altered or irrelevant |
 
-## 5. Working without a case folder
-
-The same command works standalone for a quick inventory (no registry, no case log):
+## 5. Machine-readable progress
 
 ```powershell
-rv-report scan -i D:\evidence -r --hash sha256,md5 --lang all --case CASE-2026-014 --out D:\work\inventory
-rv-report scan --input-list files.txt --progress jsonl > events.jsonl      # one JSON event per line on stdout
+rv-report assemble --case-dir D:\cases\CASE-2026-014 --progress jsonl > events.jsonl
 ```
 
-`--progress jsonl` prints every event (`run_started`, `item_started`, `item_hashed`, `progress` with elapsed time
-and ETA, `item_finished`, `evidence_linked`, `error`, `cancelled`, `timestamp`, `report_written`, `run_finished`)
-for scripts; a closed stdout never aborts the run. **Ctrl+C** stops after the current 1 MiB chunk: partial reports are written,
-`run_cancelled` is logged, exit code 130.
+One JSON event per line on stdout: `run_started` (total = runs found), `item_started` / `item_finished` per run
+(status `verified`, `excluded`, `skipped`), `progress`, `report_written`, `timestamp`, `run_finished`. Exclusions
+are repeated on stderr. RV Report always works inside a case folder; `--out` is accepted and ignored.
 
 ## 6. Timestamps
 
@@ -304,7 +284,7 @@ Signing certificate* and *Certificate password* (kept in memory only).
 $s = Read-Host "Certificate password" -AsSecureString
 $env:RV_SIGN_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR(
     [Runtime.InteropServices.Marshal]::SecureStringToBSTR($s))
-rv-report scan --case-dir D:\cases\CASE-2026-014 -i E:\export -r --sign-cert C:\certs\ana-ruiz.p12
+rv-report assemble --case-dir D:\cases\CASE-2026-014 --lang es --sign-cert C:\certs\ana-ruiz.p12
 Remove-Item Env:RV_SIGN_PASSWORD
 (Get-PfxCertificate C:\certs\ana-ruiz.p12).GetCertHashString("SHA256")   # publish this fingerprint
 ```
@@ -398,7 +378,7 @@ SHA256).Hash.ToLower()` and search the value in `audit.jsonl`.
 
 | Command | 0 | 1 | 2 | 3 | 130 |
 | --- | --- | --- | --- | --- | --- |
-| `scan` | done, no high finding | runtime error (input not found, output not writable, wrong certificate password, case log locked) | usage error (unknown option or algorithm, three algorithms, unknown language; with `--case-dir`: another case's folder, `--case` missing at creation, unknown evidence id) | done, ≥ 1 high finding; or the case folder fails verification (nothing written) | cancelled (Ctrl+C), partial reports written |
+| `assemble` | report assembled, every run verified, no medium/high signal | runtime error (case log locked, output not writable, wrong certificate password) | usage error (unknown option, three algorithms, unknown language, bad tool name, mandate file, not a case folder, another case) | a run excluded or a medium/high signal; or the case folder fails verification (nothing written) | cancelled (Ctrl+C) |
 | `verify-log` | intact | log unreadable | — | broken chain, token mismatch, or truncated (shorter than its timestamp or case record) | — |
 | `verify-case` | case intact (warnings printed) | not a case folder (no `case.json`) | — | at least one check failed (with `--rehash`: an evidence file differs from the registry) | — |
 | `timestamp` | obtained and logged | TSA unreachable (nothing changed) | — | log missing, broken or unreadable (nothing added) | — |
@@ -410,9 +390,10 @@ SHA256).Hash.ToLower()` and search the value in `audit.jsonl`.
 <!-- forge:domain -->
 | Message | Fix |
 | --- | --- |
-| `at most 2 hash algorithms can run at the same time (got 3)` | Pick one or two algorithms |
-| `unknown hash algorithm '…': use md5, sha1, sha256, sha512, sha3-256 or blake3` | Spelling: `sha3-256` (also `sha3`, `sha3_256`) |
-| `… is neither a file nor a folder (symbolic links are not followed)` | Point at the link's target, or copy it |
+| `… is not a case folder (no case.json)` | Point `--case-dir` at the folder that holds `case.json` |
+| `mandate file … is not UTF-8 text` / `… at most 65536 are accepted` | Save the mandate as UTF-8 text; quote the object, not the whole file |
+| `--include-tool '…': a Rakvor tool name such as rv-pdfauth` | Use the tool names of the case's `runs/` folders |
+| `warning: run excluded (not verified, not quoted): runs/…` | See `RUN_EXCLUDED` above |
 <!-- /forge:domain -->
 
 | Message | Fix |
@@ -420,7 +401,6 @@ SHA256).Hash.ToLower()` and search the value in `audit.jsonl`.
 | `… is not a case folder yet: give --case ID (and --jurisdiction) to create it` | First run in a new case folder: add `--case` |
 | `the case folder … belongs to case X, not Y` | Wrong folder or wrong `--case`; leave `--case` out after creation |
 | `evidence id(s) not in the case registry: E0042` | Check `evidence\registry.csv`; ids are `E` + number (`e7` = `E0007`) |
-| `--evidence needs an existing case folder with a registry` | Run the intake first |
 | `refusing to extend a broken case (…)` / `the case folder … fails verification` | Run `verify-case`; investigate what changed; **do not repair** a case log by hand — open a new case folder and document why |
 | `the case log is locked by <tool> run <id> (since …)` | Another tool is writing; wait and run again |
 | `stale case lock … held by … for more than 10 minutes` | Make sure no Rakvor tool is working on the case, then delete `case-log.lock` by hand (never automatic) and note it in the case file |

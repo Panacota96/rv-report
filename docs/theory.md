@@ -1,417 +1,169 @@
-<!--
-  Template note for the docs agent of a tool scaffolded from rv-report:
-  sections between forge:domain markers describe what THIS tool does (inventory, file types, duplicates,
-  intake role) and must be rewritten for the new tool. Everything outside the markers (hashing, audit chain,
-  case folder, RFC 3161, signed PDFs, custody forms, determinism) is shared code: keep it, and re-check the
-  numbers against the code. The scaffold replaces the tool name everywhere, so re-read any sentence that
-  names the intake tool.
--->
-
 # Theory of operation
 
-This page explains **why** each step of RV Report works, at two levels:
-
-- **[Part A — For clients, lawyers and judges](#part-a--for-clients-lawyers-and-judges)**: plain language,
-  analogies and pictures. No knowledge of computing or cryptography is needed.
-- **[Part B — For examiners and opposing experts](#part-b--for-examiners-and-opposing-experts)**: algorithms,
-  data structures, exact constants, the source file that implements each one, and the standards behind them.
-  Every number in Part B is taken from the code of this commit or computed for this page with the tool itself;
-  where the code and a standard or another page differ, Part B says so.
-
-It describes what the tool **does**, not what it should do. Known weaknesses are stated where they apply and
-collected in [admissibility.md](admissibility.md#consolidated-gap-list). How to run the tool:
-[usage.md](usage.md). How to install and verify it: [installation.md](installation.md).
+How RV Report turns the records of a Rakvor case folder into one expert report, written for two audiences:
+**Part A** in plain language for clients, lawyers and judges; **Part B** for examiners and opposing experts, with
+the rules taken from the code. Design decisions and their alternatives: [ADR 0002](adr/0002-scope.md).
 
 ## Contents
 
-- Part A: [A1 What the tool is](#a1-what-the-tool-is-and-is-not) ·
-  [A2 Digital fingerprints](#a2-digital-fingerprints-hashes) ·
-  [A3 Two fingerprints, one reading](#a3-two-fingerprints-one-reading) ·
-  [A4 What a file really is](#a4-what-a-file-really-is-its-first-bytes) ·
-  [A5 Identical copies](#a5-identical-copies) ·
-  [A6 The case folder](#a6-the-case-folder-one-register-for-the-whole-case) ·
-  [A7 The tool's own diary](#a7-the-tools-own-diary-the-audit-log) ·
-  [A8 Proving when](#a8-proving-when-trusted-timestamps) ·
-  [A9 Signed reports](#a9-signed-reports) ·
-  [A10 Custody forms](#a10-custody-forms) ·
-  [A11 Reading a clean result](#a11-what-no-findings-means)
-- Part B: [B1 Source map](#b1-source-map-and-constants) ·
-  [B2 Pipeline](#b2-pipeline-and-reads-of-the-evidence) ·
-  [B3 Hashing](#b3-single-pass-dual-hashing) ·
-  [B4 Type detection](#b4-type-detection-by-magic-bytes-and-extension-mismatch) ·
-  [B5 Duplicates](#b5-duplicate-detection-by-digest) ·
-  [B6 Audit chain](#b6-the-audit-hash-chain) ·
-  [B7 Case folder](#b7-the-case-folder) ·
-  [B8 RFC 3161](#b8-rfc-3161-trusted-timestamp) ·
-  [B9 Signed reports](#b9-signed-pdf-reports) ·
-  [B10 Custody forms](#b10-custody-forms) ·
-  [B11 Determinism](#b11-determinism-and-repeatability) ·
-  [B12 What findings do not prove](#b12-what-each-finding-does-not-prove) ·
-  [B13 References](#b13-references)
-
----
+- [Part A — For clients, lawyers and judges](#part-a--for-clients-lawyers-and-judges)
+- [Part B — For examiners and opposing experts](#part-b--for-examiners-and-opposing-experts)
 
 # Part A — For clients, lawyers and judges
 
-<!-- forge:domain -->
 ## A1 What the tool is (and is not)
 
-RV Report is the **intake desk** of a digital investigation. Before anyone examines a file, the tool writes down
-what was received: every file's exact digital fingerprint, its size, what kind of file it really is, and whether
-anything looks wrong (a photo that is really a PDF, a program hidden under another name, an empty file, two
-identical copies). In a case folder it gives each file an evidence number (`E0001`, `E0002`, …) so that every
-later tool can prove it looked at exactly the same bytes.
+A digital-forensic examination with the Rakvor tools produces many separate records: one tool registers the
+evidence, others examine PDFs, images, e-mails, and each writes its own reports and its own tamper-evident diary
+(the audit log). A court, however, receives **one** document from the expert: a *dictamen pericial* in Colombia, a
+*rapport d'expertise* in France. RV Report assembles that document from the records.
 
-It never says "this file is genuine" or "this file is fake". Each observation is written as a **finding** that
-says, in plain words, **what it shows** and **what it does not prove**. The conclusion belongs to a human
-examiner.
-
-```mermaid
-flowchart LR
-    S[("Source<br/>(phone, laptop, export)")] -->|forensic copy| C[("Verified copy")]
-    C -->|read only| T["RV Report<br/>intake"]
-    T --> F["Findings<br/>what it shows / what it does not prove"]
-    T --> R[["Evidence register<br/>E0001, E0002, …"]]
-    T --> L[("Audit log<br/>every step, sealed")]
-    R --> A["Later tools<br/>re-check each file"]
-    F --> E["Examiner's opinion"]
-    L --> E
-```
-
-| The tool can tell you | The tool cannot tell you |
+| RV Report does | RV Report does not |
 | --- | --- |
-| The exact fingerprint of every file it received, and that later copies are identical | That the copy it received equals the original source |
-| That a file's content does not match its name (e.g. a PDF called `.jpg`) | Why it was renamed, or by whom |
-| That two files have identical content | Who copied them, or when |
-| Every action it performed, in a log that shows any later edit | Whether the workstation's clock was right |
-<!-- /forge:domain -->
-
-## A2 Digital fingerprints (hashes)
-
-A **hash** is a short code computed from every byte of a file — a fingerprint. Change one character and the
-fingerprint changes completely; keep the file identical and the fingerprint is the same on any computer, with any
-correct program.
-
-Real example (SHA-256), using the sample file `examples/sample/evidence/acta.txt` (61 bytes):
-
-| Text (last line of the file) | SHA-256 fingerprint |
-| --- | --- |
-| `Firmado: Ana Ruiz` | `80e089ad6704c831e386b430adf92c5f5b72ec4428566d3580660e103c183c3c` |
-| `Firmado: Ana Ruis` | `590570db76a9735f7b3782c73679fc6af6ac4041be4c41bcba1df0b648115523` |
-
-One letter differs; the two fingerprints share nothing recognisable. This is why a hash proves that a file was
-**not** changed: if today's fingerprint equals the one written down at intake, the file is the same, bit for bit.
-
-## A3 Two fingerprints, one reading
-
-The examiner may choose **one or two** fingerprint methods (for example SHA-256, the modern standard, plus MD5,
-which older case files often use). The tool reads each file **once** and feeds every piece it reads to both
-methods at the same time, like a cashier who scans each item once while two tills add it up. Both fingerprints
-therefore describe exactly the same bytes. More than two methods at once are refused, so that the work stays
-fast on very large folders.
-
-<!-- forge:domain -->
-## A4 What a file really is: its first bytes
-
-The name of a file (`holiday.jpg`) is a label anyone can change. The **first bytes** of the content are harder to
-fake by accident: most formats start with a fixed "signature" — PDF documents start with `%PDF-`, JPEG photos with
-the bytes `FF D8 FF`, Windows programs with `MZ`. The tool compares the label with the signature.
-
-The sample `foto-vacaciones.jpg` ("holiday photo") starts with `%PDF-1.4`: it is a PDF renamed as a photo, so the
-tool reports *Extension does not match content*. A program hidden under a document name is reported with higher
-severity, because opening it could run it.
-
-Limits a court should know: the tool knows 15 common signatures (unknown types are reported as unknown, not as
-suspicious); a file without an extension is not compared; and some signatures are very short (2 bytes), so an
-ordinary text that happens to start with `MZ` would be reported as a program.
-
-## A5 Identical copies
-
-When two files have the same fingerprint, their contents are identical, whatever their names. The tool groups
-them and reports *Duplicate content*. In the sample, `acta.txt` and `acta-copia.txt` are one such pair. A
-duplicate is information, not a problem: copies are normal. It does not say which copy came first.
-<!-- /forge:domain -->
-
-## A6 The case folder: one register for the whole case
-
-In a real case several Rakvor tools work one after the other. They share **one case folder**, which holds a
-register of the evidence. The intake tool writes each file into it once, with its fingerprints and an evidence
-number. Every later tool, before examining a file, takes its fingerprint again and compares it with the register:
-same fingerprint, same evidence; different fingerprint, a high-severity warning.
+| check that every record it uses is intact and complete before using it | open or analyse the evidence itself |
+| copy each tool's findings word for word, with where they come from | reword, summarise or translate a finding |
+| list what each tool can and cannot show (its limitations) | decide whether a document is authentic |
+| say which items no tool examined | write the expert's opinion or conclusions |
+| mark the report as a draft until the expert approves it | sign for the expert (the expert's certificate does) |
 
 ```mermaid
 flowchart LR
-    I["Intake tool"] -->|"writes once"| R[["Register<br/>E0001 · E0002 · E0003"]]
-    R -->|"compare fingerprints"| A1["Analysis tool 1"]
-    R -->|"compare fingerprints"| A2["Analysis tool 2"]
-    I --> J[("Case diary<br/>who worked on the case, when")]
-    A1 --> J
-    A2 --> J
+    T["Tools' records<br/>(each with its own diary)"] --> C{"Intact and<br/>complete?"}
+    C -- no --> X["Left out, and the report<br/>says which and why"]
+    C -- yes --> Q["Quoted word for word"]
+    Q --> D["Draft report"]
+    D --> E["Expert reviews, writes the<br/>opinion, signs"]
 ```
 
-The case folder also keeps a **case diary** in which every tool notes when it started and finished and the final
-seal of its own diary (A7). The two diaries quote each other, so one cannot be edited without breaking the other.
+## A2 Why "verify before quote"
 
-## A7 The tool's own diary (the audit log)
+Each tool keeps a diary in which every line is sealed to the one before it (a hash chain), and the case keeps a
+diary of its own that records how each tool's diary ended. If anyone edits a tool's report after the fact, the
+seal recorded for that report no longer matches; if anyone removes the last pages of a diary, the case diary
+disagrees. RV Report checks all of this **before** it reads a record. A record that fails is not used at all — not
+"used with a warning" — and the annex says which one and why. That way every sentence in the report rests on a
+record that can be shown to be unchanged since the tool wrote it.
 
-Everything the tool does is written to a diary, `audit.jsonl`. Each line carries the seal (hash) of the line
-before it, like numbered pages where every page quotes the seal of the previous page. Editing, inserting,
-deleting or reordering a page breaks the seals from that point on, and `rv-report verify-log` (or an independent
-Python script) detects it.
+## A3 Word for word
 
-```mermaid
-flowchart LR
-    G["start<br/>000…000"] --> E1["#1 run started<br/>seal 6db9fbe2…"]
-    E1 --> E2["#2 3 files found<br/>quotes 6db9fbe2…<br/>seal 4c78f96c…"]
-    E2 --> E3["#3 acta.txt hashed<br/>quotes 4c78f96c…"]
-    X["someone edits #2:<br/>3 files becomes 2"] -.->|"seal becomes f6a7e0fc…<br/>#2 no longer matches"| E2
-```
+A finding such as "the producer changes from X in revision 1 to Y in revision 2" is the examining tool's wording,
+with "what it shows" and "what it does not prove". RV Report reproduces it exactly, and names the file and the
+exact place it came from, so anyone can open that file and compare. If the tool wrote its findings only in English
+and the report is in Spanish, the report shows the English text marked **[EN]** rather than inventing a
+translation: a translation would be a new statement nobody has checked.
 
-One honest limit: if the **last** pages are torn out, the remaining pages still agree with each other. That is
-why the diary's final seal is also written in the case diary, printed in the reports and sent to a notary (A8).
+## A4 What was not examined
 
-## A8 Proving when: trusted timestamps
+A report that only lists what was found can hide what was never looked at. RV Report lists every registered item
+that no analysis tool examined (for instance a text file in a case about photos). Nothing is concluded about those
+items — they are simply outside what the tools did.
 
-The diary proves its own consistency, not *when* it was written. For that, the tool sends the latest seal to a
-**time-stamping authority** — an independent online notary — which signs "I saw this seal at 15:30:01 UTC on
-21 October 2026". The notary never sees the evidence, only a 32-byte seal.
+## A5 A draft until the expert says otherwise
 
-```mermaid
-sequenceDiagram
-    participant T as RV Report
-    participant N as Time-stamping authority (notary)
-    T->>N: latest seal of the diary (32 bytes)
-    N-->>T: signed receipt "seen at 2026-10-21 15:30:01 UTC"
-    Note over T: receipt stored next to the diary (timestamp-NNNNN.tsr)
-```
+The law asks the expert, not the software, to state the method, the results and the conclusions and to sign
+(the exact requirements are to be verified by counsel for each country). RV Report therefore prints "draft for the
+examiner's review" on every page and leaves the conclusions and the declaration blank. Only when the expert runs it
+again with `--final` (recorded in the diary) does the mark change, and only the expert's own certificate signs the
+PDF.
 
-Without internet the run still finishes; the receipt can be requested later with `rv-report timestamp`. A
-timestamp proves the diary existed at that time — not that its content is true.
+## A6 What a clean report means
 
-## A9 Signed reports
-
-With the examiner's certificate, every PDF report is digitally signed, so any later change to a report is
-detectable with Adobe Reader or another validator. The HTML and JSON reports are not signed, but their
-fingerprints are written in the diary, which is timestamped.
-
-## A10 Custody forms
-
-For every file the tool pre-fills a **chain-of-custody form** — Colombian style (Spanish) or French style (French),
-always with an English copy — with the case number, the evidence number, the fingerprints and the times of the
-work, and leaves empty rows for the people who hand over and receive the evidence to sign. It is an internal
-record that accompanies, but does not replace, the official form of the police, prosecutor or court.
-
-<!-- forge:domain -->
-## A11 What "no findings" means
-
-A file without findings is **not** proven authentic. It only means that the checks this tool applies found
-nothing. Every report prints these limitations:
-
-- Type detection uses a limited table of common file signatures; unknown types are reported as unknown, not as
-  suspicious.
-- Modification times come from the file system of the examined copy and may differ from the original source.
-- A result without findings does not prove that a file is authentic or unaltered before acquisition.
-- A trusted timestamp proves the audit log existed in this exact form at the stated time; it does not prove that
-  the examined copy matches the original source.
-<!-- /forge:domain -->
-
----
+A report with no findings, no excluded runs and no signals means: the records verified and the tools found nothing
+they look for. It does **not** mean the evidence is authentic. Every tool and RV Report itself print this
+limitation.
 
 # Part B — For examiners and opposing experts
 
-## B1 Source map and constants
+## B1 Source map
 
-| Process | Implementation | Key constants (value in this commit) |
-| --- | --- | --- |
-| Input collection | [src/core/src/input.rs](../src/core/src/input.rs) | folders 1 level unless `--recursive`; symbolic links never followed; paths made absolute and lexically normalised, de-duplicated, sorted by that string bytewise (UTF-8; same rule as the Python profile), numbered from 1; a UTF-8 BOM at the start of an `--input-list` file is ignored |
-| Log verification | [src/core/src/verify.rs](../src/core/src/verify.rs) | chain + timestamps + truncation anchors (timestamp `covers_seq`, case log `run_finished`) |
-| Hashing | [src/core/src/hash.rs](../src/core/src/hash.rs) | `CHUNK` = 1 MiB (1 048 576 bytes); `MAX_SELECTED` = 2; head kept for detection = first 4 096 bytes; known answers for `"abc"` |
-| Pipeline | [src/core/src/run.rs](../src/core/src/run.rs) | progress events every 150 ms; run id = `YYYYMMDDTHHMMSSZ-` + 6 hex of SHA-256(clock, pid, host) |
-| Audit chain | [src/core/src/audit.rs](../src/core/src/audit.rs), [tests/verify_chain.py](../tests/verify_chain.py) | genesis = 64 zeros; SHA-256 over canonical JSON |
-| Case folder | [src/core/src/case.rs](../src/core/src/case.rs) | schemas `rakvor.case/1`, `rakvor.registry/1`; lock wait 30 s; stale lock 600 s; ids `E%04d` |
-| Timestamp, report signing | [src/core/src/trust.rs](../src/core/src/trust.rs) | default TSA `http://timestamp.digicert.com`; HTTP timeout 15 s; response ≤ 1 MiB; nonce 8 bytes |
-| PDF writer | [src/core/src/report/pdf.rs](../src/core/src/report/pdf.rs) | A4 595 × 842 pt; signature placeholder 16 384 bytes |
-| Reports | [src/core/src/report/mod.rs](../src/core/src/report/mod.rs) | duplicate partners listed ≤ 10, duplicate paths ≤ 20 per group; 6 blank custody transfer rows; item folder name ≤ 60 characters |
-| Environment record | [src/core/src/env.rs](../src/core/src/env.rs), [src/core/build.rs](../src/core/build.rs) | compiler, target and every `Cargo.lock` package embedded at build time; product version from `version.txt` |
+| Concern | File |
+| --- | --- |
+| Frozen data model (`rakvor.expert-report/1`) | [model.rs](../src/core/src/model.rs), [schemas/expert-report.schema.json](../schemas/expert-report.schema.json) |
+| Run discovery, verification, verified reads | [sources.rs](../src/core/src/sources.rs) (adapted from RV Timeline's `readers/mod.rs`) |
+| Assembly (quoting, custody, method, limitations, timeline, not examined, signals) | [assemble.rs](../src/core/src/assemble.rs) |
+| Rendering (one view model → HTML and PDF) | [report/expert.rs](../src/core/src/report/expert.rs), [templates/expert-report.html](../templates/expert-report.html) |
+| Pipeline, audit, case link | [run.rs](../src/core/src/run.rs) `run_assemble`, `preview_assembly` |
+| Wording EN/ES/FR | [i18n/](../i18n/en.json) `expert`, `tools`, `exclusion`, `skip`, `findings`, `limitations`, `ui` |
 
-<!-- forge:domain -->
-| Domain process | Implementation | Key constants |
-| --- | --- | --- |
-| Type detection, extension mismatch, executables, empty files | [src/core/src/analyzer.rs](../src/core/src/analyzer.rs) | 15 signatures; text extensions `txt csv log xml json html` |
-| Duplicates, intake registration | [src/core/src/report/mod.rs](../src/core/src/report/mod.rs) `duplicate_groups`; [src/core/src/run.rs](../src/core/src/run.rs) `register_items` | primary (first) algorithm; size > 0 |
-| Role in the case folder | [src/core/src/lib.rs](../src/core/src/lib.rs) `CASE_ROLE` | `Intake` |
-<!-- /forge:domain -->
+Constants: mandate at most 64 KiB (`MAX_MANDATE_BYTES`); known tools `KNOWN_TOOLS` (9); verification-only tools
+`["rv-hub"]`; tools that do not examine content `["rv-timeline", "rv-report", "rv-hub"]`.
 
-The core never prints; the CLI ([src/cli/src/main.rs](../src/cli/src/main.rs)) and the GUI
-([src/gui/src/state.rs](../src/gui/src/state.rs)) render the same event stream, so both front-ends produce the
-same audit actions, findings and reports.
-
-<!-- forge:domain -->
-## B2 Pipeline and reads of the evidence
+## B2 Run verification
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant R as run.rs
-    participant A as audit.jsonl
-    participant C as case folder
-    participant E as Evidence (read-only)
-    participant O as reports folder
-    R->>C: verify case log + registry, append run_started (under lock)
-    R->>A: run_started, case_linked, ui_* (GUI), environment_recorded, inputs_resolved
-    loop every item
-        R->>A: item_started (size, mtime)
-        R->>E: File::open, 1 MiB chunks, 1–2 digests + first 4 KiB
-        R->>A: item_hashed (digests, bytes_read, mtime_unchanged)
-        R->>A: item_analyzed (type, extension, findings, status)
-    end
-    R->>C: register items, write registry, append evidence_registered (under lock)
-    R->>A: evidence_registered ×N, duplicate_group, hash_register_written
-    R->>O: per-item reports, then item_reports_written ×N
-    R->>A: timestamp_obtained / timestamp_pending, statistics_report_written, run_finished
-    R->>C: run_finished with the final audit head (under lock)
+    participant A as assemble.rs
+    participant S as sources.rs
+    participant C as case-log.jsonl
+    participant R as runs/TOOL/RUN
+    A->>S: discover_runs (case log run_started, then folders under runs/)
+    A->>A: skip? own tool (self), rv-hub (verification), filters (tool_filter)
+    A->>S: verify_run
+    S->>R: audit.jsonl: path safe, chain (seq, prev, entry_hash), run_finished not cancelled
+    S->>C: chain; run_started for run_dir; run_finished status completed
+    S->>R: entry #audit_entries has audit_head; only timestamp_* after it
+    S->>R: verify-log: tokens, truncation, outputs.rs re-hashes every recorded output
+    S-->>A: Verified {entries, head, outputs N of M, timestamps} or ReadError {reason}
+    A->>R: RunData::json / text: each file re-checked against its recorded digest when read
 ```
 
-The evidence is read **once**, sequentially, with `File::open` (read-only access). The type check uses the first
-4 096 bytes kept during that same read, so there is no second read and no window in which the bytes hashed and
-the bytes examined could differ. The modification time is read before and after hashing and compared
-(`mtime_unchanged` in `item_hashed`); a change means the file was being written during the read.
+Exclusion reasons, in the order they can arise: `unreadable` (folder not `runs/<tool>/<run>`, resolves outside the
+case, missing or empty log, version disagreement), `chain_broken` (audit or case-log chain, head not anchored,
+entries after the end), `not_finished` (no `run_finished`, cancelled, case log not `completed`), `digest_mismatch`
+(any recorded output differs or is missing), `timestamp_invalid` (a token fails). Verification and reading are two
+steps; a file changed between them fails the second digest check and the run is excluded as well.
 
-Ordering facts an opposing expert may test:
+## B3 Quoting
 
-- Registration happens **after** all items are hashed and **before** duplicates are computed, so a cancelled run
-  still registers the items it finished.
-- The timestamp is requested after the last `item_reports_written` and **before** the statistics report, so the
-  token covers every evidence digest, finding and item-report digest, but not the statistics report or
-  `run_finished` (both are written after it; see [B8](#b8-rfc-3161-trusted-timestamp)).
-- A wrong certificate password stops the run (`run_failed`) before any evidence byte is read.
-<!-- /forge:domain -->
+For each verified run, every recorded `reports/items/*/technical.json` whose `schema` starts with
+`rakvor.item-technical/` is read. For each `findings[n]` the model keeps `code`, `severity`, `params` (strings),
+`text.<lang>.{title, shows, does_not_prove}` exactly, the pointer `/findings/<n>`, and the source
+`{file: runs/<tool>/<run>/reports/items/<folder>/technical.json, sha256}` (the SHA-256 recorded by the run's audit
+log). The evidence id comes from `item.evidence_id`, else from the run's audit (`evidence_verified_against_case`,
+`evidence_registered` for the item's index). `registry_match` is the run's own comparison.
 
-## B3 Single-pass dual hashing
+Rendering in language *L*: `text[L]` if present, else the first of en, es, fr present, prefixed `[EN]`/`[ES]`/`[FR]`.
+The end-to-end test compares every finding of every verified run with the model (JSON equality of `text`) and
+checks that the English HTML contains each `title`, `shows` and `does_not_prove` string, HTML-escaped.
 
-| Algorithm | Standard | Output | Status for evidence |
-| --- | --- | --- | --- |
-| `md5` | RFC 1321 | 128 bit | Practical collisions since 2004–2005 (Wang & Yu); legacy matching only |
-| `sha1` | FIPS 180-4 | 160 bit | Practical collision 2017 (Stevens et al., "SHAttered"); legacy matching only |
-| `sha256` | FIPS 180-4 | 256 bit | Default; recommended primary |
-| `sha512` | FIPS 180-4 | 512 bit | Recommended |
-| `sha3-256` | FIPS 202 | 256 bit | Sound; less familiar to courts |
-| `blake3` | BLAKE3 specification (2020) | 256 bit | Sound; not a NIST-approved hash |
+Limitations: codes from `reports/statistics.json` `limitations`; wording from `reports/statistics.<lang>.html`, the
+`<li>` items of the `<ul>` right after `<h2>Limitations|Limitaciones|Limites</h2>`, HTML-unescaped, paired with the
+codes **only if** the counts are equal. Blocks with the same tool, version and items are merged (runs listed).
 
-Implementations: RustCrypto `md-5`, `sha1`, `sha2`, `sha3` and the official `blake3` crate (exact versions in each
-run's `environment.json` → `dependencies`).
-
-```text
-hash_reader(r, algos)                                        src/core/src/hash.rs
-  validate_selection: 1 ≤ len ≤ 2, the two different        → else usage error (exit 2)
-  loop:
-    n = r.read(buf[0 .. 1 048 576])                          Interrupted → retry; other error → UNREADABLE
-    if n = 0: break
-    head += buf[0 .. min(n, 4096 − len(head))]               first 4 KiB, for type detection
-    for each hasher h: h.update(buf[0 .. n])                 the same slice feeds both digests
-    total += n
-    if on_chunk(total) = false: return cancelled             cancel granularity = one chunk
-  return (digests in selection order, total, head)
-```
-
-- **Same bytes for both digests.** Each chunk is passed to every hasher before the next read, so the two digests
-  can only describe the same byte stream. The unit test `one_pass_feeds_two_digests_identically_to_separate_passes`
-  checks a 3 MiB + 17-byte stream against separate one-shot digests.
-- **Primary algorithm.** The first selected algorithm is the primary: it groups duplicates, is shown as the
-  customer's "digital fingerprint" and is compared first with the case registry.
-- **`self-test`** checks every algorithm against the published digest of `"abc"` (e.g. SHA-256
-  `ba7816bf…f20015ad`, FIPS 180-4 example). It proves the build computes correct digests; it does not test type
-  detection or reports.
-- **Avalanche, measured** for [A2](#a2-digital-fingerprints-hashes): the two inputs differ in one character
-  (`'z'` = 0x7A, `'s'` = 0x73, 2 bits); their SHA-256 digests differ in **136 of 256 bits** (≈ 128 expected for an
-  ideal function), and only 4 of the 64 hexadecimal positions coincide.
-- **No hash policy.** The tool accepts `md5,sha1` without any SHA-2/SHA-3/BLAKE3 algorithm. Choosing at least
-  one collision-resistant algorithm is the examiner's job ([admissibility.md](admissibility.md#consolidated-gap-list), G11).
-- **Size.** `item_started` records the size from the file system; `item_hashed` records `bytes_read`. The reports
-  use `bytes_read`. A difference between the two means the file changed size while it was being read.
-
-<!-- forge:domain -->
-## B4 Type detection by magic bytes and extension mismatch
-
-### Signature table ([analyzer.rs](../src/core/src/analyzer.rs) `SIGNATURES`, first match wins)
-
-| # | Detected type | Offset | Magic bytes | Expected extensions | Executable |
-| --: | --- | --: | --- | --- | :-: |
-| 1 | PDF document | 0 | `25 50 44 46 2D` (`%PDF-`) | pdf | |
-| 2 | PNG image | 0 | `89 50 4E 47 0D 0A 1A 0A` | png | |
-| 3 | JPEG image | 0 | `FF D8 FF` | jpg jpeg jpe jfif | |
-| 4 | GIF image | 0 | `47 49 46 38` (`GIF8`) | gif | |
-| 5 | ZIP / Office Open XML | 0 | `50 4B 03 04` (`PK..`) | zip docx xlsx pptx odt ods jar apk epub | |
-| 6 | OLE2 (legacy Office, MSG) | 0 | `D0 CF 11 E0 A1 B1 1A E1` | doc xls ppt msg | |
-| 7 | Windows executable (PE) | 0 | `4D 5A` (`MZ`) | exe dll sys scr com efi | yes |
-| 8 | Linux executable (ELF) | 0 | `7F 45 4C 46` | so bin elf o | yes |
-| 9 | SQLite database | 0 | `SQLite format 3` + `00` | db sqlite sqlite3 | |
-| 10 | 7-Zip archive | 0 | `37 7A BC AF 27 1C` | 7z | |
-| 11 | RAR archive | 0 | `52 61 72 21 1A 07` | rar | |
-| 12 | GZIP archive | 0 | `1F 8B` | gz tgz | |
-| 13 | Windows event log (EVTX) | 0 | `ElfFile` + `00` | evtx | |
-| 14 | Windows registry hive | 0 | `72 65 67 66` (`regf`) | dat hve | |
-| 15 | MP4 / QuickTime video | 4 | `66 74 79 70` (`ftyp`) | mp4 m4v mov m4a 3gp heic | |
-
-### Annotated example: `examples/sample/evidence/foto-vacaciones.jpg` (112 bytes)
-
-```text
-offset  bytes                                            text
-     0  25 50 44 46 2D 31 2E 34 0A 25 20 73 61 6D 70 6C  %PDF-1.4.% sampl   ◄ bytes 0–4 = signature #1 "PDF document"
-    16  65 3A 20 61 20 50 44 46 20 72 65 6E 61 6D 65 64  e: a PDF renamed
-    32  20 61 73 20 61 20 70 68 6F 74 6F 0A 31 20 30 20   as a photo.1 0
-   ...
-    96  20 31 20 30 20 52 20 3E 3E 0A 25 25 45 4F 46 0A   1 0 R >>.%%EOF.
-name "foto-vacaciones.jpg" → extension "jpg" (lower-cased text after the last dot)
-"jpg" ∉ {pdf}  and  "jpg" is a known extension (signature #3)  → EXTENSION_MISMATCH (medium)
-                                                                 detected = "PDF document", extension = "jpg"
-```
-
-### Decision ([analyzer.rs](../src/core/src/analyzer.rs) `analyze`)
+## B4 Custody, method, timeline, not examined
 
 ```mermaid
-flowchart TB
-    S["name, size, first 4 KiB"] --> Z{"size = 0?"}
-    Z -->|yes| E0["EMPTY_FILE (info)"]
-    S --> D{"a signature matches<br/>at its offset?"}
-    D -->|no| U["detected_type = unknown<br/>no type finding"]
-    D -->|yes| X{"file name has<br/>an extension?"}
-    X -->|no| N["no finding"]
-    X -->|yes| L{"extension in the<br/>signature's list?"}
-    L -->|yes| N
-    L -->|no| P{"executable<br/>signature?"}
-    P -->|yes| H["EXECUTABLE_CONTENT (high)"]
-    P -->|no| K{"extension known to any signature<br/>or txt csv log xml json html?"}
-    K -->|yes| M["EXTENSION_MISMATCH (medium)"]
-    K -->|no| N
+flowchart TD
+    CL["case log: evidence_registered (added)"] --> R1["custody: registered<br/>seq, ts, actor, tool, run"]
+    RU["verified run audit: evidence_verified_against_case"] --> R2["custody: examined<br/>run_started seq/ts, match"]
+    R1 & R2 --> CU["rows sorted by case-log seq"]
+    RS["verified runs"] --> ME["method per tool: versions, runs, algorithms,<br/>langs, frontends, items, findings"]
+    TL["verified rv-timeline runs"] --> LT{"latest run id"}
+    LT --> TS["timeline summary from its statistics.json"]
+    LT --> SU["older: skipped superseded"]
+    REG["registry items"] --> NE{"examined by a verified run with role != intake<br/>and tool not in rv-timeline / rv-report / rv-hub?"}
+    NE -- no --> NX["not examined + ITEM_NOT_EXAMINED"]
 ```
 
-Consequences that matter in court (all from the code, all tested or testable with the samples):
+`TIMELINE_PREDATES_RUNS`: the timeline run's `run_started` time (case log) is earlier than the `run_finished` time
+of a quoted non-timeline run (both parsed with `jiff::Timestamp`).
 
-- A program **without an extension** (`invoice`) or with an unlisted one (`notes.md`) gets no finding: the
-  comparison needs an extension, and non-executable mismatches need a known or text extension.
-- The PE test is only 2 bytes (`MZ`) and GZIP only 2 bytes (`1F 8B`): a text file `notes.txt` that begins with
-  `MZ` is reported as `EXECUTABLE_CONTENT` (false positive). Confirm with a PE parser before relying on it.
-- Containers are typed by their outer signature: a `.docx` and a `.jar` are both "ZIP / Office Open XML", so a
-  `.jar` renamed `.docx` gives no finding. HEIC and MP4 share `ftyp`.
-- Matching is on the content's first bytes only; the extension is case-insensitive (`.JPG` = `.jpg`).
-- No error rates have been measured on a labelled corpus ([admissibility.md](admissibility.md#consolidated-gap-list), G5).
+## B5 RV Report's own signals
 
-## B5 Duplicate detection by digest
+| Code | Severity | Condition |
+| --- | --- | --- |
+| `RUN_EXCLUDED` | medium | a run failed verification (one per run) |
+| `REGISTRY_MISMATCH_REPORTED` | high | a verified run recorded `match: false` for an item it quoted |
+| `ITEM_NOT_EXAMINED` | low | B4 |
+| `TIMELINE_PREDATES_RUNS` | low | B4 |
+| `UNKNOWN_TOOL` | info | a verified tool not in `KNOWN_TOOLS` |
+| `TRANSLATION_UNAVAILABLE` | info | a run with wording lacks a report language (once per run and language) |
+| `TIMELINE_ABSENT` | info | no verified RV Timeline run |
+| `JURISDICTION_DIFFERS_FROM_CASE` | info | `--jurisdiction` differs from case.json |
 
-```text
-duplicate_groups(items)                                     src/core/src/report/mod.rs
-  key = primary digest (first selected algorithm)
-  only items that were hashed (no UNREADABLE) and have size > 0 (empty files are all identical)
-  groups = items sharing a key, if 2 or more            → audit: duplicate_group {algorithm, hash, items}
-  each member gets DUPLICATE (info) {algorithm, count, others}, others capped at 10 names + "… (+N)"
-```
-
-Two different files with the same SHA-256 would require a collision; no SHA-256 collision is publicly known, and
-the generic birthday bound for 256-bit digests is about 2¹²⁸ operations. With `md5` or `sha1` as the primary,
-deliberately colliding files can be produced (B3), so a duplicate group computed on MD5 alone proves less. The
-complete groups (paths, not only names) are in `statistics.json` and `hashes.csv`.
-<!-- /forge:domain -->
+Exit code 3 for any medium or high signal; the quoted findings' severities do not change it (ADR 0002 §10).
+Severities are proposals, not measured.
 
 ## B6 The audit hash chain
 
@@ -518,7 +270,7 @@ Layout and contract: [case-folder.md](case-folder.md). This section explains why
 <CASE>/runs/<tool>/<RUN-ID>/{logs,reports}/
 ```
 
-Real registry entry from an intake of the sample (path shortened):
+Registry entry written by the suite's intake tool (rv-hashinv; path shortened):
 
 ```json
 {
@@ -541,7 +293,7 @@ digests, so every registry row can be traced to a sealed log entry.
 | --- | --- | --- |
 | A broken case is never extended | every append re-runs `verify_log_and_registry` under the lock: case-log chain, first entry `case_created`, `case.json` digest, registry digest = last `registry_sha256` in the log | a tool cannot silently build on an edited case |
 | One writer at a time | `case-log.lock` created exclusively; wait ≤ 30 s; a lock older than 600 s is reported as stale and **never deleted automatically** | two tools never interleave entries |
-| Only the intake role writes the registry | `register` (intake); analysis tools only read it | the reference values cannot drift |
+| Only the intake role writes the registry | `register` (intake tool); RV Report and the analysis tools only read it | the reference values cannot drift |
 | Paths are compared normalised | `normalize_path`: absolute, lexically normalised (`.`/`..` removed); `same_path`: case-insensitive on Windows (`to_lowercase`), exact elsewhere | the same file is found again by path; `D:\Evidence\a.pdf` = `d:\evidence\A.PDF` on Windows |
 | A case run always shares an algorithm with the registry | `ensure_case_algorithm`: if the selection is disjoint from the algorithms present in **every** registered item, add SHA-256 (or the registry's first algorithm), replacing the second choice if two were selected; audited as `case_algorithm_added` | comparison is always possible |
 | Evidence ids are never reused | next id = highest number + 1; same path **and** same content keeps its id | an id means one content forever |
@@ -565,11 +317,9 @@ stateDiagram-v2
 ```
 
 <!-- forge:domain -->
-This tool is the **intake** role (`CASE_ROLE = Intake`): it does not run the matching above. It registers every
-item that was hashed: same path and same content keeps the existing id (`already_registered`); a registered path
-with other content gets a **new** id and the finding `REGISTRY_PATH_CONTENT_CHANGED` (medium); anything else gets
-a new id. Unreadable items are not registered. The analysis matching is in the same code and runs in every tool
-scaffolded from this one.
+RV Report does not run this matching itself: it reads the result each verified analysis run recorded
+(`evidence_verified_against_case`) and prints it in the custody rows and the results (`REGISTRY_MISMATCH_REPORTED`
+when a run examined a copy that differs).
 <!-- /forge:domain -->
 
 ### Cross-linking of the two chains
@@ -588,7 +338,7 @@ sequenceDiagram
     C->>C: #4 run_finished {audit_entries 23, audit_head 92040a6e…ea62}
 ```
 
-(Values from a real intake of the sample.) `verify-case` checks, for every `run_started` in the case log: the run's
+(Values from an intake by the suite's intake tool.) `verify-case` checks, for every `run_started` in the case log: the run's
 `audit.jsonl` chain and timestamp tokens; that its `case_linked` names this case and quotes the `run_started` hash;
 and that entry `audit_entries` of the run has hash `audit_head`, with only `timestamp_obtained` allowed after it.
 It also warns about run folders the case log never announced. Editing either chain therefore breaks a link, and
@@ -745,81 +495,25 @@ people. The form is a working aid, not the official Fiscalía *Registro de Caden
 
 ## B11 Determinism and repeatability
 
-| Same input + same build gives the same … | Varies between runs |
-| --- | --- |
-| evidence digests, `bytes_read`, detected types, findings and their parameters | `run_id`, `ts_utc`, every `entry_hash` (they include time) |
-| item order and numbering (sorted paths), duplicate groups | absolute paths of the outputs, host, OS user (in `environment.json`) |
-| `hashes.csv` rows | report digests (reports print run id, times, the audit head); PDF `/CreationDate` |
-| evidence ids for an unchanged path and content (case folder) | the RFC 3161 token and nonce |
+Given the same case folder and options, the model is the same except for the clock (`run.run_id`,
+`run.generated_utc`): runs are sorted by (tool, run id), items by the registry, findings by source path then
+position, custody rows by case-log sequence, maps by key (serde_json without `preserve_order`). The JSON is written
+pretty with sorted keys, so two assemblies of the same case differ only in those fields. The report reproduces the
+tools' wording, so a re-run of a tool with another `--lang` changes the report only through that run.
 
-Measured for this page: the Rust and Python builds of this tool, run on the sample with the same algorithms, gave
-identical digests, detected types and findings (compared on every `technical.json`). Item numbers are identical
-too: both profiles make each path absolute and lexically normalised and sort by that string **bytewise (UTF-8)**,
-so `a-b/x.txt` comes before `a/x.txt` ('-' 0x2D < '/' 0x2F) and `B.txt` before `a.txt`. The cross-profile test
-compares the numbering of such a folder ([input.rs](../src/core/src/input.rs) `items_are_sorted_by_normalised_path_bytes`;
-`cross_language_case_verification` with `RV_CROSS_PROJECT`), and CI verifies a case folder written by the Python
-profile ([tests/golden/](../tests/golden/regenerate.py)). File names that are not valid UTF-8 are outside this
-contract.
+## B12 What RV Report does not prove
 
-`environment.json` records the tool version, `rustc` version, target triple, every package and version listed in
-`Cargo.lock` (495 entries at this commit, for all platforms — not only those compiled into this binary), OS,
-host, OS user, working directory and command line (or the GUI settings), so a second examiner can rebuild the same
-version and repeat the run (ISO/IEC 27037 repeatability and reproducibility, [admissibility.md](admissibility.md#61-isoiec-270372012--identification-collection-acquisition-and-preservation-of-digital-evidence)).
+```mermaid
+stateDiagram-v2
+    [*] --> Verified: record intact since the tool wrote it
+    Verified --> Quoted: wording reproduced exactly
+    Quoted --> Opinion: the expert's reasoning, not the tool
+    Opinion --> [*]
+```
 
-<!-- forge:domain -->
-## B12 What each finding does not prove
-
-| Finding (severity) | Rule (code) | Shows | Does not prove |
-| --- | --- | --- | --- |
-| `EMPTY_FILE` (info) | bytes read = 0 | The file has 0 bytes | Whether it was emptied on purpose or created empty |
-| `EXTENSION_MISMATCH` (medium) | signature found; extension not in its list; extension known or textual ([B4](#b4-type-detection-by-magic-bytes-and-extension-mismatch)) | Name and content signature disagree | An attempt to hide content; renaming is common and often innocent |
-| `EXECUTABLE_CONTENT` (high) | PE or ELF signature; extension not an executable one | A program stored under a non-program name | That the program is malicious; a 2-byte `MZ` match can be a false positive |
-| `DUPLICATE` (info) | same primary digest, size > 0 ([B5](#b5-duplicate-detection-by-digest)) | Identical content in several files | Who copied the file, when, or which copy is the original |
-| `UNREADABLE` (high) | open or read error | The OS error text | That the file is damaged; permissions and locks cause this |
-| `REGISTRY_PATH_CONTENT_CHANGED` (medium) | intake: registered path, other content | The path now holds other content (new evidence id) | Which version is the original, or why it changed |
-<!-- /forge:domain -->
-
-Case-folder findings (shared by every tool in the analysis role):
-
-| Finding (severity) | Rule (code) | Shows | Does not prove |
-| --- | --- | --- | --- |
-| `EVIDENCE_HASH_MISMATCH_WITH_CASE` (high) | matched entry, a common algorithm differs ([B7](#matching-an-item-against-the-registry-analysis-role)) | The file examined is not bit-identical to the registered item | Who changed it, when, or whether deliberately |
-| `EVIDENCE_NOT_IN_CASE_REGISTRY` (medium) | no entry by id, path or content | Continuity from intake cannot be shown for this file | That the file is altered or irrelevant |
-
-The exact wording printed in reports is in [i18n/en.json](../i18n/en.json) (`findings`; also es, fr); a test
-enforces the same keys in all three languages.
-
-## B13 References
-
-Standards and specifications
-
-- NIST FIPS 180-4 (Secure Hash Standard, 2015); NIST FIPS 202 (SHA-3, 2015); RFC 1321 (MD5, 1992).
-- J. O'Connor, J.-P. Aumasson, S. Neves, Z. Wilcox-O'Hearn, *BLAKE3: one function, fast everywhere* (2020).
-- RFC 3161 (Time-Stamp Protocol, 2001); RFC 5816 (ESSCertIDv2 update for RFC 3161, 2010); RFC 5652
-  (Cryptographic Message Syntax, 2009); RFC 8017 (PKCS #1 v2.2, 2016); RFC 5280 (X.509 PKI profile, 2008).
-- ISO 32000-1:2008, *PDF 1.7* (§12.8 digital signatures); ETSI EN 319 142-1 (PAdES baseline signatures).
-- ISO/IEC 27037:2012 (identification, collection, acquisition and preservation of digital evidence) — see
-  [admissibility.md](admissibility.md) for what was verified of it.
-
-Academic and practitioner literature
-
-- X. Wang, H. Yu, "How to Break MD5 and Other Hash Functions", EUROCRYPT 2005.
-- M. Stevens, E. Bursztein, P. Karpman, A. Albertini, Y. Markov, "The first collision for full SHA-1",
-  CRYPTO 2017.
-
-<!-- forge:domain -->
-- G. Kessler, *File Signatures Table* (garykessler.net) and the `file(1)` / libmagic database — practitioner
-  references for magic numbers (to be verified against the entries of [B4](#b4-type-detection-by-magic-bytes-and-extension-mismatch)).
-- Format specifications for the signatures used: ISO 32000-1 (PDF header), ISO/IEC 15948 (PNG), ITU-T T.81
-  (JPEG SOI marker), PKWARE APPNOTE (ZIP local file header), RFC 1952 (GZIP), ISO/IEC 14496-12 (`ftyp` box),
-  Microsoft PE/COFF specification (`MZ` DOS header).
-<!-- /forge:domain -->
-
-Independent oracles used to cross-check this tool: Python `hashlib`/`blake3` for
-[examples/sample/expected_hashes.csv](../examples/sample/expected_hashes.csv) and
-[tests/verify_chain.py](../tests/verify_chain.py) (both in CI); JSON Schemas via
-[tests/validate_reports.py](../tests/validate_reports.py) (in CI); pyHanko for signed PDFs
-([tests/validate_pdf_signature.py](../tests/validate_pdf_signature.py), in CI); OpenSSL for RFC 3161 tokens
-(manual, see above); the Python profile of this tool: a committed case folder it wrote
-([tests/golden/](../tests/golden/regenerate.py), in CI) and the live cross-profile test (case folders and item
-numbering, run when `RV_CROSS_PROJECT` is set).
+- A verified run shows the **record** is intact since the tool wrote it, not that the tool's analysis is right.
+- An excluded run shows its record cannot be relied on as written, not that the evidence or the examiner did
+  anything wrong.
+- A quoted finding proves what the quoting tool says it proves and no more ("does not prove" is printed with it).
+- An item listed as not examined is not suspicious; one with no findings is not authentic for that reason.
+- The legal structure and references are drafts to be verified by counsel.

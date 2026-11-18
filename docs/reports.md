@@ -1,98 +1,95 @@
 # Reports
 
-Every run produces one **statistics report**. Every reviewed file produces **two separate reviews**:
-a hyper-detailed **technical review** for examiners and lawyers, and a concise **customer summary** in plain
-language. Each exists as JSON (machine-readable, language-neutral) plus HTML and PDF in each selected language.
+An assembly writes **one expert report** — `expert-report.json` (language-neutral, schema
+`rakvor.expert-report/1`) plus `expert-report.<lang>.html` and `.pdf` for each `--lang` — and the suite's standard
+outputs: a statistics report and, per registered evidence item, a technical report, a customer summary and a
+custody form. HTML and PDF are rendered from the same view model ([report/expert.rs](../src/core/src/report/expert.rs)
+`expert_view`), so they never disagree; the GUI preview shows the same view.
 
 ```mermaid
 flowchart TB
-    RUN["Run"] --> S["statistics.json<br/>statistics.LANG.html · .pdf"]
-    RUN --> I1["items/00001-acta.txt/"]
-    RUN --> I2["items/00002-…/"]
-    I1 --> T1["technical.json<br/>technical.LANG.html · .pdf"]
-    I1 --> C1["summary.json<br/>summary.LANG.html · .pdf"]
-    I1 --> K1["custody.json<br/>custody.es|fr + custody.en .html · .pdf"]
+    RUN["runs/rv-report/RUN-ID/reports"] --> E["expert-report.json<br/>expert-report.LANG.html · .pdf"]
+    RUN --> S["statistics.json<br/>statistics.LANG.html · .pdf"]
+    RUN --> I["items/00001-NAME/"]
+    I --> T["technical.json · .LANG.html · .pdf<br/>(RV Report's signals + the quoted results)"]
+    I --> C["summary.* · custody.json + custody.es|fr + .en"]
 ```
 
-Each item folder also holds a **chain-of-custody form** for the chosen jurisdiction (`--jurisdiction co|fr`)
-plus its English version — see [forensic-audit.md](forensic-audit.md#chain-of-custody-form-per-item).
+## The expert report, section by section
 
-**Brand.** HTML and PDF reports carry the Rakvor header band (RV mark, descriptor
-*FORENSICS | INCIDENT RESPONSE | SECURITY* and the tagline in the report language) on a light, printable page.
-When `--sign-cert` is used, each report (PDF and HTML) shows the signer's certificate subject and its SHA-256
-fingerprint — the value logged at `signing_certificate_loaded`, also in the JSON reports as
-`run.pdf_signer_certificate_sha256` — and each PDF carries a digital signature that Acrobat or
-`pyhanko sign validate` can check (the test suite validates every signed PDF with pyHanko). The statistics report shows the trusted timestamp (or a warning
-that it is pending).
+| Section (CO / FR) | Content | Source |
+| --- | --- | --- |
+| Identification / Mission | case id, creation, `case.json` SHA-256, expert name and `--examiner-id`, run id, status (draft/final), structure, languages, tool filters; verification of the case (case-log entries and head, registry items and SHA-256) | case folder, options |
+| Object (CO) / in Mission (FR) | the mandate quoted line by line, with file name, bytes, SHA-256 — or a note that none was given | `--mandate` |
+| Evidence received (EMP/EF) / Scellés reçus | per item: id, file name, registered path, size, every registered digest, intake time, registering run; custody rows `#seq · time · action · tool version · run · actor · registry match` | registry, case log, verified runs |
+| Methods / Description des opérations | RV Report's four steps; per tool: role (case log), what it does / checks (RV Report's summary; "unknown tool" otherwise), versions, runs, algorithms, languages, interface, items examined, findings quoted | runs' audit logs |
+| Results / Constatations | per item, per verified run: tool, version, run, the tool's item status, registry match, source file + SHA-256, then every finding: severity, title, code, **what it shows**, **what it does not prove**, pointer; RV Report's item signals first | `technical.json` (verbatim) |
+| Timeline / Chronologie | latest verified RV Timeline run: events, runs it read/excluded, zone-unknown events, display zone, signals by severity and code, sources | its `statistics.json` |
+| Limitations / Limites | each tool version's printed limitations (runs listed), then RV Report's own | `statistics.json` + `.html` |
+| Not examined | registered items no verified analysis run examined | registry vs runs |
+| Annexes | totals; every run: status (verified / EXCLUDED / skipped), reason and detail, folder, start/end, audit head (entries), outputs verified N of M, timestamp status and token lines, findings quoted; RV Report's run-level signals | verification |
+| Declaration / Conclusions et attestation | template text per jurisdiction, what the expert must add, draft/final note, signature lines | — (examiner) |
 
-**Size.** Item reports never list every other file: duplicate partners are capped at 10 names
-("… (+N)"); the complete groups are in the statistics report and `hashes.csv`.
+Every page starts with the **draft** banner (or the final banner after `--final`) and a disclaimer; each section
+lists its legal basis with the mark *[to be verified]* / *[a verificar]* / *[à vérifier]*
+([admissibility.md](admissibility.md#3b-the-reports-structure-per-jurisdiction-to-be-verified)).
 
-## What each report contains
+### Per jurisdiction
 
-| Section | Statistics | Technical review | Customer summary |
-| --- | :-: | :-: | :-: |
-| Run ID, case, examiner, start/end, duration, interface | ✔ | ✔ (run ID, case) | case, date |
-| Hash algorithms, totals, throughput | ✔ | | |
-| Findings by severity and type, items by detected type | ✔ | | |
-| Duplicate groups | ✔ | as finding | as finding |
-| Full path, size, modified time, extension, detected type | | ✔ | file name |
-| All digests | | ✔ | primary only ("digital fingerprint") |
-| Findings with **what it shows / what it does not prove** | | ✔ | plain sentence |
-| Method | | ✔ | "What we did" |
-| Audit entries covering the item | | ✔ (`#first – #last`) | |
-| Limitations | ✔ | ✔ | |
-| Status and next step | | ✔ | ✔ |
+| | Colombia (`co`) | France (`fr`) |
+| --- | --- | --- |
+| Title | Dictamen pericial — evidencia digital | Rapport d'expertise — preuve numérique |
+| Sections | 10: identification, object, evidence, method, results, timeline, limitations, not examined, annexes, declaration | 9: mission (identification + object), evidence, method, results, timeline, limitations, not examined, annexes, declaration |
+| References printed | Ley 906 de 2004 arts. 405–423, 413, 414, 415, 417, 254–266; Ley 1564 de 2012 art. 226 | CPP arts. 156, 157/160, 158, 163, 166, 167 |
+| Default | `case.json` jurisdiction | `--jurisdiction fr` or a French case |
 
-## Status and severity
+Language and structure are independent; the per-item custody forms always follow the case's jurisdiction.
+
+### Language of quoted text
+
+A tool writes finding text only in its run's `--lang`. Missing in the report language → the text is shown in the
+first available language (en, es, fr), prefixed `[EN]`/`[ES]`/`[FR]`, and `TRANSLATION_UNAVAILABLE` is recorded.
+
+## RV Report's signals (findings catalogue)
+
+| Code | Severity | What it shows | What it does not prove |
+| --- | --- | --- | --- |
+| `RUN_EXCLUDED` | medium | a run failed verification; none of its results is quoted | that the evidence or the examiner did anything wrong |
+| `REGISTRY_MISMATCH_REPORTED` | high | a verified run recorded that its copy differs from the registry | which copy is the original, or that anyone altered it |
+| `ITEM_NOT_EXAMINED` | low | a registered item no analysis tool examined | that the item is suspicious |
+| `TIMELINE_PREDATES_RUNS` | low | the timeline started before a quoted run finished | that the timeline is wrong |
+| `UNKNOWN_TOOL` | info | RV Report cannot describe a verified tool | anything about that tool's reliability |
+| `TRANSLATION_UNAVAILABLE` | info | a run's wording is missing in a report language | any change of result |
+| `TIMELINE_ABSENT` | info | no verified RV Timeline run | that times are consistent or not |
+| `JURISDICTION_DIFFERS_FROM_CASE` | info | the structure differs from the case's jurisdiction | a defect of the evidence |
+
+Exit code 3 for any medium or high signal. Per-item technical reports carry the item's signals as findings
+(status `problem` / `attention` / `ok`) and the quoted results (`quoted`).
 
 ```mermaid
 pie showData
-    title Example run: findings by severity
-    "High" : 1
-    "Medium" : 3
-    "Informational" : 6
+    title Sample case: RV Report signals (--lang all)
+    "Low (not examined)" : 1
+    "Info (translation)" : 6
 ```
 
-| Severity | Examples | Item status |
-| --- | --- | --- |
-| High | UNREADABLE, EXECUTABLE_CONTENT | `problem` (exit code 3) |
-| Medium | EXTENSION_MISMATCH | `attention` |
-| Low | — | `attention` |
-| Informational | EMPTY_FILE, DUPLICATE | `ok` |
+## Limitations printed by RV Report
 
-## Findings catalogue
-
-| Code | Shows | Does not prove |
-| --- | --- | --- |
-| `EMPTY_FILE` | The file has 0 bytes | Whether it was emptied on purpose |
-| `EXTENSION_MISMATCH` | Name and content signature disagree | Intent to hide anything |
-| `EXECUTABLE_CONTENT` | A program is stored under a non-program name | That the program is malicious |
-| `DUPLICATE` | Identical content (same primary hash) in several files | Who copied it or when |
-| `UNREADABLE` | Reading failed, with the OS error | That the file is damaged |
-| `EVIDENCE_HASH_MISMATCH_WITH_CASE` (high, case folder) | The file differs from the evidence registered at intake | Who changed it, when, or why |
-| `EVIDENCE_NOT_IN_CASE_REGISTRY` (medium, case folder) | No registered item has this path or content | That the file is altered or irrelevant |
-| `REGISTRY_PATH_CONTENT_CHANGED` (medium, intake) | A registered path now holds other content (new evidence id) | Which version is the original |
-
-With `--case-dir` every report shows the item's **evidence id** (`E0001`…), the statistics report adds a *Case
-folder* section (registered / verified / mismatched / not registered), and the custody form uses the case id, the
-evidence id and the intake date — see [case-folder.md](case-folder.md).
-
-Wording lives in `i18n/en.json`, `es.json`, `fr.json` (same keys in all three — enforced by a test).
+`REPORT_DERIVED_CONTENT`, `REPORT_QUOTES_ONLY_VERIFIED_RUNS`, `REPORT_NO_CONCLUSION`,
+`REPORT_LEGAL_STRUCTURE_UNVERIFIED`, `REPORT_NO_TRANSLATION`, `CLEAN_RESULT_IS_NOT_AUTHENTICITY`,
+`TIMESTAMP_PROVES_EXISTENCE_ONLY` (wording in [i18n/en.json](../i18n/en.json) `limitations`).
 
 ## JSON schemas
 
-| File | `schema` value | Schema |
-| --- | --- | --- |
-| `statistics.json` | `rakvor.statistics/1` | [schemas/statistics.schema.json](../schemas/statistics.schema.json) |
-| `technical.json` | `rakvor.item-technical/1` | [schemas/item-technical.schema.json](../schemas/item-technical.schema.json) |
-| `summary.json` | `rakvor.item-summary/1` | [schemas/item-summary.schema.json](../schemas/item-summary.schema.json) |
+| File | Schema |
+| --- | --- |
+| `expert-report.json` | [expert-report.schema.json](../schemas/expert-report.schema.json) (strict: no unknown fields) |
+| `statistics.json`, `technical.json`, `summary.json`, `custody.json` | the suite's schemas in [schemas/](../schemas/statistics.schema.json) |
 
-Adding a field is a minor change; removing or renaming one bumps the `/N` version.
+`python tests/validate_reports.py <run>/reports` validates them. Keys are sorted; integers and strings only.
 
 ## PDF notes
 
-PDFs are generated by a small built-in writer (A4, Helvetica/Courier, WinAnsi encoding), so no external
-program is needed on the examiner's PC. WinAnsi covers English, Spanish and French; other scripts would
-need an embedded font (upgrade path: Typst). Every report file's digest is recorded in the audit log
-(`item_reports_written`, `statistics_report_written`), so a report altered after the run can be detected.
+Built-in writer (A4, Helvetica/Courier, WinAnsiEncoding: English, Spanish and French characters; others become
+`?`). With `--sign-cert` every PDF, the expert report included, carries a detached CMS signature (checked in the
+tests with pyHanko). HTML and JSON are not signed; their digests are in the audit chain, which is timestamped.

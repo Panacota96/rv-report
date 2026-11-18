@@ -380,6 +380,8 @@ impl ReportApp {
                                 .hint_text(self.state.tr("mandate_hint"))
                                 .desired_width(320.0),
                         );
+                        // Only the Windows build has the file dialog; elsewhere `pick` stays None.
+                        #[cfg_attr(not(windows), allow(unused_mut))]
                         let mut pick: Option<String> = None;
                         #[cfg(windows)]
                         if ui.button(self.state.tr("browse")).clicked()

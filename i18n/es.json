@@ -92,7 +92,11 @@
     "unregistered": "No registrados",
     "intake_date": "Registrado en la recepción (UTC)",
     "case_dir": "Carpeta del caso",
-    "title_expert": "Dictamen pericial"
+    "title_expert": "Dictamen pericial",
+    "quoted_results": "Resultados citados de los informes de las herramientas (textuales)",
+    "quoted_note": "Cada hallazgo es la redacción propia de la herramienta, copiada del archivo fuente verificado indicado con su SHA-256; RV Report no la reformula ni la traduce ([EN]/[ES]/[FR]: solo disponible en ese idioma). Las señales propias de RV Report sobre el registro figuran aparte, arriba.",
+    "source": "Fuente",
+    "pointer": "Ubicación en la fuente"
   },
   "severity": {
     "high": "Alta",

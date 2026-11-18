@@ -409,11 +409,57 @@ pub fn item_context(lang: &str, run: &RunInfo, it: &ItemResult, audit: &AuditRef
                 .collect::<Vec<_>>()
         ),
     );
+    m.insert("quoted".into(), quoted_view(c, it));
     m.insert(
         "audit".into(),
         json!({"head": audit.head, "entries": audit.entries, "log_dir": audit.log_dir}),
     );
     Value::Object(m)
+}
+
+/// RV Report: the results quoted from the verified tool runs about this item, for the technical report. The
+/// wording is the tool's own (in the report language, else the first language the tool wrote, marked); it is kept
+/// apart from RV Report's own signals (`findings`).
+fn quoted_view(c: &Catalog, it: &ItemResult) -> Value {
+    let Some(q) = it
+        .quoted
+        .as_ref()
+        .and_then(|v| serde_json::from_value::<crate::model::ItemResults>(v.clone()).ok())
+    else {
+        return Value::Null;
+    };
+    let runs: Vec<Value> = q
+        .entries
+        .iter()
+        .map(|e| {
+            let findings: Vec<Value> = e
+                .findings
+                .iter()
+                .map(|f| {
+                    let (title, shows, dnp) = match expert::text_for(f, c.lang) {
+                        Some((t, used)) => {
+                            let mark = if used == c.lang {
+                                String::new()
+                            } else {
+                                format!("[{}] ", used.to_uppercase())
+                            };
+                            (
+                                format!("{mark}{}", t.title),
+                                t.shows.clone(),
+                                t.does_not_prove.clone(),
+                            )
+                        }
+                        None => (f.code.clone(), String::new(), String::new()),
+                    };
+                    json!({"code": f.code, "severity": f.severity.key(), "severity_label": c.severity(f.severity.key()),
+                           "title": title, "shows": shows, "does_not_prove": dnp, "pointer": f.pointer})
+                })
+                .collect();
+            json!({"tool": e.tool, "tool_version": e.tool_version, "run_id": e.run_id, "item_status": e.item_status,
+                   "source_file": e.source.file, "source_sha256": e.source.sha256, "findings": findings})
+        })
+        .collect();
+    json!({"runs": runs})
 }
 
 // ---------- JSON (language-neutral; texts included for each selected language) ----------
@@ -500,6 +546,7 @@ pub fn technical_json(run: &RunInfo, it: &ItemResult) -> Value {
         "findings": findings_json(it, &run.langs),
         "limitations": LIMITATIONS,
         "audit": {"first_seq": it.audit_first_seq, "last_seq": it.audit_last_seq},
+        "quoted": it.quoted,
     })
 }
 
@@ -791,6 +838,45 @@ pub fn technical_pdf(ctx: &Value, run: &RunInfo) -> Result<Vec<u8>, String> {
                 (t("does_not_prove"), s(x, "does_not_prove")),
             ],
         });
+    }
+    if ctx["quoted"].is_object() {
+        b.push(Block::Heading(t("quoted_results")));
+        b.push(Block::Para(t("quoted_note")));
+        let runs = arr(&ctx["quoted"], "runs");
+        if runs.is_empty() {
+            b.push(Block::Para(t("none")));
+        }
+        for r in runs {
+            b.push(Block::Note(format!(
+                "{} {} \u{00B7} {} \u{00B7} {}: {}",
+                s(r, "tool"),
+                s(r, "tool_version"),
+                s(r, "run_id"),
+                t("status"),
+                s(r, "item_status")
+            )));
+            b.push(Block::Mono(format!(
+                "{}: {} (SHA-256 {})",
+                t("source"),
+                s(r, "source_file"),
+                s(r, "source_sha256")
+            )));
+            let fs = arr(r, "findings");
+            if fs.is_empty() {
+                b.push(Block::Para(t("none")));
+            }
+            for x in fs {
+                b.push(Block::Finding {
+                    badge: s(x, "severity_label"),
+                    title: format!("{}  ({})", s(x, "title"), s(x, "code")),
+                    rows: vec![
+                        (t("shows"), s(x, "shows")),
+                        (t("does_not_prove"), s(x, "does_not_prove")),
+                        (t("pointer"), s(x, "pointer")),
+                    ],
+                });
+            }
+        }
     }
     b.push(Block::Heading(t("method")));
     b.push(Block::Para(t("method_text")));

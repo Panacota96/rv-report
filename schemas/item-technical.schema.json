@@ -317,6 +317,29 @@
           ]
         }
       }
+    },
+    "quoted": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "RV Report: the results quoted verbatim from the verified tool runs about this item (model ItemResults: evidence_id, path, entries[] with tool, tool_version, run_id, item_status, registry_match, source {file, sha256}, findings[] {code, severity, params, text.<lang>, pointer}). Kept apart from RV Report's own signals (findings).",
+      "required": [
+        "evidence_id",
+        "path",
+        "entries"
+      ],
+      "properties": {
+        "evidence_id": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "entries": {
+          "type": "array"
+        }
+      }
     }
   }
 }

@@ -374,6 +374,78 @@ fn sample_case_assembles_a_report_that_quotes_every_finding_verbatim() {
         }
     }
     assert!(checked >= 10, "only {checked} findings checked");
+
+    // The per-item technical reports carry the same quotations, verbatim and apart from RV Report's own signals:
+    // for every analysed item, each source run's findings are in `quoted` (JSON) and printed in technical.en.html.
+    let own_items: Vec<(PathBuf, Value)> = technical_reports(&run);
+    let mut per_item = 0;
+    for tool in ["rv-pdfauth", "rv-imgauth"] {
+        for (path, tech) in technical_reports(&tool_run(&case, tool)) {
+            let id = tech["item"]["evidence_id"].as_str().unwrap();
+            let rel = path
+                .strip_prefix(&case)
+                .unwrap()
+                .to_string_lossy()
+                .replace('\\', "/");
+            let (own_path, own) = own_items
+                .iter()
+                .find(|(_, o)| o["item"]["evidence_id"] == id)
+                .unwrap_or_else(|| panic!("no item report for {id}"));
+            let entry = own["quoted"]["entries"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|e| e["source"]["file"] == rel.as_str())
+                .unwrap_or_else(|| panic!("{id}: {rel} not quoted in the item report"));
+            assert_eq!(entry["tool"], tool);
+            let sha =
+                rv_report_core::hash::hash_bytes(&std::fs::read(&path).unwrap(), HashAlgo::Sha256);
+            assert_eq!(entry["source"]["sha256"], sha.as_str());
+            // RV Report's own signals stay in `findings`: none of them is a quoted code.
+            let own_codes: Vec<&str> = own["findings"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|f| f["code"].as_str().unwrap())
+                .collect();
+            let html =
+                std::fs::read_to_string(own_path.with_file_name("technical.en.html")).unwrap();
+            assert!(
+                html.contains(&minijinja_escape(&rel)),
+                "{id}: source not printed"
+            );
+            for (theirs, ours) in tech["findings"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .zip(entry["findings"].as_array().unwrap())
+            {
+                assert_eq!(theirs["code"], ours["code"]);
+                assert_eq!(theirs["severity"], ours["severity"]);
+                assert_eq!(
+                    theirs["text"], ours["text"],
+                    "{id}: wording must be verbatim"
+                );
+                assert!(!own_codes.contains(&theirs["code"].as_str().unwrap()));
+                for k in ["title", "shows", "does_not_prove"] {
+                    let s = theirs["text"]["en"][k].as_str().unwrap();
+                    assert!(
+                        html.contains(&minijinja_escape(s)),
+                        "{id}: {k} not in technical.en.html: {s}"
+                    );
+                }
+                per_item += 1;
+            }
+            assert_eq!(
+                tech["findings"].as_array().unwrap().len(),
+                entry["findings"].as_array().unwrap().len()
+            );
+        }
+    }
+    assert!(
+        per_item >= 10,
+        "only {per_item} per-item quotations checked"
+    );
     assert_eq!(report["totals"]["findings_quoted"], checked);
     // Wording only in English (rv-imgauth ran with --lang en): marked, not translated, and signalled.
     let html_es = std::fs::read_to_string(rep.join("expert-report.es.html")).unwrap();

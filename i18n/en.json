@@ -92,7 +92,11 @@
     "unregistered": "Not in the registry",
     "intake_date": "Registered at intake (UTC)",
     "case_dir": "Case folder",
-    "title_expert": "Expert report"
+    "title_expert": "Expert report",
+    "quoted_results": "Results quoted from the tools' own reports (verbatim)",
+    "quoted_note": "Each finding below is the examining tool's own wording, copied from the verified source file named with its SHA-256; RV Report does not reword or translate it ([EN]/[ES]/[FR]: only available in that language). RV Report's own signals about the record are listed separately above.",
+    "source": "Source",
+    "pointer": "Place in the source"
   },
   "severity": {
     "high": "High",

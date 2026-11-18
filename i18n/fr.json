@@ -92,7 +92,11 @@
     "unregistered": "Absents du registre",
     "intake_date": "Enregistré à la réception (UTC)",
     "case_dir": "Dossier de l'affaire",
-    "title_expert": "Rapport d'expertise"
+    "title_expert": "Rapport d'expertise",
+    "quoted_results": "Résultats cités des rapports des outils (mot pour mot)",
+    "quoted_note": "Chaque constat est le libellé propre de l'outil, copié du fichier source vérifié indiqué avec son SHA-256 ; RV Report ne le reformule ni ne le traduit ([EN]/[ES]/[FR] : disponible seulement dans cette langue). Les signaux propres de RV Report sur l'enregistrement figurent à part, ci-dessus.",
+    "source": "Source",
+    "pointer": "Emplacement dans la source"
   },
   "severity": {
     "high": "Élevée",

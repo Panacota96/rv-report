@@ -161,8 +161,7 @@ pub struct Assembly {
 
 /// Reads the mandate file: UTF-8 text (BOM ignored), at most [`MAX_MANDATE_BYTES`].
 pub fn read_mandate(p: &Path) -> Result<Mandate, String> {
-    let meta =
-        std::fs::metadata(p).map_err(|e| format!("mandate file {}: {}", p.display(), e))?;
+    let meta = std::fs::metadata(p).map_err(|e| format!("mandate file {}: {}", p.display(), e))?;
     if !meta.is_file() {
         return Err(format!("mandate file {} is not a file", p.display()));
     }
@@ -201,9 +200,13 @@ pub fn filtered_out(tool: &str, include: &[String], exclude: &[String]) -> bool 
 /// The printed limitation sentences of a statistics.<lang>.html: the `<li>` items of the list right after the
 /// localized heading (`Limitations`, `Limitaciones`, `Limites`). None when the heading is not found.
 pub fn printed_limitations(html: &str) -> Option<Vec<String>> {
-    let start = ["<h2>Limitations</h2>", "<h2>Limitaciones</h2>", "<h2>Limites</h2>"]
-        .iter()
-        .find_map(|h| html.find(h).map(|i| i + h.len()))?;
+    let start = [
+        "<h2>Limitations</h2>",
+        "<h2>Limitaciones</h2>",
+        "<h2>Limites</h2>",
+    ]
+    .iter()
+    .find_map(|h| html.find(h).map(|i| i + h.len()))?;
     let rest = &html[start..];
     let ul = rest.trim_start();
     if !ul.starts_with("<ul>") {
@@ -238,7 +241,9 @@ fn string_map(v: &Value) -> BTreeMap<String, String> {
                 .map(|(k, x)| {
                     (
                         k.clone(),
-                        x.as_str().map(String::from).unwrap_or_else(|| x.to_string()),
+                        x.as_str()
+                            .map(String::from)
+                            .unwrap_or_else(|| x.to_string()),
                     )
                 })
                 .collect()
@@ -502,8 +507,8 @@ pub fn assemble(
             annex.push(a);
             continue;
         }
-        let outcome = sources::verify_run(&case_dir, &r)
-            .and_then(|v| read_verified(&case_dir, &r, v));
+        let outcome =
+            sources::verify_run(&case_dir, &r).and_then(|v| read_verified(&case_dir, &r, v));
         match outcome {
             Ok(rr) => {
                 a.status = "verified".into();
@@ -674,12 +679,14 @@ pub fn assemble(
     // 5. Method per tool.
     let mut tools: BTreeMap<String, ToolMethod> = BTreeMap::new();
     for r in &reads {
-        let m = tools.entry(r.run.tool.clone()).or_insert_with(|| ToolMethod {
-            tool: r.run.tool.clone(),
-            known: KNOWN_TOOLS.contains(&r.run.tool.as_str()),
-            role: r.run.role.clone(),
-            ..Default::default()
-        });
+        let m = tools
+            .entry(r.run.tool.clone())
+            .or_insert_with(|| ToolMethod {
+                tool: r.run.tool.clone(),
+                known: KNOWN_TOOLS.contains(&r.run.tool.as_str()),
+                role: r.run.role.clone(),
+                ..Default::default()
+            });
         let add = |v: &mut Vec<String>, x: String| {
             if !x.is_empty() && !v.contains(&x) {
                 v.push(x);
@@ -747,10 +754,9 @@ pub fn assemble(
                     .collect(),
             })
             .collect();
-        match lims
-            .iter_mut()
-            .find(|l| l.tool == r.run.tool && l.tool_version == r.run.tool_version && l.items == items)
-        {
+        match lims.iter_mut().find(|l| {
+            l.tool == r.run.tool && l.tool_version == r.run.tool_version && l.items == items
+        }) {
             Some(l) => l.runs.push(r.run.run_id.clone()),
             None => lims.push(ToolLimitations {
                 tool: r.run.tool.clone(),
@@ -764,9 +770,9 @@ pub fn assemble(
     // 7. Missing languages (once per run and report language).
     for r in &reads {
         let has_text = !r.langs.is_empty()
-            || lims
-                .iter()
-                .any(|l| l.runs.contains(&r.run.run_id) && l.items.iter().any(|i| !i.text.is_empty()));
+            || lims.iter().any(|l| {
+                l.runs.contains(&r.run.run_id) && l.items.iter().any(|i| !i.text.is_empty())
+            });
         if !has_text {
             continue;
         }
@@ -797,7 +803,7 @@ pub fn assemble(
     let timeline = reads
         .iter()
         .find(|r| r.run.tool == TIMELINE_TOOL)
-        .map(|r| timeline_summary(r));
+        .map(timeline_summary);
     match &timeline {
         None => signals.push(ReportSignal {
             code: "TIMELINE_ABSENT".into(),
@@ -1021,10 +1027,7 @@ fn registration_rows(log: &sources::Entries) -> BTreeMap<String, CustodyEvent> {
 }
 
 fn timeline_summary(r: &RunRead) -> TimelineSummary {
-    let (st, sha) = r
-        .statistics
-        .clone()
-        .unwrap_or((Value::Null, String::new()));
+    let (st, sha) = r.statistics.clone().unwrap_or((Value::Null, String::new()));
     let t = &st["timeline"];
     let mut by_code: BTreeMap<String, u64> = BTreeMap::new();
     for sgl in t["signals"].as_array().into_iter().flatten() {
@@ -1116,7 +1119,11 @@ mod tests {
     fn mandate_rules() {
         let d = tempfile::tempdir().unwrap();
         let p = d.path().join("m.txt");
-        std::fs::write(&p, b"\xEF\xBB\xBFObject: examine E0001.\r\nSecond line.\r\n").unwrap();
+        std::fs::write(
+            &p,
+            b"\xEF\xBB\xBFObject: examine E0001.\r\nSecond line.\r\n",
+        )
+        .unwrap();
         let m = read_mandate(&p).unwrap();
         assert_eq!(m.text, "Object: examine E0001.\nSecond line.");
         assert_eq!(m.sha256.len(), 64);

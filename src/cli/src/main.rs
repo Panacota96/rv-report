@@ -632,10 +632,7 @@ fn assemble_cmd(a: AssembleArgs) -> u8 {
         algorithms: algos,
         out_dir: a.out.clone(),
         langs,
-        actor: a
-            .actor
-            .clone()
-            .unwrap_or_else(rv_report_core::env::os_user),
+        actor: a.actor.clone().unwrap_or_else(rv_report_core::env::os_user),
         case_id: a.case_id.clone(),
         frontend: "cli".into(),
         preamble: vec![],
@@ -802,16 +799,14 @@ fn timestamp(log: PathBuf, tsa_url: String, actor: Option<String>) -> u8 {
         );
         return EXIT_FINDINGS;
     }
-    let mut audit_log = match audit::AuditLog::resume(
-        &dir,
-        &actor.unwrap_or_else(rv_report_core::env::os_user),
-    ) {
-        Ok(l) => l,
-        Err(e) => {
-            eprintln!("error: {}", e);
-            return EXIT_FINDINGS;
-        }
-    };
+    let mut audit_log =
+        match audit::AuditLog::resume(&dir, &actor.unwrap_or_else(rv_report_core::env::os_user)) {
+            Ok(l) => l,
+            Err(e) => {
+                eprintln!("error: {}", e);
+                return EXIT_FINDINGS;
+            }
+        };
     match trust::timestamp_head(&dir, audit_log.entries(), audit_log.head(), &tsa_url) {
         Ok(ts) => {
             if let Err(e) = audit_log.record("timestamp_obtained", Some(&ts.file), ts.to_json()) {

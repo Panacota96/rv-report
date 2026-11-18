@@ -985,7 +985,12 @@ pub fn run_assemble(
     c.case_id = Some(case.case_id.clone());
     c.case_dir = Some(dir.clone());
     // Custody forms follow the case (suite rule); the report structure follows opts.jurisdiction.
-    c.jurisdiction = if case.jurisdiction == "fr" { "fr" } else { "co" }.into();
+    c.jurisdiction = if case.jurisdiction == "fr" {
+        "fr"
+    } else {
+        "co"
+    }
+    .into();
     c.case_role = CaseRole::Analysis;
     let structure = opts
         .jurisdiction
@@ -1300,7 +1305,8 @@ fn assemble_pipeline(
     }
     for (name, data) in &expert_files {
         let (_, digests) = report::write_hashed(&report_dir, name, data, &cfg.algorithms)?;
-        let mut d = json!({"file": name, "kind": "expert_report", "bytes": data.len(), "hashes": digests});
+        let mut d =
+            json!({"file": name, "kind": "expert_report", "bytes": data.len(), "hashes": digests});
         if name.ends_with(".pdf") {
             d["signed"] = json!(signer.is_some());
         }
@@ -1609,7 +1615,8 @@ mod tests {
     }
 
     fn sample_copy(dir: &Path) -> PathBuf {
-        let src = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/sample/evidence");
+        let src =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/template-evidence");
         let ev = dir.join("evidence");
         std::fs::create_dir_all(&ev).unwrap();
         for e in std::fs::read_dir(src).unwrap() {

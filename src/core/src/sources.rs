@@ -571,7 +571,8 @@ impl RunData {
             return Ok(None);
         }
         let (bytes, sha) = self.check_file(rel)?;
-        let t = String::from_utf8(bytes).map_err(|_| err("unreadable", format!("{rel}: not UTF-8")))?;
+        let t =
+            String::from_utf8(bytes).map_err(|_| err("unreadable", format!("{rel}: not UTF-8")))?;
         Ok(Some((t, sha)))
     }
 
@@ -677,7 +678,9 @@ mod tests {
         let p = dir.path().join("audit.jsonl");
         let (e, _) = read_jsonl(&p).unwrap();
         assert!(check_chain(&e).is_ok());
-        let t = std::fs::read_to_string(&p).unwrap().replace("\"i\":2", "\"i\":3");
+        let t = std::fs::read_to_string(&p)
+            .unwrap()
+            .replace("\"i\":2", "\"i\":3");
         std::fs::write(&p, t).unwrap();
         let (e, _) = read_jsonl(&p).unwrap();
         assert!(check_chain(&e).unwrap_err().contains("entry_hash"));

@@ -374,7 +374,7 @@ impl GuiState {
             case_dir: PathBuf::from(self.case_dir.trim()),
             jurisdiction: Some(self.jurisdiction.clone()).filter(|j| !j.is_empty()),
             examiner_id: Some(self.examiner_id.clone()).filter(|s| !s.is_empty()),
-            mandate: Some(PathBuf::from(&self.mandate)).filter(|_| !self.mandate.is_empty()),
+            mandate: (!self.mandate.is_empty()).then(|| PathBuf::from(&self.mandate)),
             include_tools: tools_of(&self.include_tools),
             exclude_tools: tools_of(&self.exclude_tools),
             final_report: self.final_report,
@@ -416,16 +416,38 @@ impl GuiState {
             format!("lang={}", self.lang),
             format!(
                 "jurisdiction={}",
-                if self.jurisdiction.is_empty() { "case" } else { self.jurisdiction.as_str() }
+                if self.jurisdiction.is_empty() {
+                    "case"
+                } else {
+                    self.jurisdiction.as_str()
+                }
             ),
-            format!("mandate={}", if self.mandate.is_empty() { "none" } else { self.mandate.as_str() }),
+            format!(
+                "mandate={}",
+                if self.mandate.is_empty() {
+                    "none"
+                } else {
+                    self.mandate.as_str()
+                }
+            ),
             format!("include_tools={}", self.include_tools),
             format!("exclude_tools={}", self.exclude_tools),
             format!("final={}", self.final_report),
-            format!("tsa={}", if self.timestamp { self.tsa_url.as_str() } else { "off" }),
+            format!(
+                "tsa={}",
+                if self.timestamp {
+                    self.tsa_url.as_str()
+                } else {
+                    "off"
+                }
+            ),
             format!(
                 "sign_cert={}",
-                if self.sign_cert.is_empty() { "none" } else { self.sign_cert.as_str() }
+                if self.sign_cert.is_empty() {
+                    "none"
+                } else {
+                    self.sign_cert.as_str()
+                }
             ),
         ];
         let cfg = RunConfig {
@@ -446,9 +468,13 @@ impl GuiState {
             command_line: settings,
             tool_name: TOOL_NAME.into(),
             tool_version: TOOL_VERSION.into(),
-            jurisdiction: if self.jurisdiction.is_empty() { "co".into() } else { self.jurisdiction.clone() },
+            jurisdiction: if self.jurisdiction.is_empty() {
+                "co".into()
+            } else {
+                self.jurisdiction.clone()
+            },
             tsa_url: self.timestamp.then(|| self.tsa_url.clone()),
-            sign_cert: Some(PathBuf::from(&self.sign_cert)).filter(|_| !self.sign_cert.is_empty()),
+            sign_cert: (!self.sign_cert.is_empty()).then(|| PathBuf::from(&self.sign_cert)),
             sign_password: Some(self.sign_password.clone()).filter(|p| !p.is_empty()),
             case_dir: Some(PathBuf::from(self.case_dir.trim())),
             evidence_ids: vec![],
@@ -520,7 +546,12 @@ impl GuiState {
                     ),
                     "kv" | "box" => {
                         if b["kind"] == "box" {
-                            lines.push(format!("[{}] {} {}", text("badge"), text("title"), text("code")));
+                            lines.push(format!(
+                                "[{}] {} {}",
+                                text("badge"),
+                                text("title"),
+                                text("code")
+                            ));
                         }
                         for r in b["rows"].as_array().into_iter().flatten() {
                             lines.push(format!(
@@ -559,9 +590,9 @@ impl GuiState {
         match e {
             Event::RunStarted { total_items, .. } => self.progress.total = *total_items,
             Event::ItemStarted { path, .. } => self.current_item = path.clone(),
-            Event::ItemFinished { path, status, .. } if status == "excluded" => {
-                self.warnings.push(format!("{}: {}", self.tr("run_excluded"), path))
-            }
+            Event::ItemFinished { path, status, .. } if status == "excluded" => self
+                .warnings
+                .push(format!("{}: {}", self.tr("run_excluded"), path)),
             Event::Progress {
                 done,
                 total,
@@ -574,9 +605,10 @@ impl GuiState {
                     elapsed_ms: *elapsed_ms,
                 };
             }
-            Event::Error { path, message } => self
-                .warnings
-                .push(format!("{}: {}", path.as_deref().unwrap_or("-"), message)),
+            Event::Error { path, message } => {
+                self.warnings
+                    .push(format!("{}: {}", path.as_deref().unwrap_or("-"), message))
+            }
             Event::RunFinished {
                 items,
                 high,
@@ -590,7 +622,11 @@ impl GuiState {
                 ..
             } => {
                 self.progress.elapsed_ms = *elapsed_ms;
-                let lang = if self.lang == "all" { "en".to_string() } else { self.lang.clone() };
+                let lang = if self.lang == "all" {
+                    "en".to_string()
+                } else {
+                    self.lang.clone()
+                };
                 self.outcome = Some(Outcome {
                     items: *items,
                     high: *high,
@@ -600,7 +636,11 @@ impl GuiState {
                     report: PathBuf::from(report_dir).join(format!("expert-report.{}.html", lang)),
                     log_dir: PathBuf::from(log_dir),
                 });
-                self.phase = if *cancelled { Phase::Cancelled } else { Phase::Finished };
+                self.phase = if *cancelled {
+                    Phase::Cancelled
+                } else {
+                    Phase::Finished
+                };
                 self.current_item.clear();
             }
             _ => {}
@@ -699,7 +739,10 @@ mod tests {
         let case = sample_case(tmp.path());
         s.set_case_dir(case.to_str().unwrap());
         let sum = s.case_summary.clone().unwrap();
-        assert_eq!((sum.case_id.as_str(), sum.items, sum.jurisdiction.as_str()), ("RV-REPORT-SAMPLE", 4, "co"));
+        assert_eq!(
+            (sum.case_id.as_str(), sum.items, sum.jurisdiction.as_str()),
+            ("RV-REPORT-SAMPLE", 4, "co")
+        );
         assert!(s.can_start());
         assert!(s.out_dir_display().contains("rv-report"));
     }
@@ -761,10 +804,19 @@ mod tests {
         let secs = s.preview_sections();
         assert_eq!(secs.len(), 10);
         assert_eq!(secs[0].key, "identification");
-        assert!(secs.iter().any(|x| x.key == "results" && x.lines.iter().any(|l| l.contains("rv-pdfauth"))));
-        assert!(secs.iter().any(|x| x.key == "not_examined" && x.lines.iter().any(|l| l.contains("E0003"))));
+        assert!(
+            secs.iter()
+                .any(|x| x.key == "results" && x.lines.iter().any(|l| l.contains("rv-pdfauth")))
+        );
+        assert!(
+            secs.iter()
+                .any(|x| x.key == "not_examined" && x.lines.iter().any(|l| l.contains("E0003")))
+        );
         assert!(actions(&s).contains(&"ui_preview_built"));
-        assert_eq!(std::fs::read(case.join("case-log.jsonl")).unwrap(), log_before);
+        assert_eq!(
+            std::fs::read(case.join("case-log.jsonl")).unwrap(),
+            log_before
+        );
         assert!(!case.join("runs").join(TOOL_NAME).exists());
         s.set_jurisdiction("fr");
         assert!(s.preview.is_none());
@@ -819,18 +871,37 @@ mod tests {
         s.build_preview();
         let (cfg, opts) = s.to_config().unwrap();
         s.start();
-        let summary = rv_report_core::run::run_assemble(&cfg, &opts, &mut |e| s.apply(e), &AtomicBool::new(false))
-            .unwrap();
+        let summary = rv_report_core::run::run_assemble(
+            &cfg,
+            &opts,
+            &mut |e| s.apply(e),
+            &AtomicBool::new(false),
+        )
+        .unwrap();
         assert_eq!(s.phase, Phase::Finished);
         let audit = std::fs::read_to_string(summary.log_dir.join("audit.jsonl")).unwrap();
         let acts: Vec<String> = audit
             .lines()
-            .map(|l| serde_json::from_str::<Value>(l).unwrap()["action"].as_str().unwrap().to_string())
+            .map(|l| {
+                serde_json::from_str::<Value>(l).unwrap()["action"]
+                    .as_str()
+                    .unwrap()
+                    .to_string()
+            })
             .collect();
-        for a in ["ui_case_dir_changed", "ui_timestamp_changed", "ui_language_changed", "ui_preview_built", "ui_start_clicked"] {
+        for a in [
+            "ui_case_dir_changed",
+            "ui_timestamp_changed",
+            "ui_language_changed",
+            "ui_preview_built",
+            "ui_start_clicked",
+        ] {
             assert!(acts.iter().any(|x| x == a), "{a} missing");
         }
-        assert_eq!(&acts[..2], &["run_started".to_string(), "case_linked".to_string()]);
+        assert_eq!(
+            &acts[..2],
+            &["run_started".to_string(), "case_linked".to_string()]
+        );
         assert!(audit.contains("\"frontend\":\"gui\""));
         assert!(s.outcome.unwrap().report.is_file());
     }

@@ -243,7 +243,10 @@ fn bad_options_are_usage_errors_and_write_nothing() {
         (vec!["--hash", "crc32"], "unknown hash algorithm".into()),
         (vec!["--lang", "de"], "unsupported language".into()),
         (vec!["--jurisdiction", "us"], "invalid value".into()),
-        (vec!["--include-tool", "pdfauth"], "a Rakvor tool name".into()),
+        (
+            vec!["--include-tool", "pdfauth"],
+            "a Rakvor tool name".into(),
+        ),
         (vec!["--exclude-tool", "RV-X"], "a Rakvor tool name".into()),
         (vec!["--case", "OTHER-CASE"], "RV-REPORT-SAMPLE".into()),
         (
@@ -286,14 +289,24 @@ fn sample_case_assembles_a_report_that_quotes_every_finding_verbatim() {
     let case = case_copy(tmp.path());
     let before = case_files(&case);
     let o = assemble(&case)
-        .args(["--hash", "sha256,md5", "--lang", "all", "--actor", "Test Examiner"])
+        .args([
+            "--hash",
+            "sha256,md5",
+            "--lang",
+            "all",
+            "--actor",
+            "Test Examiner",
+        ])
         .output()
         .unwrap();
     // Only a low (item not examined) and info signals: exit 0.
     assert_eq!(o.status.code(), Some(0), "{:?}", o);
     let stdout = String::from_utf8_lossy(&o.stdout).to_string();
     assert!(stdout.contains("verified 4, excluded 0"), "{stdout}");
-    assert!(stdout.contains("draft for the examiner's review"), "{stdout}");
+    assert!(
+        stdout.contains("draft for the examiner's review"),
+        "{stdout}"
+    );
     let run = run_folder(&o.stdout);
     let rep = run.join("reports");
     for lang in ["en", "es", "fr"] {
@@ -338,7 +351,8 @@ fn sample_case_assembles_a_report_that_quotes_every_finding_verbatim() {
                 .iter()
                 .find(|e| e["source"]["file"] == rel.as_str())
                 .unwrap_or_else(|| panic!("{rel} not quoted"));
-            let sha = rv_report_core::hash::hash_bytes(&std::fs::read(&path).unwrap(), HashAlgo::Sha256);
+            let sha =
+                rv_report_core::hash::hash_bytes(&std::fs::read(&path).unwrap(), HashAlgo::Sha256);
             assert_eq!(entry["source"]["sha256"], sha.as_str());
             let theirs = tech["findings"].as_array().unwrap();
             let ours = entry["findings"].as_array().unwrap();
@@ -418,8 +432,9 @@ fn sample_case_assembles_a_report_that_quotes_every_finding_verbatim() {
     assert_eq!(acts.iter().filter(|x| **x == "run_verified").count(), 4);
     assert_eq!(acts.last(), Some(&"run_finished"));
     assert!(
-        a.iter()
-            .any(|e| e["action"] == "output_written" && e["details"]["file"] == "expert-report.json")
+        a.iter().any(
+            |e| e["action"] == "output_written" && e["details"]["file"] == "expert-report.json"
+        )
     );
     // Verification: the tool, the case, the independent verifier and the JSON schemas.
     bin()
@@ -463,7 +478,11 @@ fn tampered_runs_are_excluded_and_never_quoted() {
             .unwrap()
             .to_string();
         let text = std::fs::read_to_string(&path).unwrap();
-        std::fs::write(&path, text.replacen("\"severity\": \"", "\"severity\":  \"", 1)).unwrap();
+        std::fs::write(
+            &path,
+            text.replacen("\"severity\": \"", "\"severity\":  \"", 1),
+        )
+        .unwrap();
         shows
     };
     let chain: Tamper = |case| {
@@ -472,8 +491,15 @@ fn tampered_runs_are_excluded_and_never_quoted() {
         let (_, tech) = technical_reports(&run).into_iter().next().unwrap();
         let p = run.join("logs/audit.jsonl");
         let text = std::fs::read_to_string(&p).unwrap();
-        std::fs::write(&p, text.replacen("\"action\":\"item_analyzed\"", "\"action\":\"item_analysed\"", 1))
-            .unwrap();
+        std::fs::write(
+            &p,
+            text.replacen(
+                "\"action\":\"item_analyzed\"",
+                "\"action\":\"item_analysed\"",
+                1,
+            ),
+        )
+        .unwrap();
         tech["findings"][0]["text"]["en"]["shows"]
             .as_str()
             .unwrap()
@@ -649,7 +675,11 @@ fn tool_filters_skip_runs_and_widen_what_was_not_examined() {
             "rv-report" => ("skipped", "self"),
             _ => ("skipped", "tool_filter"),
         };
-        assert_eq!((a["status"].as_str().unwrap(), a["reason"].as_str().unwrap()), want, "{tool}");
+        assert_eq!(
+            (a["status"].as_str().unwrap(), a["reason"].as_str().unwrap()),
+            want,
+            "{tool}"
+        );
     }
     let ids: Vec<&str> = report["not_examined"]
         .as_array()
@@ -686,20 +716,19 @@ fn edited_or_deleted_outputs_fail_verify_log_and_verify_case() {
         .code(0);
     let run = run_folder(&out.get_output().stdout);
     let logs = run.join("logs");
-    bin()
-        .arg("verify-log")
-        .arg(&logs)
-        .assert()
-        .code(0)
-        .stdout(predicate::str::is_match(r"outputs: (\d+) verified of \d+ recorded \(md5, sha256\)").unwrap());
+    bin().arg("verify-log").arg(&logs).assert().code(0).stdout(
+        predicate::str::is_match(r"outputs: (\d+) verified of \d+ recorded \(md5, sha256\)")
+            .unwrap(),
+    );
     let html = run.join("reports/expert-report.en.html");
     let saved = std::fs::read(&html).unwrap();
     std::fs::write(&html, b"<p>edited</p>").unwrap();
     let stats = run.join("reports/statistics.json");
     std::fs::rename(&stats, tmp.path().join("moved.json")).unwrap();
     bin().arg("verify-log").arg(&logs).assert().code(3).stdout(
-        predicate::str::contains("output reports/expert-report.en.html: md5 differs")
-            .and(predicate::str::contains("output reports/statistics.json: missing")),
+        predicate::str::contains("output reports/expert-report.en.html: md5 differs").and(
+            predicate::str::contains("output reports/statistics.json: missing"),
+        ),
     );
     bin().arg("verify-case").arg(&case).assert().code(3);
     std::fs::write(&html, saved).unwrap();
@@ -735,7 +764,11 @@ fn sample_script_assembles_the_report() {
         .unwrap();
     let text = String::from_utf8_lossy(&o.stdout);
     assert!(o.status.success(), "{}", text);
-    assert!(text.contains("expert-report.json is listed in the audit log"), "{}", text);
+    assert!(
+        text.contains("expert-report.json is listed in the audit log"),
+        "{}",
+        text
+    );
 }
 
 #[test]
@@ -782,7 +815,15 @@ fn trust_timestamp_signature_and_custody_with_test_pki() {
         .env("RV_SIGN_PASSWORD", "test")
         .args(["assemble", "--case-dir"])
         .arg(&case)
-        .args(["--jurisdiction", "fr", "--tsa-url", &url, "--progress", "none", "--sign-cert"])
+        .args([
+            "--jurisdiction",
+            "fr",
+            "--tsa-url",
+            &url,
+            "--progress",
+            "none",
+            "--sign-cert",
+        ])
         .arg(pki.path().join("examiner.p12"))
         .output()
         .unwrap();
@@ -822,7 +863,12 @@ fn trust_timestamp_signature_and_custody_with_test_pki() {
     assert!(v.status.success(), "pyHanko validation failed:\n{}", report);
     assert!(report.contains("expert-report.en.pdf"), "{}", report);
     let model = json(&run.join("reports/expert-report.json"));
-    assert!(model["run"]["pdf_signed_by"].as_str().unwrap().contains("Ana Ruiz"));
+    assert!(
+        model["run"]["pdf_signed_by"]
+            .as_str()
+            .unwrap()
+            .contains("Ana Ruiz")
+    );
     // Tampering with the token is detected.
     let tsr = std::fs::read_dir(&logs)
         .unwrap()
@@ -873,7 +919,11 @@ fn trust_timestamp_signature_and_custody_with_test_pki() {
 fn golden_case_from_the_other_profile_verifies() {
     let golden = root().join("tests/golden");
     let mut archives: Vec<PathBuf> = std::fs::read_dir(&golden)
-        .map(|d| d.filter_map(|e| e.ok()).map(|e| e.path()).collect::<Vec<_>>())
+        .map(|d| {
+            d.filter_map(|e| e.ok())
+                .map(|e| e.path())
+                .collect::<Vec<_>>()
+        })
         .unwrap_or_default();
     archives.retain(|p| p.to_string_lossy().ends_with(".zip.b64"));
     archives.sort();
@@ -885,7 +935,11 @@ fn golden_case_from_the_other_profile_verifies() {
             .arg(tmp.path())
             .status();
         if !unzip.is_ok_and(|s| s.success()) {
-            eprintln!("skipping golden case test: {} cannot unpack {}", py(), archive.display());
+            eprintln!(
+                "skipping golden case test: {} cannot unpack {}",
+                py(),
+                archive.display()
+            );
             return;
         }
         let case = tmp.path().join("CASE-GOLDEN");

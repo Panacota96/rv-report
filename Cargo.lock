@@ -3465,6 +3465,7 @@ dependencies = [
  "rfd",
  "rv-report-core",
  "serde_json",
+ "tempfile",
  "winresource",
 ]
 

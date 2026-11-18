@@ -86,9 +86,11 @@ impl ReportApp {
     /// .exe) that is a case folder.
     pub fn from_launch(args: crate::launch::LaunchArgs) -> Self {
         let mut app = Self::new();
-        let dir = args
-            .case_dir
-            .or_else(|| args.inputs.into_iter().find(|p| p.join("case.json").is_file()));
+        let dir = args.case_dir.or_else(|| {
+            args.inputs
+                .into_iter()
+                .find(|p| p.join("case.json").is_file())
+        });
         if let Some(dir) = dir {
             app.state.set_case_dir_from_launcher(&dir);
             app.case_entry = dir.display().to_string();
@@ -189,7 +191,11 @@ impl ReportApp {
                 egui::Stroke::new(2.0, CYAN),
             );
             ui.vertical(|ui| {
-                ui.label(egui::RichText::new("R A K V O R  ·  RV Report").strong().size(16.0));
+                ui.label(
+                    egui::RichText::new("R A K V O R  ·  RV Report")
+                        .strong()
+                        .size(16.0),
+                );
                 let desc = rv_report_core::i18n::catalog(&self.state.ui_lang).brand()["descriptor"]
                     .as_str()
                     .unwrap_or_default()
@@ -316,7 +322,10 @@ impl ReportApp {
                         .selected_text(label(&self.state.jurisdiction))
                         .show_ui(ui, |ui| {
                             for j in ["", "co", "fr"] {
-                                if ui.selectable_label(self.state.jurisdiction == j, label(j)).clicked() {
+                                if ui
+                                    .selectable_label(self.state.jurisdiction == j, label(j))
+                                    .clicked()
+                                {
                                     chosen = Some(j);
                                 }
                             }
@@ -347,7 +356,9 @@ impl ReportApp {
                     }
                     ui.end_row();
                     ui.label(self.state.tr("examiner"));
-                    let a = ui.add(egui::TextEdit::singleline(&mut self.examiner_entry).desired_width(260.0));
+                    let a = ui.add(
+                        egui::TextEdit::singleline(&mut self.examiner_entry).desired_width(260.0),
+                    );
                     ui.end_row();
                     ui.label(self.state.tr("examiner_id"));
                     let b = ui.add(
@@ -356,8 +367,10 @@ impl ReportApp {
                             .desired_width(260.0),
                     );
                     if a.lost_focus() || b.lost_focus() {
-                        self.state
-                            .set_examiner(&self.examiner_entry.clone(), &self.examiner_id_entry.clone());
+                        self.state.set_examiner(
+                            &self.examiner_entry.clone(),
+                            &self.examiner_id_entry.clone(),
+                        );
                     }
                     ui.end_row();
                     ui.label(self.state.tr("mandate"));
@@ -370,18 +383,21 @@ impl ReportApp {
                         let mut pick: Option<String> = None;
                         #[cfg(windows)]
                         if ui.button(self.state.tr("browse")).clicked()
-                            && let Some(f) = rfd::FileDialog::new().add_filter("Text", &["txt"]).pick_file()
+                            && let Some(f) = rfd::FileDialog::new()
+                                .add_filter("Text", &["txt"])
+                                .pick_file()
                         {
                             pick = Some(f.display().to_string());
                         }
                         if let Some(p) = pick {
                             self.mandate_entry = p;
                         }
-                        if r.lost_focus() || self.mandate_entry != self.state.mandate && !r.has_focus() {
-                            if let Err(e) = self.state.set_mandate(&self.mandate_entry.clone()) {
-                                self.notice = Some(e);
-                                self.mandate_entry = self.state.mandate.clone();
-                            }
+                        if (r.lost_focus()
+                            || self.mandate_entry != self.state.mandate && !r.has_focus())
+                            && let Err(e) = self.state.set_mandate(&self.mandate_entry.clone())
+                        {
+                            self.notice = Some(e);
+                            self.mandate_entry = self.state.mandate.clone();
                         }
                     });
                     ui.end_row();
@@ -393,11 +409,14 @@ impl ReportApp {
                     );
                     ui.end_row();
                     ui.label(self.state.tr("exclude_tools"));
-                    let x = ui.add(egui::TextEdit::singleline(&mut self.exclude_entry).desired_width(320.0));
+                    let x = ui.add(
+                        egui::TextEdit::singleline(&mut self.exclude_entry).desired_width(320.0),
+                    );
                     if (i.lost_focus() || x.lost_focus())
-                        && let Err(e) = self
-                            .state
-                            .set_tool_filters(&self.include_entry.clone(), &self.exclude_entry.clone())
+                        && let Err(e) = self.state.set_tool_filters(
+                            &self.include_entry.clone(),
+                            &self.exclude_entry.clone(),
+                        )
                     {
                         self.notice = Some(e);
                     }
@@ -445,7 +464,10 @@ impl ReportApp {
                         let mut on = self.state.timestamp;
                         let mut url = self.state.tsa_url.clone();
                         let c = ui.checkbox(&mut on, "");
-                        let t = ui.add_enabled(on, egui::TextEdit::singleline(&mut url).desired_width(280.0));
+                        let t = ui.add_enabled(
+                            on,
+                            egui::TextEdit::singleline(&mut url).desired_width(280.0),
+                        );
                         if c.changed() || t.lost_focus() {
                             self.state.set_timestamp(on, &url);
                         } else {
@@ -485,7 +507,10 @@ impl ReportApp {
         Self::section_title(ui, self.state.tr("preview_section"));
         ui.horizontal(|ui| {
             if ui
-                .add_enabled(enabled && self.state.can_start(), egui::Button::new(self.state.tr("preview")))
+                .add_enabled(
+                    enabled && self.state.can_start(),
+                    egui::Button::new(self.state.tr("preview")),
+                )
                 .clicked()
             {
                 self.state.build_preview();
@@ -578,7 +603,11 @@ impl ReportApp {
         let live = self.started.map(|s| s.elapsed().as_millis() as u64);
         ui.label(self.state.timing_text(live));
         if !self.state.current_item.is_empty() {
-            ui.weak(format!("{}: {}", self.state.tr("now"), self.state.current_item));
+            ui.weak(format!(
+                "{}: {}",
+                self.state.tr("now"),
+                self.state.current_item
+            ));
         }
         match &self.state.phase {
             Phase::Failed(e) => {
@@ -683,7 +712,11 @@ mod tests {
     }
 
     fn actions(app: &ReportApp) -> Vec<&str> {
-        app.state.ui_actions.iter().map(|(a, _)| a.as_str()).collect()
+        app.state
+            .ui_actions
+            .iter()
+            .map(|(a, _)| a.as_str())
+            .collect()
     }
 
     #[test]
@@ -691,7 +724,10 @@ mod tests {
         let app = launch(&["--case-dir", "X"]);
         assert_eq!(app.state.case_dir, "X");
         assert_eq!(app.case_entry, "X");
-        assert_eq!(actions(&app), ["ui_case_dir_from_launcher", "ui_case_dir_changed"]);
+        assert_eq!(
+            actions(&app),
+            ["ui_case_dir_from_launcher", "ui_case_dir_changed"]
+        );
         let d = &app.state.ui_actions[0].1;
         assert_eq!(d["path"], "X");
         assert!(d["at_utc"].as_str().is_some_and(|t| t.ends_with('Z')));
@@ -714,6 +750,10 @@ mod tests {
         let app = launch(&["--case-dir"]);
         assert!(app.state.case_dir.is_empty());
         assert_eq!(actions(&app), ["ui_launch_argument_ignored"]);
-        assert!(app.notice.as_deref().is_some_and(|n| n.contains("--case-dir")));
+        assert!(
+            app.notice
+                .as_deref()
+                .is_some_and(|n| n.contains("--case-dir"))
+        );
     }
 }

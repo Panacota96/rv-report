@@ -45,13 +45,23 @@ fn sub(t: String) -> Value {
 fn bullets(items: Vec<String>) -> Value {
     json!({"kind": "bullets", "items": items})
 }
-fn boxed(badge: String, sev: &str, title: String, code: &str, rows: Vec<(String, String)>) -> Value {
+fn boxed(
+    badge: String,
+    sev: &str,
+    title: String,
+    code: &str,
+    rows: Vec<(String, String)>,
+) -> Value {
     json!({"kind": "box", "badge": badge, "sev": sev, "title": title, "code": code,
            "rows": rows.into_iter().map(|(k, v)| vec![k, v]).collect::<Vec<_>>()})
 }
 
 fn or_dash(s: &str) -> String {
-    if s.is_empty() { "—".into() } else { s.to_string() }
+    if s.is_empty() {
+        "—".into()
+    } else {
+        s.to_string()
+    }
 }
 
 fn yes_no_match(c: &Catalog, m: Option<bool>) -> String {
@@ -127,7 +137,10 @@ fn identification_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
         ),
         (x(c, "labels.report_run"), or_dash(&r.run.run_id)),
         (x(c, "labels.generated"), r.run.generated_utc.clone()),
-        (x(c, "labels.status"), x(c, &format!("labels.status_{}", r.run.status))),
+        (
+            x(c, "labels.status"),
+            x(c, &format!("labels.status_{}", r.run.status)),
+        ),
         (
             x(c, "labels.structure"),
             x(c, &format!("labels.structure_{}", r.jurisdiction.code)),
@@ -159,7 +172,10 @@ fn identification_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
     b.push(sub(x(c, "labels.case_verification")));
     b.push(para(x(c, "case_verification_text")));
     b.push(kv(vec![
-        (x(c, "labels.case_log_entries"), v.case_log_entries.to_string()),
+        (
+            x(c, "labels.case_log_entries"),
+            v.case_log_entries.to_string(),
+        ),
         (x(c, "labels.case_log_head"), v.case_log_head.clone()),
         (x(c, "labels.registry_items"), v.registry_items.to_string()),
         (x(c, "labels.registry_sha256"), or_dash(&v.registry_sha256)),
@@ -198,7 +214,10 @@ fn evidence_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
     for e in &r.evidence {
         let mut rows = vec![
             (x(c, "labels.path"), e.path.clone()),
-            (x(c, "labels.size"), format!("{} {}", e.size, x(c, "labels.bytes_unit"))),
+            (
+                x(c, "labels.size"),
+                format!("{} {}", e.size, x(c, "labels.bytes_unit")),
+            ),
         ];
         for (a, h) in &e.hashes {
             rows.push((a.to_uppercase(), h.clone()));
@@ -218,17 +237,17 @@ fn evidence_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
             "",
             rows,
         ));
-        b.push(sub(xf(
-            c,
-            "custody_of",
-            &[("id", e.evidence_id.clone())],
-        )));
+        b.push(sub(xf(c, "custody_of", &[("id", e.evidence_id.clone())])));
         b.push(bullets(
             e.custody
                 .iter()
                 .map(|k| {
                     let m = if k.action == "examined" {
-                        format!(" · {}: {}", x(c, "labels.registry"), yes_no_match(c, k.registry_match))
+                        format!(
+                            " · {}: {}",
+                            x(c, "labels.registry"),
+                            yes_no_match(c, k.registry_match)
+                        )
                     } else {
                         String::new()
                     };
@@ -252,12 +271,15 @@ fn evidence_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
 }
 
 fn method_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
-    let mut b = vec![para(x(c, "intro.method")), bullets(vec![
-        x(c, "method_steps.verify_case"),
-        x(c, "method_steps.verify_runs"),
-        x(c, "method_steps.quote"),
-        x(c, "method_steps.not_examined"),
-    ])];
+    let mut b = vec![
+        para(x(c, "intro.method")),
+        bullets(vec![
+            x(c, "method_steps.verify_case"),
+            x(c, "method_steps.verify_runs"),
+            x(c, "method_steps.quote"),
+            x(c, "method_steps.not_examined"),
+        ]),
+    ];
     b.push(sub(x(c, "labels.tools_used")));
     b.push(para(x(c, "tools_note")));
     for m in &r.method.tools {
@@ -278,11 +300,17 @@ fn method_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
                 (x(c, "labels.what_it_does"), what),
                 (x(c, "labels.what_it_checks"), checks),
                 (x(c, "labels.runs"), m.runs.join(", ")),
-                (x(c, "labels.algorithms"), or_dash(&m.algorithms.join(" + "))),
+                (
+                    x(c, "labels.algorithms"),
+                    or_dash(&m.algorithms.join(" + ")),
+                ),
                 (x(c, "labels.languages"), or_dash(&m.langs.join(", "))),
                 (x(c, "labels.frontends"), or_dash(&m.frontends.join(", "))),
                 (x(c, "labels.items_examined"), m.items_examined.to_string()),
-                (x(c, "labels.findings_quoted"), m.findings_quoted.to_string()),
+                (
+                    x(c, "labels.findings_quoted"),
+                    m.findings_quoted.to_string(),
+                ),
             ],
         ));
     }
@@ -291,7 +319,10 @@ fn method_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
     }
     b.push(sub(x(c, "labels.this_tool")));
     b.push(kv(vec![
-        (x(c, "labels.tool"), format!("{} {}", r.tool.name, r.tool.version)),
+        (
+            x(c, "labels.tool"),
+            format!("{} {}", r.tool.name, r.tool.version),
+        ),
         (x(c, "labels.report_run"), or_dash(&r.run.run_id)),
     ]));
     b
@@ -303,11 +334,9 @@ fn results_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
     for it in &r.results {
         let name = it.path.rsplit(['/', '\\']).next().unwrap_or(&it.path);
         b.push(sub(format!("{} — {}", or_dash(&it.evidence_id), name)));
-        for s in r
-            .signals
-            .iter()
-            .filter(|s| s.evidence_id.as_deref() == Some(it.evidence_id.as_str()) && !it.evidence_id.is_empty())
-        {
+        for s in r.signals.iter().filter(|s| {
+            s.evidence_id.as_deref() == Some(it.evidence_id.as_str()) && !it.evidence_id.is_empty()
+        }) {
             b.push(signal_box(c, s));
         }
         if it.entries.is_empty() {
@@ -315,7 +344,11 @@ fn results_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
         }
         for e in &it.entries {
             let registry = match e.registry_match {
-                Some(_) => format!(" · {}: {}", x(c, "labels.registry"), yes_no_match(c, e.registry_match)),
+                Some(_) => format!(
+                    " · {}: {}",
+                    x(c, "labels.registry"),
+                    yes_no_match(c, e.registry_match)
+                ),
                 None => String::new(),
             };
             b.push(para(format!(
@@ -370,15 +403,34 @@ fn timeline_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
         Some(t) => {
             let sev = ["high", "medium", "low", "info"]
                 .iter()
-                .map(|k| format!("{} {}", c.severity(k), t.signals_by_severity.get(*k).copied().unwrap_or(0)))
+                .map(|k| {
+                    format!(
+                        "{} {}",
+                        c.severity(k),
+                        t.signals_by_severity.get(*k).copied().unwrap_or(0)
+                    )
+                })
                 .collect::<Vec<_>>()
                 .join(" · ");
             let mut rows = vec![
-                (x(c, "labels.timeline_run"), format!("rv-timeline {} · {}", t.tool_version, t.run_id)),
+                (
+                    x(c, "labels.timeline_run"),
+                    format!("rv-timeline {} · {}", t.tool_version, t.run_id),
+                ),
                 (x(c, "labels.started"), or_dash(&t.started_utc)),
                 (x(c, "labels.finished"), or_dash(&t.finished_utc)),
                 (x(c, "labels.events"), t.events.to_string()),
-                (x(c, "labels.timeline_runs"), xf(c, "timeline_runs", &[("verified", t.runs_verified.to_string()), ("excluded", t.runs_excluded.to_string())])),
+                (
+                    x(c, "labels.timeline_runs"),
+                    xf(
+                        c,
+                        "timeline_runs",
+                        &[
+                            ("verified", t.runs_verified.to_string()),
+                            ("excluded", t.runs_excluded.to_string()),
+                        ],
+                    ),
+                ),
                 (x(c, "labels.zone_unknown"), t.zone_unknown.to_string()),
                 (x(c, "labels.display_zone"), t.display_zone.clone()),
                 (x(c, "labels.signals"), sev),
@@ -393,9 +445,15 @@ fn timeline_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
                         .join(", "),
                 ));
             }
-            rows.push((x(c, "labels.source"), format!("{} (SHA-256 {})", t.source.file, t.source.sha256)));
+            rows.push((
+                x(c, "labels.source"),
+                format!("{} (SHA-256 {})", t.source.file, t.source.sha256),
+            ));
             if let Some(f) = &t.timeline_file {
-                rows.push((x(c, "labels.timeline_file"), format!("{} (SHA-256 {})", f.file, f.sha256)));
+                rows.push((
+                    x(c, "labels.timeline_file"),
+                    format!("{} (SHA-256 {})", f.file, f.sha256),
+                ));
             }
             b.push(kv(rows));
             b.push(para(x(c, "timeline_signals_note")));
@@ -475,7 +533,10 @@ fn annex_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
             (x(c, "labels.runs_verified"), t.runs_verified.to_string()),
             (x(c, "labels.runs_excluded"), t.runs_excluded.to_string()),
             (x(c, "labels.runs_skipped"), t.runs_skipped.to_string()),
-            (x(c, "labels.findings_quoted"), t.findings_quoted.to_string()),
+            (
+                x(c, "labels.findings_quoted"),
+                t.findings_quoted.to_string(),
+            ),
         ]),
     ];
     for a in &r.annexes.runs {
@@ -486,23 +547,41 @@ fn annex_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
         };
         let mut rows = vec![(x(c, "labels.run_dir"), a.run_dir.clone())];
         if !a.reason.is_empty() {
-            let group = if a.status == "excluded" { "exclusion" } else { "skip" };
+            let group = if a.status == "excluded" {
+                "exclusion"
+            } else {
+                "skip"
+            };
             rows.push((
                 x(c, "labels.reason"),
                 format!(
                     "{}{}",
                     c.text(&format!("{group}.{}", a.reason)),
-                    if a.detail.is_empty() { String::new() } else { format!(" ({})", a.detail) }
+                    if a.detail.is_empty() {
+                        String::new()
+                    } else {
+                        format!(" ({})", a.detail)
+                    }
                 ),
             ));
         }
         rows.push((x(c, "labels.started"), or_dash(&a.started_utc)));
         rows.push((x(c, "labels.finished"), or_dash(&a.finished_utc)));
         if a.status != "excluded" && a.audit_entries > 0 {
-            rows.push((x(c, "labels.audit_head"), format!("#{} {}", a.audit_entries, a.audit_head)));
+            rows.push((
+                x(c, "labels.audit_head"),
+                format!("#{} {}", a.audit_entries, a.audit_head),
+            ));
             rows.push((
                 x(c, "labels.outputs_verified"),
-                xf(c, "outputs_of", &[("verified", a.outputs_verified.to_string()), ("recorded", a.outputs_recorded.to_string())]),
+                xf(
+                    c,
+                    "outputs_of",
+                    &[
+                        ("verified", a.outputs_verified.to_string()),
+                        ("recorded", a.outputs_recorded.to_string()),
+                    ],
+                ),
             ));
         }
         rows.push((
@@ -512,7 +591,10 @@ fn annex_blocks(c: &Catalog, r: &ExpertReport) -> Vec<Value> {
         for line in &a.timestamps {
             rows.push((String::new(), line.clone()));
         }
-        rows.push((x(c, "labels.findings_quoted"), a.findings_quoted.to_string()));
+        rows.push((
+            x(c, "labels.findings_quoted"),
+            a.findings_quoted.to_string(),
+        ));
         b.push(boxed(
             x(c, &format!("labels.run_{}", a.status)),
             sev,
@@ -715,8 +797,14 @@ pub fn expert_pdf(
     let producer = format!("{} {}", r.tool.name, r.tool.version);
     let (page, of) = (c.label("page"), c.label("of"));
     let (descriptor, tagline) = (
-        c.brand()["descriptor"].as_str().unwrap_or_default().to_string(),
-        c.brand()["tagline"].as_str().unwrap_or_default().to_string(),
+        c.brand()["descriptor"]
+            .as_str()
+            .unwrap_or_default()
+            .to_string(),
+        c.brand()["tagline"]
+            .as_str()
+            .unwrap_or_default()
+            .to_string(),
     );
     let meta = pdf::Meta {
         title: &title,

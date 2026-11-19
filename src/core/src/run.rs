@@ -478,6 +478,7 @@ fn pipeline(
             evidence_id: None,
             case_status: None,
             intake_utc: None,
+            quoted: None,
         };
         match outcome {
             Ok(None) => {
@@ -923,6 +924,609 @@ fn register_items(
     Ok(())
 }
 
+// ------------------------------------------------------------------------------------------- assemble
+
+/// Assembles the expert report of a case folder (`assemble`, RV Report's main verb): opens and verifies the case,
+/// announces the run in the case log, assembles the model from the verified runs (`assemble.rs`), then writes
+/// `hashes.csv` (the files read), `reports/expert-report.json` + `.html`/`.pdf` per language, the per-item reports
+/// and the statistics report, timestamps the chain and closes the run in the case log. Outputs go to
+/// `<CASE>/runs/rv-report/<RUN-ID>/`; every step is an audit entry.
+pub fn run_assemble(
+    cfg: &RunConfig,
+    opts: &crate::model::AssembleOptions,
+    sink: &mut dyn FnMut(&Event),
+    cancel: &AtomicBool,
+) -> Result<RunSummary, String> {
+    validate_selection(&cfg.algorithms)?;
+    if cfg.langs.is_empty() {
+        return Err("select at least one report language".into());
+    }
+    if let Some(j) = &opts.jurisdiction
+        && j != "co"
+        && j != "fr"
+    {
+        return Err(format!("unknown jurisdiction '{}': use co or fr", j));
+    }
+    let dir = if opts.case_dir.as_os_str().is_empty() {
+        cfg.case_dir.clone().ok_or_else(|| {
+            "an expert report is assembled from a case folder: give --case-dir".to_string()
+        })?
+    } else {
+        opts.case_dir.clone()
+    };
+    // The mandate is read before anything is written: a bad file is a usage problem, not a failed run.
+    if let Some(m) = &opts.mandate {
+        crate::assemble::read_mandate(m)?;
+    }
+    let run_id = new_run_id();
+    let writer = Writer {
+        tool: cfg.tool_name.clone(),
+        version: cfg.tool_version.clone(),
+        run_id: run_id.clone(),
+        actor: cfg.actor.clone(),
+    };
+    // Verifies the case log and the registry; a broken case is never extended.
+    let case = Case::open(&dir)?;
+    if let Some(want) = cfg
+        .case_id
+        .as_deref()
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        && want != case.case_id
+    {
+        return Err(format!(
+            "the case folder {} belongs to case {}, not {}",
+            dir.display(),
+            case.case_id,
+            want
+        ));
+    }
+    let mut c = cfg.clone();
+    c.case_id = Some(case.case_id.clone());
+    c.case_dir = Some(dir.clone());
+    // Custody forms follow the case (suite rule); the report structure follows opts.jurisdiction.
+    c.jurisdiction = if case.jurisdiction == "fr" {
+        "fr"
+    } else {
+        "co"
+    }
+    .into();
+    c.case_role = CaseRole::Analysis;
+    let structure = opts
+        .jurisdiction
+        .clone()
+        .unwrap_or_else(|| c.jurisdiction.clone());
+    let run_rel = format!("runs/{}/{}", cfg.tool_name, run_id);
+    let run_dir = dir.join("runs").join(&cfg.tool_name).join(&run_id);
+    let (started_seq, started_head) = case.append(
+        &writer,
+        "run_started",
+        json!({"tool": cfg.tool_name, "version": cfg.tool_version, "run_dir": run_rel, "frontend": cfg.frontend,
+               "role": CaseRole::Analysis.name(), "purpose": "expert_report", "structure": structure,
+               "evidence_ids": Vec::<String>::new()}),
+    )?;
+    let registry_sha256 = case::registry_digest(&dir);
+    let link = CaseLink {
+        case,
+        writer,
+        run_rel,
+        run_dir,
+        started_seq,
+        started_head,
+        created: false,
+        requested_algorithms: cfg.algorithms.clone(),
+        algo_change: None,
+        requested_jurisdiction: cfg.jurisdiction.clone(),
+        registry_sha256,
+        by_evidence: BTreeMap::new(),
+        tally: CaseTally::default(),
+    };
+    let log_dir = link.run_dir.join("logs");
+    let result = assemble_pipeline(&c, opts, &structure, sink, cancel, &run_id, &link);
+    finish_case(&link, &c, &log_dir, &result, sink);
+    result
+}
+
+/// Records a failure (error + run_failed) and hands the message back.
+fn failed(log: &mut AuditLog, stage: &str, message: String) -> String {
+    let _ = log.record("error", None, json!({"stage": stage, "message": message}));
+    let _ = log.record("run_failed", None, json!({"reason": message}));
+    message
+}
+
+fn to_finding(s: &crate::model::ReportSignal) -> Finding {
+    Finding {
+        code: s.code.clone(),
+        severity: match s.severity {
+            crate::model::Severity::High => Severity::High,
+            crate::model::Severity::Medium => Severity::Medium,
+            crate::model::Severity::Low => Severity::Low,
+            crate::model::Severity::Info => Severity::Info,
+        },
+        params: s.params.clone(),
+    }
+}
+
+fn assemble_pipeline(
+    cfg: &RunConfig,
+    opts: &crate::model::AssembleOptions,
+    structure: &str,
+    sink: &mut dyn FnMut(&Event),
+    cancel: &AtomicBool,
+    run_id: &str,
+    link: &CaseLink,
+) -> Result<RunSummary, String> {
+    use crate::model::Severity as Sev;
+    let started = Instant::now();
+    let started_utc = utc_now();
+    let run_id = run_id.to_string();
+    let case_dir = link.case.dir.clone();
+    let log_dir = link.run_dir.join("logs");
+    let report_dir = link.run_dir.join("reports");
+    let mut log = AuditLog::create(&log_dir, &run_id, &cfg.actor)
+        .map_err(|e| format!("cannot create audit log in {}: {}", log_dir.display(), e))?;
+    let io = |e: std::io::Error| format!("audit log write failed: {}", e);
+
+    log.record(
+        "run_started",
+        None,
+        json!({
+            "tool": cfg.tool_name, "version": cfg.tool_version, "frontend": cfg.frontend, "purpose": "expert_report",
+            "algorithms": cfg.algorithms, "langs": cfg.langs, "case_id": cfg.case_id,
+            "case_dir": case_dir.display().to_string(), "jurisdiction": cfg.jurisdiction, "tsa_url": cfg.tsa_url,
+            "sign_cert": cfg.sign_cert.as_ref().map(|p| p.display().to_string()),
+            "report": {"structure": structure, "requested_jurisdiction": opts.jurisdiction,
+                       "examiner_id": opts.examiner_id, "mandate": opts.mandate.as_ref().map(|p| p.display().to_string()),
+                       "include_tools": opts.include_tools, "exclude_tools": opts.exclude_tools,
+                       "final": opts.final_report},
+        }),
+    )
+    .map_err(io)?;
+    log.record(
+        "case_linked",
+        None,
+        json!({"case_id": link.case.case_id, "case_dir": case_dir.display().to_string(), "role": CaseRole::Analysis.name(),
+               "run_dir": link.run_rel, "case_created": false, "case_log_seq_at_start": link.started_seq,
+               "case_log_head_at_start": link.started_head, "registry_sha256": link.registry_sha256,
+               "registry_items": link.case.items.len(), "jurisdiction": link.case.jurisdiction,
+               "requested_jurisdiction": opts.jurisdiction}),
+    )
+    .map_err(io)?;
+    for (action, details) in &cfg.preamble {
+        log.record(action, None, details.clone()).map_err(io)?;
+    }
+    let env_json = report::pretty(&crate::env::describe(
+        &cfg.tool_name,
+        &cfg.tool_version,
+        &cfg.frontend,
+        &cfg.command_line,
+    ));
+    let (_, env_digest) =
+        report::write_hashed(&log_dir, "environment.json", &env_json, &cfg.algorithms)?;
+    log.record("environment_recorded", Some("environment.json"), env_digest)
+        .map_err(io)?;
+    let signer = match &cfg.sign_cert {
+        None => None,
+        Some(p) => {
+            match crate::trust::PdfSigner::load(p, cfg.sign_password.as_deref().unwrap_or("")) {
+                Ok(s) => {
+                    log.record(
+                        "signing_certificate_loaded",
+                        Some(&p.display().to_string()),
+                        json!({"subject": s.subject, "certificate_sha256": s.fingerprint_sha256}),
+                    )
+                    .map_err(io)?;
+                    Some(std::sync::Arc::new(s))
+                }
+                Err(e) => {
+                    log.record("run_failed", None, json!({"reason": e}))
+                        .map_err(io)?;
+                    return Err(e);
+                }
+            }
+        }
+    };
+    if opts.final_report {
+        log.record(
+            "report_marked_final",
+            None,
+            json!({"actor": cfg.actor, "examiner_id": opts.examiner_id, "at_utc": utc_now()}),
+        )
+        .map_err(io)?;
+    }
+
+    // 1. Assemble the model from the verified runs (read-only).
+    let ctx = crate::assemble::AssembleCtx {
+        tool_name: cfg.tool_name.clone(),
+        tool_version: cfg.tool_version.clone(),
+        run_id: run_id.clone(),
+        actor: cfg.actor.clone(),
+        langs: cfg.langs.clone(),
+        generated_utc: utc_now(),
+        pdf_signed_by: signer.as_ref().map(|s| s.subject.clone()),
+        pdf_signer_certificate_sha256: signer.as_ref().map(|s| s.fingerprint_sha256.clone()),
+    };
+    let start_event = |total: u64| Event::RunStarted {
+        run_id: run_id.clone(),
+        tool: cfg.tool_name.clone(),
+        version: cfg.tool_version.clone(),
+        frontend: cfg.frontend.clone(),
+        algorithms: cfg.algorithms.clone(),
+        langs: cfg.langs.clone(),
+        total_items: total,
+        total_bytes: 0,
+    };
+    let mut started_sent = false;
+    let mut on_run = |index: u64, total: u64, run_dir: &str, status: &str| {
+        if !started_sent {
+            sink(&start_event(total));
+            started_sent = true;
+        }
+        sink(&Event::ItemStarted {
+            index,
+            path: run_dir.to_string(),
+            size: 0,
+        });
+        sink(&Event::ItemFinished {
+            index,
+            path: run_dir.to_string(),
+            status: status.to_string(),
+            findings: vec![],
+        });
+        sink(&Event::Progress {
+            done: index,
+            total,
+            bytes_done: 0,
+            bytes_total: 0,
+            elapsed_ms: started.elapsed().as_millis() as u64,
+            eta_ms: None,
+        });
+    };
+    let mut o = opts.clone();
+    o.jurisdiction = Some(structure.to_string());
+    let assembly = crate::assemble::assemble(&link.case, &o, &ctx, &mut on_run);
+    if !started_sent {
+        sink(&start_event(0));
+        sink(&Event::Progress {
+            done: 0,
+            total: 0,
+            bytes_done: 0,
+            bytes_total: 0,
+            elapsed_ms: started.elapsed().as_millis() as u64,
+            eta_ms: None,
+        });
+    }
+    let assembly = match assembly {
+        Ok(a) => a,
+        Err(e) => return Err(failed(&mut log, "assemble", e)),
+    };
+    for (action, item, details) in &assembly.notes {
+        log.record(action, item.as_deref(), details.clone())
+            .map_err(io)?;
+    }
+    let mut model = assembly.report;
+    let cancelled = cancel.load(Ordering::Relaxed);
+    if cancelled {
+        log.record(
+            "run_cancelled",
+            None,
+            json!({"stage": "after assembly", "runs": model.totals.runs_found}),
+        )
+        .map_err(io)?;
+        sink(&Event::Cancelled {
+            done: model.totals.runs_found,
+            elapsed_ms: started.elapsed().as_millis() as u64,
+        });
+    }
+    let by_sev = |s: Sev| model.signals.iter().filter(|x| x.severity == s).count() as u64;
+    let (high, medium, low, info) = (
+        by_sev(Sev::High),
+        by_sev(Sev::Medium),
+        by_sev(Sev::Low),
+        by_sev(Sev::Info),
+    );
+    log.record(
+        "report_assembled",
+        None,
+        json!({"structure": model.jurisdiction.code, "sections": model.jurisdiction.sections,
+               "status": model.run.status, "evidence_items": model.totals.evidence_items,
+               "runs_found": model.totals.runs_found, "runs_verified": model.totals.runs_verified,
+               "runs_excluded": model.totals.runs_excluded, "runs_skipped": model.totals.runs_skipped,
+               "findings_quoted": model.totals.findings_quoted, "items_not_examined": model.totals.items_not_examined,
+               "signals": model.signals.iter().map(|s| s.code.clone()).collect::<Vec<_>>(),
+               "timeline_run": model.timeline.as_ref().map(|t| t.run_id.clone())}),
+    )
+    .map_err(io)?;
+
+    // 2. hashes.csv: the files whose content entered the report.
+    let mut csv = format!(
+        "index,path,size,{},status,error\n",
+        cfg.algorithms
+            .iter()
+            .map(|a| a.name())
+            .collect::<Vec<_>>()
+            .join(",")
+    );
+    let mut rows = 0u64;
+    for path in &assembly.files_read {
+        let (size, hashes, error) = match std::fs::File::open(path)
+            .and_then(|f| hash_reader(f, &cfg.algorithms, |_| true))
+        {
+            Ok(Some(o)) => (o.bytes, o.digests, String::new()),
+            Ok(None) => continue,
+            Err(e) => (0, vec![], e.to_string()),
+        };
+        let cols: Vec<String> = cfg
+            .algorithms
+            .iter()
+            .map(|a| {
+                hashes
+                    .iter()
+                    .find(|(x, _)| x == a)
+                    .map(|(_, h)| h.clone())
+                    .unwrap_or_default()
+            })
+            .collect();
+        rows += 1;
+        csv.push_str(&format!(
+            "{},{},{},{},{},{}\n",
+            rows,
+            csv_field(&path.display().to_string()),
+            size,
+            cols.join(","),
+            if error.is_empty() { "read" } else { "error" },
+            csv_field(&error)
+        ));
+    }
+    let (_, csv_digest) =
+        report::write_hashed(&log_dir, "hashes.csv", csv.as_bytes(), &cfg.algorithms)?;
+    let mut csv_details = csv_digest;
+    csv_details["rows"] = json!(rows);
+    log.record("hash_register_written", Some("hashes.csv"), csv_details)
+        .map_err(io)?;
+
+    // 3. The expert report: JSON + HTML + PDF per language.
+    std::fs::create_dir_all(&report_dir)
+        .map_err(|e| format!("cannot create {}: {}", report_dir.display(), e))?;
+    model.run.generated_utc = ctx.generated_utc.clone();
+    let mut expert_files: Vec<(String, Vec<u8>)> = vec![(
+        "expert-report.json".into(),
+        report::expert::expert_json(&model),
+    )];
+    for lang in &cfg.langs {
+        expert_files.push((
+            format!("expert-report.{lang}.html"),
+            report::expert::expert_html(&model, lang)?.into_bytes(),
+        ));
+        expert_files.push((
+            format!("expert-report.{lang}.pdf"),
+            report::expert::expert_pdf(&model, lang, signer.as_deref())?,
+        ));
+    }
+    for (name, data) in &expert_files {
+        let (_, digests) = report::write_hashed(&report_dir, name, data, &cfg.algorithms)?;
+        let mut d =
+            json!({"file": name, "kind": "expert_report", "bytes": data.len(), "hashes": digests});
+        if name.ends_with(".pdf") {
+            d["signed"] = json!(signer.is_some());
+        }
+        log.record("output_written", Some(name), d).map_err(io)?;
+    }
+    sink(&Event::ReportWritten {
+        kind: "expert_report".into(),
+        path: report_dir
+            .join(format!("expert-report.{}.html", cfg.langs[0]))
+            .display()
+            .to_string(),
+    });
+
+    // 4. Per-item reports (one per registered item): RV Report's signals about the item + the quoted results.
+    let mut results: Vec<ItemResult> = Vec::new();
+    for (n, ev) in model.evidence.iter().enumerate() {
+        let item_signals: Vec<Finding> = model
+            .signals
+            .iter()
+            .filter(|s| s.evidence_id.as_deref() == Some(ev.evidence_id.as_str()))
+            .map(to_finding)
+            .collect();
+        let quoted = model
+            .results
+            .iter()
+            .find(|r| r.evidence_id == ev.evidence_id)
+            .cloned()
+            .unwrap_or_default();
+        let seq = log
+            .record(
+                "item_assembled",
+                Some(&ev.path),
+                json!({"index": n as u64 + 1, "evidence_id": ev.evidence_id,
+                       "runs_quoted": quoted.entries.len(),
+                       "findings_quoted": quoted.entries.iter().map(|e| e.findings.len()).sum::<usize>(),
+                       "custody_rows": ev.custody.len(),
+                       "signals": item_signals.iter().map(|f| f.code.clone()).collect::<Vec<_>>()}),
+            )
+            .map_err(io)?;
+        results.push(ItemResult {
+            index: n as u64 + 1,
+            path: PathBuf::from(&ev.path),
+            size: ev.size,
+            modified_utc: None,
+            hashes: ev
+                .hashes
+                .iter()
+                .filter_map(|(k, v)| HashAlgo::parse(k).map(|h| (h, v.clone())))
+                .collect(),
+            detected_type: None,
+            extension: None,
+            findings: item_signals,
+            error: None,
+            audit_first_seq: seq,
+            audit_last_seq: seq,
+            evidence_id: Some(ev.evidence_id.clone()),
+            case_status: None,
+            intake_utc: Some(ev.registered_utc.clone()),
+            quoted: serde_json::to_value(&quoted).ok(),
+        });
+    }
+    let elapsed_ms = started.elapsed().as_millis() as u64;
+    let mut info_run = RunInfo {
+        tool_name: cfg.tool_name.clone(),
+        tool_version: cfg.tool_version.clone(),
+        run_id: run_id.clone(),
+        case_id: cfg.case_id.clone(),
+        actor: cfg.actor.clone(),
+        frontend: cfg.frontend.clone(),
+        algorithms: cfg.algorithms.clone(),
+        langs: cfg.langs.clone(),
+        started_utc,
+        finished_utc: utc_now(),
+        elapsed_ms,
+        cancelled,
+        jurisdiction: cfg.jurisdiction.clone(),
+        signer,
+        timestamp: json!({"status": "off"}),
+        case: Some(link.info(CaseRole::Analysis)),
+    };
+    let log_dir_s = log_dir.display().to_string();
+    for r in &results {
+        let audit = AuditRef {
+            head: log.head().to_string(),
+            entries: log.entries(),
+            log_dir: log_dir_s.clone(),
+        };
+        let dir = report_dir.join("items").join(r.folder());
+        let files = report::write_item_reports(&dir, &info_run, r, &audit)?;
+        log.record(
+            "item_reports_written",
+            Some(&r.path.display().to_string()),
+            json!({"folder": format!("items/{}", r.folder()), "files": files}),
+        )
+        .map_err(io)?;
+    }
+    if !results.is_empty() {
+        sink(&Event::ReportWritten {
+            kind: "items".into(),
+            path: report_dir.join("items").display().to_string(),
+        });
+    }
+    let totals = RunTotals {
+        items: results.len() as u64,
+        bytes: 0,
+        errors: 0,
+    };
+
+    // 5. Trusted timestamp of the chain head, then the statistics report (which prints its result).
+    if let Some(url) = &cfg.tsa_url {
+        match crate::trust::timestamp_head(&log_dir, log.entries(), log.head(), url) {
+            Ok(ts) => {
+                log.record("timestamp_obtained", Some(&ts.file), ts.to_json())
+                    .map_err(io)?;
+                let mut v = ts.to_json();
+                v["status"] = json!("ok");
+                info_run.timestamp = v;
+            }
+            Err(e) => {
+                log.record(
+                    "timestamp_pending",
+                    None,
+                    json!({"tsa": url, "reason": e, "covers_seq": log.entries(), "head": log.head()}),
+                )
+                .map_err(io)?;
+                info_run.timestamp = json!({"status": "pending", "tsa": url, "reason": e});
+            }
+        }
+        sink(&Event::Timestamp {
+            status: info_run.timestamp["status"]
+                .as_str()
+                .unwrap_or_default()
+                .into(),
+            tsa: url.clone(),
+            gen_time: info_run.timestamp["gen_time"].as_str().map(String::from),
+            reason: info_run.timestamp["reason"].as_str().map(String::from),
+        });
+    }
+    let audit = AuditRef {
+        head: log.head().to_string(),
+        entries: log.entries(),
+        log_dir: log_dir_s,
+    };
+    let files = report::write_statistics(&report_dir, &info_run, &results, &totals, &audit)?;
+    log.record("statistics_report_written", None, json!({"files": files}))
+        .map_err(io)?;
+    sink(&Event::ReportWritten {
+        kind: "statistics".into(),
+        path: report_dir
+            .join(format!("statistics.{}.html", cfg.langs[0]))
+            .display()
+            .to_string(),
+    });
+
+    let summary = RunSummary {
+        run_id: run_id.clone(),
+        items: totals.items,
+        bytes: 0,
+        errors: 0,
+        elapsed_ms: started.elapsed().as_millis() as u64,
+        high,
+        medium,
+        low,
+        info,
+        cancelled,
+        report_dir: report_dir.clone(),
+        log_dir: log_dir.clone(),
+        audit_head: String::new(),
+        timestamp: info_run.timestamp.clone(),
+        case: info_run.case.clone(),
+    };
+    log.record(
+        "run_finished",
+        None,
+        json!({"items": summary.items, "runs_found": model.totals.runs_found,
+               "runs_verified": model.totals.runs_verified, "runs_excluded": model.totals.runs_excluded,
+               "runs_skipped": model.totals.runs_skipped, "findings_quoted": model.totals.findings_quoted,
+               "status": model.run.status, "elapsed_ms": summary.elapsed_ms,
+               "high": high, "medium": medium, "low": low, "info": info, "cancelled": cancelled}),
+    )
+    .map_err(io)?;
+    sink(&Event::RunFinished {
+        items: summary.items,
+        bytes: 0,
+        errors: 0,
+        elapsed_ms: summary.elapsed_ms,
+        high,
+        medium,
+        low,
+        info,
+        report_dir: report_dir.display().to_string(),
+        log_dir: log_dir.display().to_string(),
+        cancelled,
+    });
+    Ok(RunSummary {
+        audit_head: log.head().to_string(),
+        ..summary
+    })
+}
+
+/// The model of a case folder without writing anything (the GUI's section preview): the case is verified and
+/// every run is verified as in `assemble`; nothing is appended to the case log and no audit log is created.
+pub fn preview_assembly(
+    cfg: &RunConfig,
+    opts: &crate::model::AssembleOptions,
+) -> Result<crate::model::ExpertReport, String> {
+    let case = Case::open(&opts.case_dir)?;
+    let ctx = crate::assemble::AssembleCtx {
+        tool_name: cfg.tool_name.clone(),
+        tool_version: cfg.tool_version.clone(),
+        run_id: String::new(),
+        actor: cfg.actor.clone(),
+        langs: cfg.langs.clone(),
+        generated_utc: utc_now(),
+        pdf_signed_by: None,
+        pdf_signer_certificate_sha256: None,
+    };
+    crate::assemble::assemble(&case, opts, &ctx, &mut |_, _, _, _| {}).map(|a| a.report)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1011,7 +1615,8 @@ mod tests {
     }
 
     fn sample_copy(dir: &Path) -> PathBuf {
-        let src = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/sample/evidence");
+        let src =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/template-evidence");
         let ev = dir.join("evidence");
         std::fs::create_dir_all(&ev).unwrap();
         for e in std::fs::read_dir(src).unwrap() {

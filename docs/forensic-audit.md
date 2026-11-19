@@ -1,6 +1,7 @@
 # Forensic audit trail
 
-Everything RV Report does is written to `<OUT>/logs/<RUN-ID>/`. The folder is designed so that a second
+Everything RV Report does is written to `<CASE>/runs/rv-report/<RUN-ID>/logs/` (an assembly always runs inside
+the case folder it reads). The folder is designed so that a second
 examiner, months later, can check **what was done, to which files, by whom, with which tool version**, and
 that the record was not altered.
 
@@ -167,36 +168,47 @@ physical transfers. This is a working aid, not legal advice: check it against th
 
 | Action | When | Key details |
 | --- | --- | --- |
-| `run_started` | first | tool, version, frontend, algorithms, langs, inputs, case |
-| `ui_*` | GUI only, before the run | input added/removed, hash selection, language, recursive, start clicked |
+<!-- forge:domain -->
+| `run_started` | first | tool, version, frontend, purpose `expert_report`, algorithms, langs, case, `report` {structure, requested_jurisdiction, examiner_id, mandate path, include/exclude tools, final} |
+| `case_linked` | second | case id, run folder, case-log entry that announced the run, registry digest, jurisdiction |
+| `ui_*` | GUI only, before the run | case folder, structure, languages, examiner, mandate (name + SHA-256), tool filters, final, hashes, timestamp, certificate, preview built, start clicked |
 | `environment_recorded` | | digests of `environment.json` |
-| `inputs_resolved` | | number of items and bytes |
-| `item_started` | each item | index, size, modified time |
-| `item_hashed` | each item | digests, bytes read, `mtime_unchanged` |
-| `item_error` | unreadable item | error message |
-| `item_analyzed` | each item | detected type, extension, findings, status |
-| `item_cancelled` / `run_cancelled` | on cancel | processed count |
-| `duplicate_group` | after the loop | hash, item indexes |
-| `hash_register_written` | | digests of `hashes.csv` |
+| `signing_certificate_loaded` | with `--sign-cert` | subject, SHA-256 fingerprint (never the password) |
+| `report_marked_final` | with `--final` | actor, examiner id, time |
+| `mandate_read` | with `--mandate` | file name, bytes, SHA-256 (the text is in the report, not in the log) |
+| `run_skipped` | each skipped run | tool, version, run folder, reason `self`, `verification`, `tool_filter`, `superseded` |
+| `run_verified` | each verified run | audit entries and head, outputs verified of recorded |
+| `run_excluded` | each run that fails verification | reason (`unreadable`, `chain_broken`, `not_finished`, `digest_mismatch`, `timestamp_invalid`) and detail |
+| `run_quoted` | each verified run used | items, findings quoted, every source file with its SHA-256 |
+| `report_assembled` | | structure, sections, status, totals, RV Report's signal codes, timeline run used |
+| `hash_register_written` | | digests of `hashes.csv` (the files read) |
+| `output_written` | each expert-report file | `expert-report.json` / `.<lang>.html` / `.<lang>.pdf`, bytes, digests, signed |
+| `item_assembled` | each registered item | evidence id, runs and findings quoted, custody rows, signals |
 | `item_reports_written` | each item | digests of every report file |
+| `timestamp_obtained` / `timestamp_pending` | | RFC 3161 token of the chain head |
 | `statistics_report_written` | | digests of statistics files |
-| `run_finished` / `run_failed` | last | totals, severities, elapsed |
+| `run_cancelled`, `run_finished` / `run_failed` | last | totals, severities, elapsed |
+<!-- /forge:domain -->
 
 ## Evidence handling
 
 ```mermaid
 flowchart LR
     O[("Original media")] -->|write blocker + imaging tool| C[("Verified working copy")]
-    C -->|read-only open| T["RV Report"]
+    C -->|"tools of the case (read-only)"| K0[("Case folder<br/>runs + registry")]
+    K0 -->|"verified outputs only"| T["RV Report"]
     T --> L["logs/"]
     T --> R["reports/"]
     L & R --> K["Case file<br/>(keep together)"]
 ```
 
-- Files are opened with read-only access; modification times are compared before and after hashing
-  (`mtime_unchanged` in `item_hashed`).
-- Symbolic links are never followed (no escape outside the selected folders).
-- The tool does not replace imaging tools or write blockers: run it on a verified copy.
+<!-- forge:domain -->
+- RV Report never opens the evidence: it reads only the case folder's records and the outputs each tool run
+  recorded with a digest, after verifying them ([case-folder.md](case-folder.md)).
+- Every file it reads is listed in `hashes.csv`; symbolic links or junctions leading out of the case are refused.
+- It writes only its own run folder and two case-log entries. The tool does not replace imaging tools or write
+  blockers: the evidence was handled by the tools whose runs it quotes.
+<!-- /forge:domain -->
 
 ## Mapping to ISO/IEC 27037:2012
 
@@ -206,7 +218,7 @@ flowchart LR
 | Repeatability (5.3.3) | `environment.json` records exact tool and dependency versions; same input → same hashes |
 | Reproducibility (5.3.4) | Independent verifier (`tests/verify_chain.py`), standard algorithms, and a second implementation of the tool (the other profile) that numbers, hashes and verifies identically |
 | Justifiability (5.3.5) | Every finding states what it shows and what it does **not** prove; limitations in every report |
-| Preservation (7.1.4) | Read-only access; hashes of every file and of every report produced |
+| Preservation (7.1.4) | Evidence never opened; every file read and every report produced hashed and logged |
 | Documentation / chain of custody | Hash register, reports, and log folder form the record of the examination |
 
 Colombian practice (Ley 906 de 2004, Manual de cadena de custodia) and French practice (Code de procédure

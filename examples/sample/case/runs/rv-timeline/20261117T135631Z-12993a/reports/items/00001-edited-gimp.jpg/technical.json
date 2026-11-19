@@ -1,0 +1,374 @@
+{
+  "audit": {
+    "first_seq": 16,
+    "last_seq": 16
+  },
+  "case": {
+    "case_dir": "R:\\case",
+    "case_id": "RV-REPORT-SAMPLE",
+    "intake_utc": "2026-11-17T13:56:24.635Z",
+    "role": "analysis",
+    "status": null
+  },
+  "findings": [],
+  "hashes": {
+    "md5": "636327633cd387f9e4f80193cd87112e",
+    "sha256": "1a37e10d99d05c6ff552cc2ea29b218b133e1ee319b5b477d5ca64989ddff3f5"
+  },
+  "item": {
+    "detected_type": null,
+    "error": null,
+    "evidence_id": "E0001",
+    "extension": null,
+    "file_name": "edited-gimp.jpg",
+    "index": 1,
+    "modified_utc": null,
+    "path": "R:\\evidence\\images\\edited-gimp.jpg",
+    "size": 105483,
+    "status": "ok"
+  },
+  "limitation_params": {
+    "TIMESTAMP_PROVES_EXISTENCE_ONLY": {
+      "skew_s": "300"
+    },
+    "TL_CLEAN_IS_NOT_PROOF": {
+      "skew_s": "300"
+    },
+    "TL_CLOCK_SKEW": {
+      "skew_s": "300"
+    },
+    "TL_READER_VERSIONS": {
+      "skew_s": "300"
+    },
+    "TL_TOOL_OUTPUTS_ONLY": {
+      "skew_s": "300"
+    },
+    "TL_ZONE_UNKNOWN": {
+      "skew_s": "300"
+    }
+  },
+  "limitations": [
+    "TL_ZONE_UNKNOWN",
+    "TL_CLOCK_SKEW",
+    "TL_TOOL_OUTPUTS_ONLY",
+    "TL_READER_VERSIONS",
+    "TL_CLEAN_IS_NOT_PROOF",
+    "TIMESTAMP_PROVES_EXISTENCE_ONLY"
+  ],
+  "run": {
+    "actor": "Sample Examiner",
+    "algorithms": [
+      "sha256",
+      "md5"
+    ],
+    "cancelled": false,
+    "case_id": "RV-REPORT-SAMPLE",
+    "elapsed_ms": 68,
+    "finished_utc": "2026-11-17T13:56:31.083Z",
+    "frontend": "cli",
+    "jurisdiction": "co",
+    "langs": [
+      "en"
+    ],
+    "pdf_signed_by": null,
+    "pdf_signer_certificate_sha256": null,
+    "run_id": "20261117T135631Z-12993a",
+    "started_utc": "2026-11-17T13:56:31.015Z"
+  },
+  "schema": "rakvor.item-technical/1",
+  "timeline": {
+    "display_zone": "UTC",
+    "events": [
+      {
+        "details": {
+          "model": "Canon EOS R6",
+          "offset_pointer": "/tags/16/value"
+        },
+        "id": "rv-imgauth:20261117T135629Z-6e0abc:E0001:exif.digitized:0",
+        "item": {
+          "evidence_id": "E0001",
+          "path": "R:\\evidence\\images\\edited-gimp.jpg",
+          "sha256": "1a37e10d99d05c6ff552cc2ea29b218b133e1ee319b5b477d5ca64989ddff3f5",
+          "sub": ""
+        },
+        "kind": "exif.digitized",
+        "offset_min": 120,
+        "original": "2026:05:14 10:21:33 +02:00",
+        "precision": "second",
+        "source": {
+          "file": "reports/items/00001-edited-gimp.jpg/metadata.json",
+          "file_sha256": "6d9a9d70212eb2428a487968e14dba0902f63b07590114e2746e4ca42970ad28",
+          "pointer": "/tags/13/value",
+          "run_dir": "runs/rv-imgauth/20261117T135629Z-6e0abc",
+          "run_id": "20261117T135629Z-6e0abc",
+          "tool": "rv-imgauth",
+          "tool_version": "0.3.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1778746893,
+        "zone": "explicit"
+      },
+      {
+        "details": {
+          "model": "Canon EOS R6",
+          "offset_pointer": "/tags/15/value"
+        },
+        "id": "rv-imgauth:20261117T135629Z-6e0abc:E0001:exif.original:0",
+        "item": {
+          "evidence_id": "E0001",
+          "path": "R:\\evidence\\images\\edited-gimp.jpg",
+          "sha256": "1a37e10d99d05c6ff552cc2ea29b218b133e1ee319b5b477d5ca64989ddff3f5",
+          "sub": ""
+        },
+        "kind": "exif.original",
+        "offset_min": 120,
+        "original": "2026:05:14 10:21:33 +02:00",
+        "precision": "second",
+        "source": {
+          "file": "reports/items/00001-edited-gimp.jpg/metadata.json",
+          "file_sha256": "6d9a9d70212eb2428a487968e14dba0902f63b07590114e2746e4ca42970ad28",
+          "pointer": "/tags/12/value",
+          "run_dir": "runs/rv-imgauth/20261117T135629Z-6e0abc",
+          "run_id": "20261117T135629Z-6e0abc",
+          "tool": "rv-imgauth",
+          "tool_version": "0.3.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1778746893,
+        "zone": "explicit"
+      },
+      {
+        "details": {
+          "action": "saved",
+          "software_agent": "Gimp 2.10 (Linux)"
+        },
+        "id": "rv-imgauth:20261117T135629Z-6e0abc:E0001:xmp.history:0",
+        "item": {
+          "evidence_id": "E0001",
+          "path": "R:\\evidence\\images\\edited-gimp.jpg",
+          "sha256": "1a37e10d99d05c6ff552cc2ea29b218b133e1ee319b5b477d5ca64989ddff3f5",
+          "sub": ""
+        },
+        "kind": "xmp.history",
+        "offset_min": 120,
+        "original": "2026-05-16T17:40:02+02:00",
+        "precision": "second",
+        "source": {
+          "file": "reports/items/00001-edited-gimp.jpg/metadata.json",
+          "file_sha256": "6d9a9d70212eb2428a487968e14dba0902f63b07590114e2746e4ca42970ad28",
+          "pointer": "/xmp_history/0/when",
+          "run_dir": "runs/rv-imgauth/20261117T135629Z-6e0abc",
+          "run_id": "20261117T135629Z-6e0abc",
+          "tool": "rv-imgauth",
+          "tool_version": "0.3.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1778946002,
+        "zone": "explicit"
+      },
+      {
+        "details": {
+          "model": "Canon EOS R6",
+          "offset_pointer": "/tags/14/value"
+        },
+        "id": "rv-imgauth:20261117T135629Z-6e0abc:E0001:exif.modify:0",
+        "item": {
+          "evidence_id": "E0001",
+          "path": "R:\\evidence\\images\\edited-gimp.jpg",
+          "sha256": "1a37e10d99d05c6ff552cc2ea29b218b133e1ee319b5b477d5ca64989ddff3f5",
+          "sub": ""
+        },
+        "kind": "exif.modify",
+        "offset_min": 120,
+        "original": "2026:05:16 18:02:10 +02:00",
+        "precision": "second",
+        "source": {
+          "file": "reports/items/00001-edited-gimp.jpg/metadata.json",
+          "file_sha256": "6d9a9d70212eb2428a487968e14dba0902f63b07590114e2746e4ca42970ad28",
+          "pointer": "/tags/7/value",
+          "run_dir": "runs/rv-imgauth/20261117T135629Z-6e0abc",
+          "run_id": "20261117T135629Z-6e0abc",
+          "tool": "rv-imgauth",
+          "tool_version": "0.3.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1778947330,
+        "zone": "explicit"
+      },
+      {
+        "details": {
+          "action": "saved",
+          "software_agent": "Gimp 2.10 (Linux)"
+        },
+        "id": "rv-imgauth:20261117T135629Z-6e0abc:E0001:xmp.history:1",
+        "item": {
+          "evidence_id": "E0001",
+          "path": "R:\\evidence\\images\\edited-gimp.jpg",
+          "sha256": "1a37e10d99d05c6ff552cc2ea29b218b133e1ee319b5b477d5ca64989ddff3f5",
+          "sub": ""
+        },
+        "kind": "xmp.history",
+        "offset_min": 120,
+        "original": "2026-05-16T18:02:10+02:00",
+        "precision": "second",
+        "source": {
+          "file": "reports/items/00001-edited-gimp.jpg/metadata.json",
+          "file_sha256": "6d9a9d70212eb2428a487968e14dba0902f63b07590114e2746e4ca42970ad28",
+          "pointer": "/xmp_history/1/when",
+          "run_dir": "runs/rv-imgauth/20261117T135629Z-6e0abc",
+          "run_id": "20261117T135629Z-6e0abc",
+          "tool": "rv-imgauth",
+          "tool_version": "0.3.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1778947330,
+        "zone": "explicit"
+      },
+      {
+        "details": {},
+        "id": "rv-imgauth:20261117T135629Z-6e0abc:E0001:xmp.metadata:0",
+        "item": {
+          "evidence_id": "E0001",
+          "path": "R:\\evidence\\images\\edited-gimp.jpg",
+          "sha256": "1a37e10d99d05c6ff552cc2ea29b218b133e1ee319b5b477d5ca64989ddff3f5",
+          "sub": ""
+        },
+        "kind": "xmp.metadata",
+        "offset_min": 120,
+        "original": "2026-05-16T18:02:10+02:00",
+        "precision": "second",
+        "source": {
+          "file": "reports/items/00001-edited-gimp.jpg/metadata.json",
+          "file_sha256": "6d9a9d70212eb2428a487968e14dba0902f63b07590114e2746e4ca42970ad28",
+          "pointer": "/tags/36/value",
+          "run_dir": "runs/rv-imgauth/20261117T135629Z-6e0abc",
+          "run_id": "20261117T135629Z-6e0abc",
+          "tool": "rv-imgauth",
+          "tool_version": "0.3.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1778947330,
+        "zone": "explicit"
+      },
+      {
+        "details": {},
+        "id": "rv-imgauth:20261117T135629Z-6e0abc:E0001:xmp.modify:0",
+        "item": {
+          "evidence_id": "E0001",
+          "path": "R:\\evidence\\images\\edited-gimp.jpg",
+          "sha256": "1a37e10d99d05c6ff552cc2ea29b218b133e1ee319b5b477d5ca64989ddff3f5",
+          "sub": ""
+        },
+        "kind": "xmp.modify",
+        "offset_min": 120,
+        "original": "2026-05-16T18:02:10+02:00",
+        "precision": "second",
+        "source": {
+          "file": "reports/items/00001-edited-gimp.jpg/metadata.json",
+          "file_sha256": "6d9a9d70212eb2428a487968e14dba0902f63b07590114e2746e4ca42970ad28",
+          "pointer": "/tags/35/value",
+          "run_dir": "runs/rv-imgauth/20261117T135629Z-6e0abc",
+          "run_id": "20261117T135629Z-6e0abc",
+          "tool": "rv-imgauth",
+          "tool_version": "0.3.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1778947330,
+        "zone": "explicit"
+      },
+      {
+        "details": {},
+        "id": "rv-hashinv:20261117T135624Z-e74fa7:E0001:fs.modified:0",
+        "item": {
+          "evidence_id": "E0001",
+          "path": "R:\\evidence\\images\\edited-gimp.jpg",
+          "sha256": "1a37e10d99d05c6ff552cc2ea29b218b133e1ee319b5b477d5ca64989ddff3f5",
+          "sub": ""
+        },
+        "kind": "fs.modified",
+        "offset_min": 0,
+        "original": "2026-11-12T06:00:00Z",
+        "precision": "second",
+        "source": {
+          "file": "logs/audit.jsonl",
+          "file_sha256": "8001ba46d4b296b86c1415cc9b2958e247be79de6b4e7251312140fd09bf1438",
+          "pointer": "line:5/details/modified_utc",
+          "run_dir": "runs/rv-hashinv/20261117T135624Z-e74fa7",
+          "run_id": "20261117T135624Z-e74fa7",
+          "tool": "rv-hashinv",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1794463200,
+        "zone": "explicit"
+      },
+      {
+        "details": {},
+        "id": "rv-imgauth:20261117T135629Z-6e0abc:E0001:fs.modified:0",
+        "item": {
+          "evidence_id": "E0001",
+          "path": "R:\\evidence\\images\\edited-gimp.jpg",
+          "sha256": "1a37e10d99d05c6ff552cc2ea29b218b133e1ee319b5b477d5ca64989ddff3f5",
+          "sub": ""
+        },
+        "kind": "fs.modified",
+        "offset_min": 0,
+        "original": "2026-11-12T06:00:00Z",
+        "precision": "second",
+        "source": {
+          "file": "logs/audit.jsonl",
+          "file_sha256": "61298a047be297edcb8aa1d695c7a898f792fdc3adf7cc9d1bcfc58fd5e387b1",
+          "pointer": "line:5/details/modified_utc",
+          "run_dir": "runs/rv-imgauth/20261117T135629Z-6e0abc",
+          "run_id": "20261117T135629Z-6e0abc",
+          "tool": "rv-imgauth",
+          "tool_version": "0.3.1"
+        },
+        "utc_ns": 0,
+        "utc_s": 1794463200,
+        "zone": "explicit"
+      },
+      {
+        "details": {
+          "tool": "rv-hashinv"
+        },
+        "id": "rv-hashinv:20261117T135624Z-e74fa7:E0001:intake.registered:0",
+        "item": {
+          "evidence_id": "E0001",
+          "path": "R:\\evidence\\images\\edited-gimp.jpg",
+          "sha256": "1a37e10d99d05c6ff552cc2ea29b218b133e1ee319b5b477d5ca64989ddff3f5",
+          "sub": ""
+        },
+        "kind": "intake.registered",
+        "offset_min": 0,
+        "original": "2026-11-17T13:56:24.635Z",
+        "precision": "millisecond",
+        "source": {
+          "file": "reports/items/00001-edited-gimp.jpg/technical.json",
+          "file_sha256": "2094bf0d215e193843a12ead2ce9fb80b3c04926d1d31053ca6d96c8ba195149",
+          "pointer": "/case/intake_utc",
+          "run_dir": "runs/rv-hashinv/20261117T135624Z-e74fa7",
+          "run_id": "20261117T135624Z-e74fa7",
+          "tool": "rv-hashinv",
+          "tool_version": "0.4.1"
+        },
+        "utc_ns": 635000000,
+        "utc_s": 1794923784,
+        "zone": "explicit"
+      }
+    ],
+    "events_listed": 10,
+    "events_total": 10,
+    "first_utc": "2026-05-14T08:21:33Z",
+    "last_utc": "2026-11-17T13:56:24Z",
+    "signals": [],
+    "tools": [
+      "rv-hashinv",
+      "rv-imgauth"
+    ]
+  },
+  "tool": {
+    "name": "rv-timeline",
+    "version": "0.2.1"
+  }
+}

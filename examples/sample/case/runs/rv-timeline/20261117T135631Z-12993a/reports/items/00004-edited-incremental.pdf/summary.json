@@ -1,0 +1,24 @@
+{
+  "case_id": "RV-REPORT-SAMPLE",
+  "findings": [],
+  "fingerprint": {
+    "algorithm": "md5",
+    "value": "b28a97d821a22ccdf5726426c16b8fed"
+  },
+  "item": {
+    "evidence_id": "E0004",
+    "file_name": "edited-incremental.pdf",
+    "index": 4
+  },
+  "run_id": "20261117T135631Z-12993a",
+  "schema": "rakvor.item-summary/1",
+  "status": "ok",
+  "text": {
+    "en": {
+      "next_step": "No action needed for this item.",
+      "status": "No issues found",
+      "summary": "The timeline of this item shows no time signal under the checks applied.",
+      "timeline": "9 events from rv-hashinv, rv-pdfauth, from 2026-03-02T14:15:00Z to 2026-11-17T13:56:24Z (UTC)."
+    }
+  }
+}

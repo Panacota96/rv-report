@@ -1,77 +1,58 @@
 # Architecture
 
-One engine, two front-ends. The engine (`src/core`) does all the work and never prints; the CLI and
-the GUI only turn user input into a `RunConfig` and render the `Event`s the engine emits. This is why
-both interfaces always produce identical logs and reports.
+One core library that never prints; the CLI and the GUI are thin front-ends that build a `RunConfig` +
+`AssembleOptions`, call the core and render its events.
 
 ```mermaid
-flowchart TB
-    subgraph Front-ends
-        CLI["rv-report (src/cli)<br/>clap · indicatif"]
-        GUI["rv-report-gui (src/gui)<br/>egui · wgpu"]
-    end
-    subgraph Core["rv_report_core (src/core)"]
-        RUN["run.rs<br/>pipeline"]
-        IN["input.rs"]
-        H["hash.rs"]
-        AN["analyzer.rs<br/>(domain logic)"]
-        AU["audit.rs"]
-        CA["case.rs<br/>case folder"]
-        REP["report/<br/>JSON · HTML · PDF"]
-        I18N["i18n.rs"]
-    end
-    CLI -- RunConfig --> RUN
-    GUI -- "RunConfig (+ UI actions)" --> RUN
-    RUN -- "Event stream" --> CLI
-    RUN -- "Event stream (mpsc)" --> GUI
-    RUN --> IN & H & AN & AU & REP & CA
-    CA --> AU
-    REP --> I18N
+flowchart LR
+    CLI["src/cli<br/>assemble, verify-*"] --> RUN
+    GUI["src/gui<br/>state.rs + app.rs"] --> RUN
+    GUI -. preview .-> PRE["run::preview_assembly<br/>(read-only)"]
+    RUN["run::run_assemble"] --> CASE["case.rs<br/>open, verify, lock, append"]
+    RUN --> ASM["assemble.rs"]
+    PRE --> ASM
+    ASM --> SRC["sources.rs<br/>discover, verify, read"]
+    SRC --> VER["verify.rs + outputs.rs + trust.rs<br/>(shared)"]
+    ASM --> MOD[["model.rs<br/>ExpertReport"]]
+    RUN --> EXP["report/expert.rs<br/>HTML + PDF"]
+    RUN --> REP["report/mod.rs<br/>statistics + items"]
+    RUN --> AUD["audit.rs"]
 ```
 
 ## Modules
 
-| Module | Responsibility | Replace when building a new tool? |
+| File | Role | Shared with the suite |
 | --- | --- | --- |
-| `input.rs` | Files, folders, list files → sorted, de-duplicated, absolute paths. Symlinks not followed. | No |
-| `hash.rs` | One read loop (1 MiB chunks) feeding 1–2 digests; known-answer self-test. | No |
-| `analyzer.rs` | Signature detection and per-item findings. | **Yes — this is the domain logic** |
-| `audit.rs` | Append-only hash-chained `audit.jsonl` + `audit.log`; `verify`. | No |
-| `case.rs` | Shared case folder: `case.json`, hash-chained `case-log.jsonl` under a lock, evidence registry, `verify_case`. Role = `CASE_ROLE` (intake here, analysis in scaffolded tools). See [case-folder.md](case-folder.md). | No (flip `CASE_ROLE`) |
-| `report/` | View models → minijinja HTML, built-in PDF writer, schema-versioned JSON. | Adapt wording/fields |
-| `events.rs` | Typed events; ETA computation. | No |
-| `env.rs` | `environment.json` (versions, OS, host, user, command line). | No |
-| `run.rs` | Orchestration, cancellation, duplicates, `hashes.csv`. | Small changes |
+| `src/core/src/model.rs` | frozen data model of the report (`rakvor.expert-report/1`) | — |
+| `src/core/src/sources.rs` | run discovery, verification, verified reads (adapted from RV Timeline) | pattern |
+| `src/core/src/assemble.rs` | builds the model: skip/verify/quote, custody, method, limitations, timeline, not examined, signals | — |
+| `src/core/src/report/expert.rs` | view model → HTML (minijinja) and PDF (built-in writer), per language | — |
+| `src/core/src/run.rs` | `run_assemble` (pipeline, audit, case link), `preview_assembly`; template `run` kept for its tests | partly |
+| `src/core/src/{audit,case,verify,i18n,events,env}.rs` | audit chain, case folder, verify-log, wording, events | yes |
+| `src/core/src/{trust,outputs,hash,time}.rs`, `report/pdf.rs` | timestamps and signing, output re-hash, hashing, time, PDF writer | **byte-identical** across repos |
+| `src/gui/src/state.rs` | every GUI rule, audited `ui_*` actions, preview sections | — |
 
 ## One run, step by step
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant UI as CLI / GUI
-    participant R as run.rs
-    participant A as audit.jsonl
-    participant FS as Evidence (read-only)
-    participant O as reports/
-    UI->>R: run(config, sink, cancel)
-    R->>A: run_started, UI actions, environment_recorded
-    R->>R: collect inputs
-    R->>A: inputs_resolved
-    R-->>UI: RunStarted{total_items,total_bytes}
-    loop each item
-        R->>A: item_started
-        R->>FS: open read-only, read 1 MiB chunks
-        R-->>UI: Progress{elapsed_ms, eta_ms} (≤ every 150 ms)
-        R->>A: item_hashed{digests, mtime_unchanged}
-        R->>A: item_analyzed{findings, status}
-        R-->>UI: ItemFinished
-    end
-    R->>A: duplicate_group(s), hash_register_written
-    R->>O: per-item technical + summary (JSON/HTML/PDF)
-    R->>A: item_reports_written{file digests}
-    R->>O: statistics (JSON/HTML/PDF)
-    R->>A: statistics_report_written, run_finished
-    R-->>UI: RunFinished
+    participant F as front-end
+    participant R as run_assemble
+    participant C as case log
+    participant A as assemble
+    participant L as audit.jsonl
+    F->>R: RunConfig + AssembleOptions
+    R->>R: mandate readable? jurisdiction valid?
+    R->>C: Case::open (verify) then run_started (under the lock)
+    R->>L: run_started, case_linked, ui_*, environment_recorded, signing, report_marked_final
+    R->>A: assemble (read-only)
+    A-->>R: model + notes + files read
+    R->>L: run_skipped / run_verified / run_excluded / run_quoted, report_assembled
+    R->>L: hash_register_written, output_written x (1 + 2 x langs)
+    R->>L: item_assembled, item_reports_written per item
+    R->>L: timestamp_obtained | timestamp_pending, statistics_report_written, run_finished
+    R->>C: run_finished (audit head read back from disk)
 ```
 
 ## Run states (as the GUI sees them)
@@ -79,24 +60,21 @@ sequenceDiagram
 ```mermaid
 stateDiagram-v2
     [*] --> Idle
-    Idle --> Running: Start (inputs ≥ 1, algorithms 1–2)
-    Running --> Finished: RunFinished
-    Running --> Cancelled: Cancel → partial reports
-    Running --> Failed: error (e.g. output not writable)
-    Finished --> Running: Start again (new run ID)
-    Cancelled --> Running
-    Failed --> Running
+    Idle --> Idle: case chosen (verified), preview built
+    Idle --> Running: Generate
+    Running --> Finished
+    Running --> Cancelled
+    Running --> Failed
+    Finished --> Idle: new settings
 ```
 
 ## Concurrency and cancellation
 
-- The GUI runs the engine on a worker thread and receives events through a channel, so the window stays
-  responsive; the elapsed-time label is refreshed every 200 ms from the window clock.
-- Cancellation is an `AtomicBool` checked after every 1 MiB chunk: large images stop within milliseconds.
-  The engine still writes `hashes.csv`, partial reports and `run_cancelled` to the audit log.
-- Files are processed sequentially on purpose: the order of audit entries equals the order of work, which is
-  easier to explain in court. Hashing is I/O-bound on typical evidence drives.
+The GUI runs the core on a `std::thread` and receives events through an `mpsc` channel. The assembly is short (it
+reads records, not evidence); Ctrl+C or Cancel is checked after the assembly: the run then records `run_cancelled`,
+still writes the (partial) reports with the cancellation noted in the statistics report, and ends with
+`run_finished {cancelled: true}` (exit 130).
 
 ## Why Rust
 
-See [ADR 0001](adr/0001-language.md).
+Same profile as the other Rakvor tools for one shared, audited core ([ADR 0001](adr/0001-language.md)).

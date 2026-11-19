@@ -1,0 +1,25 @@
+2026-11-17T13:56:29.913Z  #00001  run_started          algorithms=sha256+md5 case_dir=R:\case case_id=RV-REPORT-SAMPLE evidence_ids= frontend=cli input_list=null inputs=R:\evidence\images jurisdiction=co langs=en out_dir=rakvor-out recursive=false sign_cert=null tool=rv-imgauth tsa_url=null version=0.3.1
+2026-11-17T13:56:29.914Z  #00002  case_linked          case_created=false case_dir=R:\case case_id=RV-REPORT-SAMPLE case_log_head_at_start=a4c94bf1991c883aeb10547729f5c06b3d7309ef7570d9cdb59dabe5906fa096 case_log_seq_at_start=7 jurisdiction=co registry_items=4 registry_sha256=d9a22c5ec0dcf8bf5ab3da0e424c368f02d50f37827cd3799ba57e978592b209 requested_jurisdiction=co role=analysis run_dir=runs/rv-imgauth/20261117T135629Z-6e0abc
+2026-11-17T13:56:29.916Z  #00003  environment_recorded environment.json  md5=995eb4ba561c122eeefe4143f7f0599e sha256=3d76e3e9cd15deef5ac7a809de00c1b10a44260cf1d7d3529742f39efc6d7f23
+2026-11-17T13:56:29.917Z  #00004  inputs_resolved      bytes=113777 items=2
+2026-11-17T13:56:29.917Z  #00005  item_started         R:\evidence\images\edited-gimp.jpg  index=1 modified_utc=2026-11-12T06:00:00Z size=105483
+2026-11-17T13:56:29.918Z  #00006  item_hashed          R:\evidence\images\edited-gimp.jpg  bytes_read=105483 index=1 mtime_unchanged=true
+2026-11-17T13:56:29.919Z  #00007  evidence_verified_against_case R:\evidence\images\edited-gimp.jpg  algorithm=sha256+md5 evidence_id=E0001 index=1 match=true matched_by=path
+2026-11-17T13:56:29.920Z  #00008  analysis_started     R:\evidence\images\edited-gimp.jpg  index=1 isolation=worker_process
+2026-11-17T13:56:30.212Z  #00009  output_written       R:\evidence\images\edited-gimp.jpg  bytes=11358 file=items/00001-edited-gimp.jpg/structure.json index=1 kind=structure
+2026-11-17T13:56:30.212Z  #00010  output_written       R:\evidence\images\edited-gimp.jpg  bytes=6405 file=items/00001-edited-gimp.jpg/metadata.json index=1 kind=metadata
+2026-11-17T13:56:30.220Z  #00011  output_written       R:\evidence\images\edited-gimp.jpg  bytes=1076768 file=items/00001-edited-gimp.jpg/maps/original.png index=1 kind=original_preview
+2026-11-17T13:56:30.222Z  #00012  output_written       R:\evidence\images\edited-gimp.jpg  bytes=70868 file=items/00001-edited-gimp.jpg/maps/thumbnail-diff.png index=1 kind=map
+2026-11-17T13:56:30.222Z  #00013  item_analyzed        R:\evidence\images\edited-gimp.jpg  detected_type=JPEG image extension=jpg findings={"code":"EXIF_SOFTWARE_EDITOR","params":{"editor":"GIMP","software":"GIMP 2.10.36","source":"EXIF Software, XMP CreatorTool, JPEG comment, XMP history"},"severity":"medium"}+{"code":"XMP_EDIT_HISTORY","params":{"actions":"saved, saved","events":"2","last_agent":"Gimp 2.10 (Linux)"},"severity":"medium"}+{"code":"METADATA_DATES_INCONSISTENT","params":{"details":"EXIF DateTime 2026:05:16 18:02:10 is 2.3 days after DateTimeOriginal 2026:05:14 10:21:33 and a Software tag is present"},"severity":"medium"}+{"code":"QT_STANDARD_IJG","params":{"quality":"85"},"severity":"info"}+{"code":"QT_UNKNOWN","params":{"hash":"43920728cfe021cebc3e0bf197ec4338c16eec09bf89e4b7a5cac6f67651ebfa"},"severity":"info"} index=1 status=attention
+2026-11-17T13:56:30.223Z  #00014  item_started         R:\evidence\images\photo.webp  index=2 modified_utc=2026-11-12T06:00:00Z size=8294
+2026-11-17T13:56:30.224Z  #00015  item_hashed          R:\evidence\images\photo.webp  bytes_read=8294 index=2 mtime_unchanged=true
+2026-11-17T13:56:30.224Z  #00016  evidence_verified_against_case R:\evidence\images\photo.webp  algorithm=sha256+md5 evidence_id=E0002 index=2 match=true matched_by=path
+2026-11-17T13:56:30.224Z  #00017  analysis_started     R:\evidence\images\photo.webp  index=2 isolation=worker_process
+2026-11-17T13:56:30.287Z  #00018  output_written       R:\evidence\images\photo.webp  bytes=809 file=items/00002-photo.webp/structure.json index=2 kind=structure
+2026-11-17T13:56:30.288Z  #00019  output_written       R:\evidence\images\photo.webp  bytes=123 file=items/00002-photo.webp/metadata.json index=2 kind=metadata
+2026-11-17T13:56:30.289Z  #00020  item_analyzed        R:\evidence\images\photo.webp  detected_type=WebP image extension=webp findings={"code":"WEBP_FLAGS_MISMATCH","params":{"problems":"the EXIF flag is set but there is no EXIF chunk"},"severity":"medium"}+{"code":"PIXELS_NOT_DECODED","params":{"format":"webp","reason":"WebP: An expected chunk was missing"},"severity":"low"} index=2 status=attention
+2026-11-17T13:56:30.290Z  #00021  hash_register_written hashes.csv  md5=b3b64035a2138545114ed16eb76773f6 sha256=6a701ea4ab4b6934cbdc6365c6cbf8efa2f3c24b3634e826819993cfa434e94d
+2026-11-17T13:56:30.348Z  #00022  item_reports_written R:\evidence\images\edited-gimp.jpg  folder=items/00001-edited-gimp.jpg
+2026-11-17T13:56:30.359Z  #00023  item_reports_written R:\evidence\images\photo.webp  folder=items/00002-photo.webp
+2026-11-17T13:56:30.362Z  #00024  statistics_report_written 
+2026-11-17T13:56:30.362Z  #00025  run_finished         bytes=113777 cancelled=false elapsed_ms=449 errors=0 high=0 info=2 items=2 low=1 medium=4

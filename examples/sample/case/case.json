@@ -1,0 +1,12 @@
+{
+  "case_id": "RV-REPORT-SAMPLE",
+  "created_by": {
+    "actor": "Sample Examiner",
+    "run_id": "20261117T135624Z-e74fa7",
+    "tool": "rv-hashinv",
+    "version": "0.4.1"
+  },
+  "created_utc": "2026-11-17T13:56:24.074Z",
+  "jurisdiction": "co",
+  "schema": "rakvor.case/1"
+}

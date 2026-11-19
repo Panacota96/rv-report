@@ -1,0 +1,224 @@
+{
+  "case_id": "RV-REPORT-SAMPLE",
+  "findings": [
+    {
+      "code": "PRODUCER_CHANGED_BETWEEN_REVISIONS",
+      "params": {
+        "after": "Foxit PDF Editor Version 13.0.0",
+        "before": "ReportLab PDF Library - (opensource)",
+        "from_rev": "1",
+        "to_rev": "2"
+      },
+      "severity": "medium",
+      "text": {
+        "en": {
+          "does_not_prove": "Documents legitimately pass through several programs (for example a signing or form tool); this shows a change of tool, not who used it or why.",
+          "shows": "The producer changes from “ReportLab PDF Library - (opensource)” in revision 1 to “Foxit PDF Editor Version 13.0.0” in revision 2.",
+          "title": "Different software between revisions"
+        },
+        "es": {
+          "does_not_prove": "Es habitual que un documento pase por varios programas (por ejemplo, uno de firma o de formularios); esto muestra un cambio de herramienta, no quién la usó ni con qué fin.",
+          "shows": "El productor cambia de «ReportLab PDF Library - (opensource)» en la revisión 1 a «Foxit PDF Editor Version 13.0.0» en la revisión 2.",
+          "title": "Software distinto entre revisiones"
+        },
+        "fr": {
+          "does_not_prove": "Un document passe couramment par plusieurs logiciels (par exemple un outil de signature ou de formulaires) ; cela montre un changement d'outil, ni qui l'a utilisé ni pourquoi.",
+          "shows": "Le producteur passe de « ReportLab PDF Library - (opensource) » dans la révision 1 à « Foxit PDF Editor Version 13.0.0 » dans la révision 2.",
+          "title": "Logiciel différent d'une révision à l'autre"
+        }
+      }
+    },
+    {
+      "code": "EDITOR_FINGERPRINT",
+      "params": {
+        "label": "Foxit PDF Editor / PhantomPDF",
+        "matched_on": "producer",
+        "revision": "2",
+        "value": "Foxit PDF Editor Version 13.0.0"
+      },
+      "severity": "medium",
+      "text": {
+        "en": {
+          "does_not_prove": "Editors are also used for legitimate tasks such as filling in, signing, rotating or compressing a document; the fingerprint shows which software saved the file, not what was changed.",
+          "shows": "Revision 2 carries the fingerprint of a PDF editor: Foxit PDF Editor / PhantomPDF (metadata producer: “Foxit PDF Editor Version 13.0.0”).",
+          "title": "PDF editor fingerprint"
+        },
+        "es": {
+          "does_not_prove": "Los editores también se usan para tareas legítimas como diligenciar, firmar, rotar o comprimir un documento; la huella indica qué programa guardó el archivo, no qué se modificó.",
+          "shows": "La revisión 2 lleva la huella de un editor de PDF: Foxit PDF Editor / PhantomPDF (metadato producer: «Foxit PDF Editor Version 13.0.0»).",
+          "title": "Huella de un editor de PDF"
+        },
+        "fr": {
+          "does_not_prove": "Les éditeurs servent aussi à des tâches légitimes : remplir, signer, faire pivoter ou compresser un document ; l'empreinte indique quel logiciel a enregistré le fichier, pas ce qui a été modifié.",
+          "shows": "La révision 2 porte l'empreinte d'un éditeur PDF : Foxit PDF Editor / PhantomPDF (métadonnée producer : « Foxit PDF Editor Version 13.0.0 »).",
+          "title": "Empreinte d'un éditeur PDF"
+        }
+      }
+    },
+    {
+      "code": "FONT_ADDED_IN_LATER_REVISION",
+      "params": {
+        "font": "Courier-Bold",
+        "revision": "3"
+      },
+      "severity": "medium",
+      "text": {
+        "en": {
+          "does_not_prove": "Editing tools add fonts when a form is filled in, a stamp or comment is added or text is legitimately corrected; this shows that text was written in that revision, not that it falsifies the document.",
+          "shows": "Font Courier-Bold first appears in revision 3 and is used by page content there.",
+          "title": "Font added in a later revision"
+        },
+        "es": {
+          "does_not_prove": "Las herramientas de edición añaden fuentes al diligenciar un formulario, poner un sello o un comentario, o corregir un texto de forma legítima; indica que se escribió texto en esa revisión, no que falsee el documento.",
+          "shows": "La fuente Courier-Bold aparece por primera vez en la revisión 3 y el contenido de las páginas la usa en esa revisión.",
+          "title": "Fuente añadida en una revisión posterior"
+        },
+        "fr": {
+          "does_not_prove": "Les outils d'édition ajoutent des polices lors du remplissage d'un formulaire, de l'ajout d'un tampon ou d'un commentaire, ou d'une correction légitime ; cela montre que du texte a été écrit dans cette révision, non qu'il falsifie le document.",
+          "shows": "La police Courier-Bold apparaît pour la première fois dans la révision 3, où le contenu des pages l'utilise.",
+          "title": "Police ajoutée dans une révision ultérieure"
+        }
+      }
+    },
+    {
+      "code": "INCREMENTAL_UPDATES",
+      "params": {
+        "revisions": "3"
+      },
+      "severity": "low",
+      "text": {
+        "en": {
+          "does_not_prove": "Incremental saving is normal when a PDF is filled in, signed, annotated or re-saved by many programs; it does not show who changed the file or that a change was improper.",
+          "shows": "The file contains 3 revisions: the original save plus later updates appended to the end of the file. Each earlier version can be extracted and compared.",
+          "title": "Incremental updates"
+        },
+        "es": {
+          "does_not_prove": "Guardar de forma incremental es normal cuando un PDF se diligencia, se firma, se anota o lo vuelven a guardar muchos programas; no indica quién modificó el archivo ni que el cambio haya sido indebido.",
+          "shows": "El archivo contiene 3 revisiones: el guardado original y actualizaciones añadidas después al final del archivo. Cada versión anterior se puede extraer y comparar.",
+          "title": "Actualizaciones incrementales"
+        },
+        "fr": {
+          "does_not_prove": "L'enregistrement incrémental est normal lorsqu'un PDF est rempli, signé, annoté ou réenregistré par de nombreux logiciels ; il n'indique ni qui a modifié le fichier ni que la modification était irrégulière.",
+          "shows": "Le fichier contient 3 révisions : l'enregistrement d'origine et des mises à jour ajoutées ensuite à la fin du fichier. Chaque version antérieure peut être extraite et comparée.",
+          "title": "Mises à jour incrémentales"
+        }
+      }
+    },
+    {
+      "code": "REVISION_TIME_GAP",
+      "params": {
+        "from_rev": "1",
+        "gap": "2 d 3 h 0 min",
+        "to_rev": "2"
+      },
+      "severity": "info",
+      "text": {
+        "en": {
+          "does_not_prove": "Metadata dates are written by the editing software from the computer clock and can be set freely; the gap does not prove when the changes were really made or by whom.",
+          "shows": "Revision 2 is dated 2 d 3 h 0 min after revision 1 (according to their modification dates).",
+          "title": "Time gap between revisions"
+        },
+        "es": {
+          "does_not_prove": "Las fechas de los metadatos las escribe el programa de edición a partir del reloj del equipo y pueden fijarse a voluntad; el intervalo no prueba cuándo se hicieron realmente los cambios ni quién los hizo.",
+          "shows": "La revisión 2 tiene una fecha 2 d 3 h 0 min posterior a la de la revisión 1 (según sus fechas de modificación).",
+          "title": "Intervalo de tiempo entre revisiones"
+        },
+        "fr": {
+          "does_not_prove": "Les dates des métadonnées sont écrites par le logiciel d'édition à partir de l'horloge de l'ordinateur et peuvent être fixées librement ; l'écart ne prouve ni quand les modifications ont réellement eu lieu ni qui les a faites.",
+          "shows": "La révision 2 est datée 2 d 3 h 0 min après la révision 1 (d'après leurs dates de modification).",
+          "title": "Écart de temps entre révisions"
+        }
+      }
+    },
+    {
+      "code": "REVISION_TIME_GAP",
+      "params": {
+        "from_rev": "2",
+        "gap": "6 d 21 h 0 min",
+        "to_rev": "3"
+      },
+      "severity": "info",
+      "text": {
+        "en": {
+          "does_not_prove": "Metadata dates are written by the editing software from the computer clock and can be set freely; the gap does not prove when the changes were really made or by whom.",
+          "shows": "Revision 3 is dated 6 d 21 h 0 min after revision 2 (according to their modification dates).",
+          "title": "Time gap between revisions"
+        },
+        "es": {
+          "does_not_prove": "Las fechas de los metadatos las escribe el programa de edición a partir del reloj del equipo y pueden fijarse a voluntad; el intervalo no prueba cuándo se hicieron realmente los cambios ni quién los hizo.",
+          "shows": "La revisión 3 tiene una fecha 6 d 21 h 0 min posterior a la de la revisión 2 (según sus fechas de modificación).",
+          "title": "Intervalo de tiempo entre revisiones"
+        },
+        "fr": {
+          "does_not_prove": "Les dates des métadonnées sont écrites par le logiciel d'édition à partir de l'horloge de l'ordinateur et peuvent être fixées librement ; l'écart ne prouve ni quand les modifications ont réellement eu lieu ni qui les a faites.",
+          "shows": "La révision 3 est datée 6 d 21 h 0 min après la révision 2 (d'après leurs dates de modification).",
+          "title": "Écart de temps entre révisions"
+        }
+      }
+    },
+    {
+      "code": "VISUAL_DIFF_SKIPPED",
+      "params": {
+        "reason": "PDFium library not found or not loadable: R:\\bin\\pdfium.dll (not found); R:\\pdfium.dll (not found)"
+      },
+      "severity": "info",
+      "text": {
+        "en": {
+          "does_not_prove": "It does not show that the revisions look the same or differ; the structural analysis of the revisions is unaffected.",
+          "shows": "The page-by-page visual comparison of the revisions could not be made: PDFium library not found or not loadable: R:\\bin\\pdfium.dll (not found); R:\\pdfium.dll (not found).",
+          "title": "Visual comparison not performed"
+        },
+        "es": {
+          "does_not_prove": "No demuestra que las revisiones se vean iguales ni distintas; el análisis estructural de las revisiones no se ve afectado.",
+          "shows": "No se pudo hacer la comparación visual página por página de las revisiones: PDFium library not found or not loadable: R:\\bin\\pdfium.dll (not found); R:\\pdfium.dll (not found).",
+          "title": "Comparación visual no realizada"
+        },
+        "fr": {
+          "does_not_prove": "Cela ne montre pas que les révisions sont identiques ou différentes à l'écran ; l'analyse structurelle des révisions n'est pas affectée.",
+          "shows": "La comparaison visuelle page par page des révisions n'a pas pu être faite : PDFium library not found or not loadable: R:\\bin\\pdfium.dll (not found); R:\\pdfium.dll (not found).",
+          "title": "Comparaison visuelle non effectuée"
+        }
+      }
+    }
+  ],
+  "fingerprint": {
+    "algorithm": "sha256",
+    "value": "2ada8845654ce455968242d3aa211e26339943fa82cb69e07f610915485d93b0"
+  },
+  "history": {
+    "last_change_after_s": 777600,
+    "saves": 3,
+    "text": {
+      "en": "The document was saved 3 times; the last change was made 9 days after creation. This information comes from the document itself and is not proof on its own.",
+      "es": "El documento se guardó 3 veces; el último cambio se hizo 9 días después de su creación. Esta información proviene del propio documento y no es una prueba por sí sola.",
+      "fr": "Le document a été enregistré 3 fois ; la dernière modification a été faite 9 jours après sa création. Ces informations proviennent du document lui-même et ne constituent pas une preuve à elles seules."
+    },
+    "tool_category": null,
+    "tool_label": null
+  },
+  "item": {
+    "evidence_id": "E0004",
+    "file_name": "edited-incremental.pdf",
+    "index": 1
+  },
+  "run_id": "20261117T135627Z-939b2f",
+  "schema": "rakvor.item-summary/1",
+  "status": "attention",
+  "text": {
+    "en": {
+      "next_step": "Review the findings below with your examiner before relying on this file.",
+      "status": "Needs attention",
+      "summary": "The file was hashed and checked. Some points need attention."
+    },
+    "es": {
+      "next_step": "Revise los hallazgos con su perito antes de apoyarse en este archivo.",
+      "status": "Requiere atención",
+      "summary": "Se calculó el hash del archivo y se revisó. Algunos puntos requieren atención."
+    },
+    "fr": {
+      "next_step": "Examinez les constatations avec votre expert avant de vous appuyer sur ce fichier.",
+      "status": "À examiner",
+      "summary": "Le fichier a été haché et vérifié. Certains points méritent attention."
+    }
+  }
+}

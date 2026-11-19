@@ -1,0 +1,52 @@
+{
+  "format": "webp",
+  "heif": null,
+  "height": 480,
+  "jpeg": null,
+  "png": null,
+  "structure": [
+    {
+      "children": [],
+      "detail": {
+        "riff_size": "8286"
+      },
+      "kind": "RIFF header",
+      "length": 12,
+      "offset": 0
+    },
+    {
+      "children": [],
+      "detail": {
+        "canvas": "640x480",
+        "flags": "0x08"
+      },
+      "kind": "VP8X",
+      "length": 18,
+      "offset": 12
+    },
+    {
+      "children": [],
+      "detail": {
+        "height": "480",
+        "width": "640"
+      },
+      "kind": "VP8",
+      "length": 8264,
+      "offset": 30
+    }
+  ],
+  "webp": {
+    "chunks": [
+      "VP8X",
+      "VP8"
+    ],
+    "flags": [
+      "EXIF"
+    ],
+    "height": 480,
+    "kind": "VP8X",
+    "lossless": false,
+    "width": 640
+  },
+  "width": 640
+}

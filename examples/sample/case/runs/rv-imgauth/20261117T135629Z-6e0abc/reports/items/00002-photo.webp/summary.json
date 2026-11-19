@@ -1,0 +1,53 @@
+{
+  "case_id": "RV-REPORT-SAMPLE",
+  "findings": [
+    {
+      "code": "WEBP_FLAGS_MISMATCH",
+      "params": {
+        "problems": "the EXIF flag is set but there is no EXIF chunk"
+      },
+      "severity": "medium",
+      "text": {
+        "en": {
+          "does_not_prove": "It shows the file was rewritten or assembled by a tool that did not update the header; it does not show what changed in the picture.",
+          "shows": "The WebP extended header and the chunks disagree: the EXIF flag is set but there is no EXIF chunk.",
+          "title": "WebP header does not match its content"
+        }
+      }
+    },
+    {
+      "code": "PIXELS_NOT_DECODED",
+      "params": {
+        "format": "webp",
+        "reason": "WebP: An expected chunk was missing"
+      },
+      "severity": "low",
+      "text": {
+        "en": {
+          "does_not_prove": "Damaged files, unusual but valid encoder choices and decoder limits all cause this; it does not show that the file was altered, and the analyses that did not run say nothing either way.",
+          "shows": "The webp decoder refused the image data (WebP: An expected chunk was missing), so no preview, map, copy-move search or thumbnail comparison was made for this file. Structure, metadata and tables were still examined.",
+          "title": "Pixels could not be decoded"
+        }
+      }
+    }
+  ],
+  "fingerprint": {
+    "algorithm": "sha256",
+    "value": "68a1b049108b5f459446a6c6a203b363a68bd123c7d91f0cba7f538cc206238d"
+  },
+  "item": {
+    "evidence_id": "E0002",
+    "file_name": "photo.webp",
+    "index": 2
+  },
+  "run_id": "20261117T135629Z-6e0abc",
+  "schema": "rakvor.item-summary/1",
+  "status": "attention",
+  "text": {
+    "en": {
+      "next_step": "Review the findings below with your examiner before relying on this file.",
+      "status": "Needs attention",
+      "summary": "The file was hashed and checked. Some points need attention."
+    }
+  }
+}

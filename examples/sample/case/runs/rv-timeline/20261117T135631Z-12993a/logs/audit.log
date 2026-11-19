@@ -1,0 +1,25 @@
+2026-11-17T13:56:31.016Z  #00001  run_started          algorithms=sha256+md5 case_dir=R:\case case_id=RV-REPORT-SAMPLE frontend=cli jurisdiction=co langs=en purpose=timeline sign_cert=null tool=rv-timeline tsa_url=null version=0.2.1
+2026-11-17T13:56:31.017Z  #00002  case_linked          case_created=false case_dir=R:\case case_id=RV-REPORT-SAMPLE case_log_head_at_start=214191af0cd989c5f2eabd25d11b344490828c2bfb343f151e72d39ffccd0847 case_log_seq_at_start=9 jurisdiction=co registry_items=4 registry_sha256=d9a22c5ec0dcf8bf5ab3da0e424c368f02d50f37827cd3799ba57e978592b209 requested_jurisdiction=co role=analysis run_dir=runs/rv-timeline/20261117T135631Z-12993a
+2026-11-17T13:56:31.018Z  #00003  environment_recorded environment.json  md5=2e1a8122479a2fcbe08ff81a7d274f48 sha256=2d3c93687f25d7a982619d6c10162a2f74fed80e062e7fdef33992edfe236647
+2026-11-17T13:56:31.021Z  #00004  runs_discovered      count=4 runs={"run_dir":"runs/rv-hashinv/20261117T135624Z-e74fa7","run_id":"20261117T135624Z-e74fa7","tool":"rv-hashinv","version":"0.4.1"}+{"run_dir":"runs/rv-imgauth/20261117T135629Z-6e0abc","run_id":"20261117T135629Z-6e0abc","tool":"rv-imgauth","version":"0.3.1"}+{"run_dir":"runs/rv-pdfauth/20261117T135627Z-939b2f","run_id":"20261117T135627Z-939b2f","tool":"rv-pdfauth","version":"0.4.1"}+{"run_dir":"runs/rv-timeline/20261117T135631Z-12993a","run_id":"20261117T135631Z-12993a","tool":"rv-timeline","version":"0.2.1"}
+2026-11-17T13:56:31.027Z  #00005  run_verified         runs/rv-hashinv/20261117T135624Z-e74fa7  run_dir=runs/rv-hashinv/20261117T135624Z-e74fa7 run_id=20261117T135624Z-e74fa7 tool=rv-hashinv version=0.4.1
+2026-11-17T13:56:31.031Z  #00006  run_read             runs/rv-hashinv/20261117T135624Z-e74fa7  events_kept=10 events_outside_filters=0 events_read=10 run_dir=runs/rv-hashinv/20261117T135624Z-e74fa7 run_id=20261117T135624Z-e74fa7 times_skipped=0 tool=rv-hashinv version=0.4.1
+2026-11-17T13:56:31.038Z  #00007  run_verified         runs/rv-imgauth/20261117T135629Z-6e0abc  run_dir=runs/rv-imgauth/20261117T135629Z-6e0abc run_id=20261117T135629Z-6e0abc tool=rv-imgauth version=0.3.1
+2026-11-17T13:56:31.041Z  #00008  run_read             runs/rv-imgauth/20261117T135629Z-6e0abc  events_kept=11 events_outside_filters=0 events_read=11 run_dir=runs/rv-imgauth/20261117T135629Z-6e0abc run_id=20261117T135629Z-6e0abc times_skipped=0 tool=rv-imgauth version=0.3.1
+2026-11-17T13:56:31.045Z  #00009  run_verified         runs/rv-pdfauth/20261117T135627Z-939b2f  run_dir=runs/rv-pdfauth/20261117T135627Z-939b2f run_id=20261117T135627Z-939b2f tool=rv-pdfauth version=0.4.1
+2026-11-17T13:56:31.047Z  #00010  run_read             runs/rv-pdfauth/20261117T135627Z-939b2f  events_kept=9 events_outside_filters=0 events_read=9 run_dir=runs/rv-pdfauth/20261117T135627Z-939b2f run_id=20261117T135627Z-939b2f times_skipped=0 tool=rv-pdfauth version=0.4.1
+2026-11-17T13:56:31.048Z  #00011  run_skipped          runs/rv-timeline/20261117T135631Z-12993a  reason=self run_dir=runs/rv-timeline/20261117T135631Z-12993a run_id=20261117T135631Z-12993a tool=rv-timeline version=0.2.1
+2026-11-17T13:56:31.048Z  #00012  events_ordered       events=30 order=utc_s, utc_ns, id sort=memory spilled_chunks=0 threshold=250000
+2026-11-17T13:56:31.055Z  #00013  timeline_written     timeline.jsonl  display_zone=UTC folder=reports format=timesketch-jsonl lines=30
+2026-11-17T13:56:31.081Z  #00014  hash_register_written hashes.csv  md5=b287ca96b37d526f8c2666e3d72b9f1d rows=41 sha256=b1fe5b47cfff2cff7fb58b2be92f1b88a2fe6f700c72a0bc8b960bdad5ac5a90
+2026-11-17T13:56:31.082Z  #00015  signals_computed     clock_skew_s=300 count=0 zone_unknown_events=0
+2026-11-17T13:56:31.082Z  #00016  item_timeline        R:\evidence\images\edited-gimp.jpg  events=10 events_listed=10 evidence_id=E0001 index=1 signals= tools=rv-hashinv+rv-imgauth
+2026-11-17T13:56:31.082Z  #00017  item_timeline        R:\evidence\images\photo.webp  events=3 events_listed=3 evidence_id=E0002 index=2 signals= tools=rv-hashinv+rv-imgauth
+2026-11-17T13:56:31.082Z  #00018  item_timeline        R:\evidence\notes\acta.txt  events=2 events_listed=2 evidence_id=E0003 index=3 signals= tools=rv-hashinv
+2026-11-17T13:56:31.083Z  #00019  item_timeline        R:\evidence\pdf\edited-incremental.pdf  events=9 events_listed=9 evidence_id=E0004 index=4 signals= tools=rv-hashinv+rv-pdfauth
+2026-11-17T13:56:31.097Z  #00020  item_reports_written R:\evidence\images\edited-gimp.jpg  folder=items/00001-edited-gimp.jpg
+2026-11-17T13:56:31.107Z  #00021  item_reports_written R:\evidence\images\photo.webp  folder=items/00002-photo.webp
+2026-11-17T13:56:31.114Z  #00022  item_reports_written R:\evidence\notes\acta.txt  folder=items/00003-acta.txt
+2026-11-17T13:56:31.126Z  #00023  item_reports_written R:\evidence\pdf\edited-incremental.pdf  folder=items/00004-edited-incremental.pdf
+2026-11-17T13:56:31.130Z  #00024  statistics_report_written 
+2026-11-17T13:56:31.131Z  #00025  run_finished         cancelled=false elapsed_ms=115 events=30 high=0 info=0 items=4 low=0 max_events_reached=false medium=0 runs_excluded=0 runs_verified=3 signals=0

@@ -1,16 +1,15 @@
-<!--
-  Template note for the docs agent of a tool scaffolded from rv-report: the legal frameworks (sections 4–7), the
-  verification marks, the shared gaps and the shared checklist steps apply to every Rakvor tool — keep them and
-  re-check each "How the tool meets it" cell against the new code. Rewrite the parts between forge:domain markers
-  (tool-specific features, gaps and checklist steps). Never upgrade a "to be verified" mark without a source.
--->
-
 # Admissibility and reliability
 
 > **Not legal advice.** This page maps legal and technical requirements to what RV Report actually does, so that
 > an examiner, a lawyer or an opposing expert can see where the tool helps and where it does not. It was prepared
 > from a sourced research note dated 2026-10-21 (pass 2: verification) and **must be reviewed by counsel in each jurisdiction before it is
 > relied on or quoted**. Status: draft for counsel review.
+>
+> **RV Report assembles an expert report.** Its output is not a measurement of the evidence but a document an
+> expert files: a *dictamen pericial* (Colombia) or a *rapport d'expertise* (France). The structure it prints and
+> **every legal reference in it are marked "to be verified"** (in the report itself: *[to be verified]*,
+> *[a verificar]*, *[à vérifier]*) until counsel has reviewed them. Section 3b maps the report's sections to the
+> legal elements; no mark there was upgraded beyond the research note.
 
 ## Contents
 
@@ -63,19 +62,19 @@ PRIS content.
 
 | Key | Feature | Where it is implemented (file / command) |
 | --- | --- | --- |
-| F1 | Read-only evidence access (software level), one sequential read per file | `File::open` in [src/core/src/run.rs](../src/core/src/run.rs); `mtime_unchanged` in `item_hashed`; symbolic links never followed ([src/core/src/input.rs](../src/core/src/input.rs)) |
-| F2 | Hashing with 1 or 2 algorithms (md5, sha1, sha256, sha512, sha3-256, blake3) in one read | [src/core/src/hash.rs](../src/core/src/hash.rs); `scan --hash`; `logs/<RUN-ID>/hashes.csv` |
+| F1 | The evidence is never opened: only the case folder's records and the tool runs' recorded outputs are read; links leading out of the case are refused | [src/core/src/sources.rs](../src/core/src/sources.rs); [case-folder.md](case-folder.md) |
+| F2 | Hashing with 1 or 2 algorithms of every file read (`hashes.csv`) and every file written (audit log) | [src/core/src/hash.rs](../src/core/src/hash.rs); `assemble --hash`; `logs/hashes.csv` |
 | F3 | SHA-256 hash-chained audit log + independent verifier | [src/core/src/audit.rs](../src/core/src/audit.rs); `rv-report verify-log`; [tests/verify_chain.py](../tests/verify_chain.py) |
 | F4 | `environment.json`: tool, compiler and dependency versions, OS, host, user, command line | [src/core/src/env.rs](../src/core/src/env.rs), [src/core/build.rs](../src/core/build.rs) |
 | F5 | RFC 3161 timestamp of the audit chain head | [src/core/src/trust.rs](../src/core/src/trust.rs); `--tsa-url`, `--no-timestamp`, `rv-report timestamp` |
 | F6 | PDF reports signed with the examiner's own certificate (CMS, `adbe.pkcs7.detached`) | `--sign-cert`; `PdfSigner` in [src/core/src/trust.rs](../src/core/src/trust.rs); [src/core/src/report/pdf.rs](../src/core/src/report/pdf.rs) |
 | F7 | Per-item chain-of-custody form: Colombia (Fiscalía style) or France (scellés), plus English | `--jurisdiction co` or `fr`; `custody.json/.html/.pdf`; [templates/custody.html](../templates/custody.html); [schemas/item-custody.schema.json](../schemas/item-custody.schema.json) |
-| F8 | Findings state what they show **and** what they do not prove; observations only | [i18n/en.json](../i18n/en.json) (`findings`), es/fr; [src/core/src/analyzer.rs](../src/core/src/analyzer.rs) |
-| F9 | Declared limitations, printed in every report | `LIMITATIONS` in [src/core/src/report/mod.rs](../src/core/src/report/mod.rs); [i18n/en.json](../i18n/en.json) (`limitations`) |
+| F8 | Findings quoted verbatim from each tool's own report, with what they show **and** what they do not prove; RV Report's own signals concern the record only | [src/core/src/assemble.rs](../src/core/src/assemble.rs); [i18n/en.json](../i18n/en.json) (`findings`), es/fr |
+| F9 | Limitations: every quoted tool's printed limitations plus RV Report's own, in every report | `OWN_LIMITATIONS` in [src/core/src/assemble.rs](../src/core/src/assemble.rs); [i18n/en.json](../i18n/en.json) (`limitations`) |
 | F10 | Known-answer self-test (hash algorithms only) | `rv-report self-test` |
-| F11 | Synthetic sample evidence with expected results | [examples/sample/](../examples/README.md): 3 files, `expected_hashes.csv` (Python `hashlib`/`blake3`), expected summary |
+| F11 | Synthetic sample case written by the released Rakvor tools, with expected results | [examples/sample/](../examples/README.md): 4 synthetic files, the case folder, `expected_hashes.csv` (Python `hashlib`/`blake3`) |
 | F12 | Test oracles (independent implementations) | [tests/verify_chain.py](../tests/verify_chain.py) re-checks the chain, re-hashes the evidence and every output the audit log records with Python (in CI); [tests/validate_reports.py](../tests/validate_reports.py) JSON Schemas (in CI); pyHanko's validator on every signed PDF ([tests/validate_pdf_signature.py](../tests/validate_pdf_signature.py), in CI); OpenSSL for timestamps (manual); the Python profile of this tool: a committed case folder it wrote is verified in CI ([tests/golden/](../tests/golden/regenerate.py)), and the live cross-profile test (case folders and item numbering) runs with `RV_CROSS_PROJECT` |
-| F13 | Robustness tests | cancel, unreadable input, missing input, three algorithms, edited/deleted/re-ordered log, tampered case log and registry, lock contention ([src/core/src/run.rs](../src/core/src/run.rs), [src/core/src/case.rs](../src/core/src/case.rs), [src/cli/tests/cli.rs](../src/cli/tests/cli.rs)); no fuzzing |
+| F13 | Robustness tests | tampered runs (edited output, edited audit entry, missing `run_finished`) excluded and never quoted, broken case refused, edited outputs detected, bad options and mandate files refused ([src/cli/tests/cli.rs](../src/cli/tests/cli.rs), [src/core/src/case.rs](../src/core/src/case.rs)); no fuzzing |
 | F14 | CI on Windows and Linux | [.github/workflows/ci.yml](../.github/workflows/ci.yml) |
 | F15 | SBOM and build provenance | [.github/workflows/release.yml](../.github/workflows/release.yml) (CycloneDX, `actions/attest-build-provenance`) |
 | F16 | Versioned releases with `SHA256SUMS`; pinned toolchain | [.github/workflows/release.yml](../.github/workflows/release.yml); [rust-toolchain.toml](../rust-toolchain.toml); [installation.md](installation.md#2-verify-the-download) |
@@ -83,9 +82,16 @@ PRIS content.
 | F18 | Shared case folder: evidence registry, hash-chained case log, cross-linked run chains, `verify-case` | [src/core/src/case.rs](../src/core/src/case.rs); `--case-dir`, `--evidence`, `rv-report verify-case`; [case-folder.md](case-folder.md) |
 
 <!-- forge:domain -->
-Domain features named below: **type detection by magic bytes** (15 signatures, `EXTENSION_MISMATCH`,
-`EXECUTABLE_CONTENT`), **duplicate detection** by primary digest, and the **intake role**: this tool writes the
-case registry that every later tool verifies against ([theory.md B4–B5, B7](theory.md#b4-type-detection-by-magic-bytes-and-extension-mismatch)).
+Domain features named below:
+
+| Key | Feature | Where |
+| --- | --- | --- |
+| F19 | **Verify before quote**: each run's chain, completion, case-log anchor, timestamp tokens and every recorded output are checked; a failing run is excluded (annex + `RUN_EXCLUDED`) and never quoted | [sources.rs](../src/core/src/sources.rs) `verify_run`; [theory.md B2](theory.md#b2-run-verification) |
+| F20 | **Verbatim quoting** with the source file, its SHA-256 and the JSON pointer; missing languages shown in the tool's own language, marked, never translated | [assemble.rs](../src/core/src/assemble.rs), [report/expert.rs](../src/core/src/report/expert.rs) |
+| F21 | **Custody rows** from the case log (registration) and from the verified runs' registry comparisons | [assemble.rs](../src/core/src/assemble.rs) |
+| F22 | **What was not examined**: registered items no verified analysis run examined | [assemble.rs](../src/core/src/assemble.rs) |
+| F23 | **Draft until `--final`** (audited `report_marked_final`); no conclusion written by the tool | [run.rs](../src/core/src/run.rs) `run_assemble`; [ADR 0002](adr/0002-scope.md) |
+| F24 | Mandate quoted verbatim, its SHA-256 audited | `--mandate`; [assemble.rs](../src/core/src/assemble.rs) `read_mandate` |
 <!-- /forge:domain -->
 
 ## 2. Evidence lifecycle and where each control sits
@@ -140,13 +146,48 @@ Daubert/Kumho (to be verified) give the vocabulary opposing experts use.
 | Factor | What the tool offers (evidence an examiner can show) | Status |
 | --- | --- | --- |
 | **Testability** — can the method be tested? | Deterministic digests and findings ([theory.md B11](theory.md#b11-determinism-and-repeatability)); sample with independently computed digests (F11); unit and integration tests on Windows and Linux (F14); tamper tests for both chains (F13); every digest can be re-computed with any standard utility (`sha256sum`, `Get-FileHash`) | met |
-| **Known or potential error rate, and limits** | Digests: published algorithms with known-answer tests (F10) and an independent re-computation in CI (F12). Type detection: every finding states what it does not prove (F8); 4 limitations in every report (F9); signature table and decision rule published ([theory.md B4](theory.md#b4-type-detection-by-magic-bytes-and-extension-mismatch)). **No measured false-positive / false-negative rates** for type detection (G5) | partial |
+| **Known or potential error rate, and limits** | Digests: published algorithms with known-answer tests (F10) and an independent re-computation in CI (F12). The assembly is deterministic over verified inputs and quotes verbatim (F19, F20); every quoted finding states what it does not prove (F8); every tool's limitations plus RV Report's own in every report (F9). **No measured error rates** for the quoted tools' findings (G5, G-RP2) | partial |
 | **Peer review / independent oracles** | Source auditable (F17); Python re-implementation of the chain and of the hashing (F12, in CI); pyHanko validation of every signed PDF (in CI); Python profile of the whole tool (identical findings and item numbering measured on the sample; its case folders verified in CI); OpenSSL for timestamps (manual). No publication or external review (G7) | partial |
 | **Standards controlling the operation** | FIPS 180-4/202, RFC 1321 for digests; RFC 3161, RFC 5652 for timestamps and signatures; ISO/IEC 27037 principles ([section 6.1](#61-isoiec-270372012--identification-collection-acquisition-and-preservation-of-digital-evidence)); release verification ([installation.md](installation.md)); examiner checklist (below). No enforced hash policy (G11); no formal SOP signed by the firm | partial |
 | **General acceptance** | Cryptographic hashing of evidence and file-signature identification are standard forensic practice; digests agree with standard utilities and with Python `hashlib` (F12) | met |
 | **Validation for intended use** (ISO/IEC 17025 §7.2.2 [V]; 27041 — to be verified) | Inputs exist (F10–F14) but there is **no per-release validation report** with plan, acceptance criteria, results and sign-off (G6) | gap |
 | **Verification by the user** before casework (17025 §7.2.1 [V]; 27041 — to be verified) | `self-test` + sample run with known expected summary ([installation.md](installation.md#6-first-run-self-test-and-sample)) | met |
 | **Reliable application in this case** (FRE 702(d), 2023 — [V]) | Every step of the run in the audit chain (F3), environment pinned (F4), case-folder cross-links (F18), timestamp (F5), signed report (F6) | met |
+
+## 3b. The report's structure per jurisdiction (to be verified)
+
+The structure below is the building agent's reading of the suite's research notes, recorded in
+[ADR 0002](adr/0002-scope.md). **Every reference is to be verified**; the report prints them with that mark.
+
+```mermaid
+flowchart LR
+    M["model (expert-report.json)"] --> CO["CO: dictamen pericial<br/>10 sections"]
+    M --> FR["FR: rapport d'expertise<br/>9 sections"]
+    CO --> X["examiner reviews,<br/>writes the opinion, signs"]
+    FR --> X
+```
+
+| CO section (Ley 906 de 2004) | Legal element printed [to be verified] | Filled from |
+| --- | --- | --- |
+| 1 Identification | arts. 405–423 (expert evidence); art. 413 (party reports; *idoneidad*) | case.json, `--actor`, `--examiner-id`, case-log verification |
+| 2 Object | art. 415 (basis of the opinion, summary report) | `--mandate` (verbatim) |
+| 3 EMP/EF and custody | arts. 254–266 (chain of custody) | registry, case log, verified runs' registry comparisons |
+| 4 Methods, techniques, instruments | art. 417 (instruments, principles, methods) | runs' audit logs, case log, RV Report's tool descriptions |
+| 5 Results | art. 415 | verified `technical.json` (verbatim) |
+| 6 Timeline | — | latest verified RV Timeline `statistics.json` |
+| 7 Limitations | art. 417 | runs' `statistics.json` + printed HTML |
+| 8 Not examined | — | registry minus verified analysis runs |
+| 9 Annexes | art. 414 (admissibility of the report) | every run: status, audit head, timestamp, outputs verified |
+| 10 Declaration | art. 415; CGP art. 226 (civil) | blank: the examiner writes it |
+
+| FR section (CPP) | Legal element printed [to be verified] | Filled from |
+| --- | --- | --- |
+| 1 Mission | arts. 156, 158 (technical question), 157 and 160 (lists, oath) | case, examiner, `--mandate` |
+| 2 Scellés reçus | art. 163 (opening and re-sealing mentioned) | registry, case log, verified runs |
+| 3 Description des opérations | art. 166 (operations described) | runs' audit logs, tool descriptions |
+| 4 Constatations | art. 166 | verified `technical.json` (verbatim) |
+| 5–8 | — | as CO 6–9 |
+| 9 Conclusions et attestation | arts. 166, 167 | blank: the expert writes and signs |
 
 ## 4. Colombia
 
@@ -175,7 +216,7 @@ normograma mirror (arts. 366–453).
 | CO-P13 | Summary report disclosed ≥ 5 days before the hearing; inadmissible if the perito does not testify | Art. 415 [V] | F6 produces the report | examiner |
 | CO-P14 | Perito examined on instruments, principles, methods, and "corroboración … por otros expertos" | Art. 417 [V] | F4, F9, F12, F17; [theory.md](theory.md); validation dossier missing (G6) | partial |
 | CO-P15 | Court weighs competence, acceptance of principles, instruments, consistency | Art. 420 [V] | F12, F16, F17; hashing is generally accepted; type-detection error rates not measured (G5) | partial |
-| CO-P16 | Novel technique meets ≥ 1: verifiable; published and peer-reviewed; "se haya acreditado el nivel de confiabilidad"; academic acceptance | Art. 422 [V] | Hashing and file-signature identification are not novel; verifiable: F10, F11, F12 (criterion 1 met); reliability level of type detection not measured (G5) | partial |
+| CO-P16 | Novel technique meets ≥ 1: verifiable; published and peer-reviewed; "se haya acreditado el nivel de confiabilidad"; academic acceptance | Art. 422 [V] | Assembling verified records is not novel; verifiable: F10, F11, F12, F19 (criterion 1 met); reliability of the quoted findings rests on each tool (G5, G-RP2) | partial |
 | CO-P17 | Peritos have access to the EMP referred to in reports (enables opposing review) | Art. 416 [V] | F17 auditable source; F11 samples; F16 exact release; F18 registry with every digest | met |
 | CO-P18 | Data messages are documents; authenticated by certification of a digital-signature entity or "informe de experto" | Art. 424 #7, art. 426 [V] | F6 (expert report) with F2/F3 integrity evidence | met (expert route) |
 | CO-P19 | Documentary appraisal: "Que no haya sido alterado en su forma ni en su contenido" | Art. 432 #1 [V] | F2, F3, F18: no change **from intake onward**; earlier changes are outside this tool (F9) | met (from intake) |
@@ -473,7 +514,7 @@ Mitigation Analysis v2.0 (2018-11-20). **NIST CFTT** [V]: hashing and PDF analys
 | US-10 | Self-authentication of copied data "authenticated by a process of digital identification" via a qualified person's certification | FRE 902(14) [V]; 2017 note [S] | F2, F18; **no certification template** in the reports | partial (add template) |
 | US-11 | Self-authentication of records generated by an electronic process via certification | FRE 902(13) [V] | F6, F3; no certification template | partial (add template) |
 | US-12 | Test before casework and re-test at every revision, preferably by a tester independent of the developer, on a dataset other than the development one; record scope, tester, date, procedure, datasets with expected results, anomalies, limitations | SWGDE 18-Q-001-2.1 §4, §5.1.3, §5.6, §6, App. A [V]; NIST CFTT methodology [V] | F10, F11 (known dataset), F12 (comparison), F13, F14, F16. Missing: a §6-style test record per release, independent tester, separate test dataset | partial (G6) |
-| US-13 | Hash choice: SWGDE finds MD5 and SHA-1 appropriate for integrity verification if the hash is securely recorded, recommends that "all users transition to SHA2 and SHA3", and requires SHA-2/SHA-3 to identify files without inspection; BLAKE3 is not NIST-approved | SWGDE 12-f-002 v1.0 [V]; NIST FIPS 180-4 / 202 — **to be verified** | F2 (default sha256; no enforced policy); duplicates use the first algorithm | partial (G11) |
+| US-13 | Hash choice: SWGDE finds MD5 and SHA-1 appropriate for integrity verification if the hash is securely recorded, recommends that "all users transition to SHA2 and SHA3", and requires SHA-2/SHA-3 to identify files without inspection; BLAKE3 is not NIST-approved | SWGDE 12-f-002 v1.0 [V]; NIST FIPS 180-4 / 202 — **to be verified** | F2 (default sha256; no enforced policy) | partial (G11) |
 | UK-1 | Methods fit for purpose and validated before implementation (DIG 100) | FSR Code v2 §24.1.1, §24.3.1, §24.3.7 [V]; Table 1 DIG 100 [V] | F10–F16 | gap (G1, G6) if UK work is in scope |
 
 ## Consolidated gap list
@@ -509,13 +550,16 @@ Rakvor management.
 | G25 | Cross-profile reproducibility of item numbering — **closed**: both profiles sort items by the normalised path, bytewise (UTF-8); the cross-profile test compares the numbering, and CI verifies a case folder written by the Python profile ([tests/golden/](../tests/golden/regenerate.py)) without the other repository; kept for numbering | — | — | — | — |
 
 <!-- forge:domain -->
-Gaps specific to this tool's domain (inventory and type detection):
+Gaps specific to this tool's domain (assembling an expert report):
 
-| ID | Gap | Affected | Mitigation now | Remedy | Owner |
+| # | Gap | Rows | Mitigation now | Fix | Owner |
 | --- | --- | --- | --- | --- | --- |
-| G5 | Unknown error rates and coverage of type detection (15 signatures; 2-byte `MZ` and GZIP magics; containers typed by their outer format) | CO-P15, CO-P16, CO-J8, ISO-17, US-6 | Present type findings as observations; confirm executables with a PE/ELF parser and mismatches with a format-aware tool | Labelled corpus; publish FP/FN rates per signature and release; extend the table | Eng. |
-| G23 | Files without an extension, or with an extension unknown to the table, are never compared (a program named `invoice` gives no finding) | CO-P15, ISO-4 | Review the `detected_type` column of the statistics report for executables regardless of findings | Flag executables whatever the extension | Eng. |
-| G26 | Sample scripts checking the tool's output — **closed**: `run.sh` and `run.ps1` compare the tool's `hashes.csv` (size, SHA-256, MD5) with `expected_hashes.csv` and fail on any difference; kept for numbering | — | — | — | — |
+| G-RP1 | The report structures (CO arts. 413–417, CGP 226; FR CPP 156–169) and every citation are unverified readings of the research notes | CO-P8–P10, CO-C1–C2, FR-P3–P7 | Every reference printed "to be verified"; the examiner checks the structure against the order and local practice | Counsel review per jurisdiction; then upgrade marks with sources | Counsel |
+| G-RP2 | Derived content: a quoted finding is only as reliable as the tool that made it; RV Report adds no validation of its own | CO-P10, US-6 | Limitation `REPORT_DERIVED_CONTENT`; each tool's own validation documents | Per-tool validation records (G6) | Eng. |
+| G-RP3 | Missing languages are shown in the tool's language, not translated | CO-P9, FR-P6 | Re-run the tool with the court's `--lang` before filing (`TRANSLATION_UNAVAILABLE`) | — | Examiner |
+| G-RP4 | Tool descriptions in the method section are RV Report's summary, not the tools' own `describe` output (which has no description) | CO-P10 | Labelled as such; cite each tool's documentation | Add a description field to `describe --json` suite-wide | Eng. |
+| G-RP5 | Physical custody (seals, transfers on paper, signatures) is not in the digital record | CO-P2, FR-P5 | The report says so; official forms alongside | — | Examiner |
+| G5 | Error rates of the quoted tools are not measured (inherited) | CO-P15, US-6 | Findings presented as signals | Per-tool corpora | Eng. |
 <!-- /forge:domain -->
 
 ## Examiner checklist before filing a report
@@ -564,12 +608,12 @@ Gaps specific to this tool's domain (inventory and type detection):
     G14).
 
 <!-- forge:domain -->
-Domain steps for this tool:
-
-18. **Every `UNREADABLE` item** was re-acquired or explained; unreadable items are not registered in the case.
-19. **Every `EXECUTABLE_CONTENT`** was confirmed with a PE/ELF parser and handled as potentially hostile; every
-    `EXTENSION_MISMATCH` relied on was confirmed by opening the file with a suitable tool.
-20. **Duplicates** relied on were computed with SHA-256 (or stronger) as the primary algorithm.
+12. **Every run is verified**: the annex lists no excluded run (or each exclusion is explained and the run repeated
+    on a verified copy); the report's run count matches `verify-case`.
+13. **Languages**: no `TRANSLATION_UNAVAILABLE` for the filing language (re-run the tools with that `--lang`).
+14. **What was not examined** is consistent with the mandate; nothing outside it is concluded.
+15. **Structure and citations** reviewed by counsel; "to be verified" marks resolved or kept.
+16. **Opinion and declaration** written by the examiner; the final assembly made with `--final` and `--sign-cert`.
 <!-- /forge:domain -->
 
 ## Sources

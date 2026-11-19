@@ -159,9 +159,9 @@ Unattended:
 .\rv-report-0.1.0-windows-x64-setup.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /TASKS="addtopath"
 ```
 
-The installer copies the executables, README, LICENSE, NOTICE, CHANGELOG, `docs\` and the sample evidence
-(`examples\sample\evidence\`), not the sample scripts or `expected_hashes.csv` (those are in the zip and the source
-tree).
+The installer copies the executables, README, LICENSE, NOTICE, CHANGELOG, `docs\`, the sample case
+(`examples\sample\case\`, with every run's logs and reports) and its evidence, not the sample scripts (those are in
+the zip and the source tree).
 
 <!-- forge:domain -->
 ### 5c. Native libraries
@@ -180,37 +180,29 @@ rv-report self-test
 
 `self-test` prints `PASS` for md5, sha1, sha256, sha512, sha3-256 and blake3 (known answers for `"abc"`), exit code
 0. It tests the hash implementations only. Then run the synthetic sample, which exercises type detection,
-duplicates, reports and the audit chain:
+verification of every run, quoting, reports and the audit chain:
 
 ```powershell
-# portable zip (script included): self-test, sample scan, verify-log, hashes.csv vs expected_hashes.csv
+# portable zip (script included): self-test, assemble on a copy of the sample case, verify-log, verify-case
 .\examples\sample\run.ps1 -Bin .\rv-report.exe
 
-# installer (no script installed): run it by hand into a temporary folder
+# installer (no script installed): copy the sample case, then assemble by hand
 $app = "$env:LOCALAPPDATA\Programs\Rakvor\RV Report"
-$out = Join-Path $env:TEMP "rv-report-check"
-rv-report scan -i "$app\examples\sample\evidence" --hash sha256,md5 --out $out --progress none --no-timestamp
+$case = Join-Path $env:TEMP "rv-report-check\case"
+Copy-Item -Recurse "$app\examples\sample\case" $case
+rv-report assemble --case-dir $case --lang es --progress none --no-timestamp
 $LASTEXITCODE                                  # 0
-rv-report verify-log (Get-ChildItem "$out\logs" | Select-Object -Last 1).FullName   # OK … chain intact
+rv-report verify-case $case                    # OK … runs verified
 ```
 
 <!-- forge:domain -->
-Expected summary: **3 items, 0 errors, findings high 0, medium 1, low 0, info 2**, exit code 0 (one
-`EXTENSION_MISMATCH` for `foto-vacaciones.jpg`, one `DUPLICATE` pair `acta.txt` / `acta-copia.txt`). The SHA-256
-column of `hashes.csv` must equal `examples\sample\expected_hashes.csv` (computed independently with Python):
-
-| File | Size | SHA-256 |
-| --- | --: | --- |
-| `acta-copia.txt` | 61 | `80e089ad6704c831e386b430adf92c5f5b72ec4428566d3580660e103c183c3c` |
-| `acta.txt` | 61 | `80e089ad6704c831e386b430adf92c5f5b72ec4428566d3580660e103c183c3c` |
-| `foto-vacaciones.jpg` | 112 | `42503ebb0f9892b30b72e11cfa0cbf5bcb5d60f667d611fa9598c9b4e835c643` |
-
-`run.ps1` / `run.sh` make this comparison themselves: they read the tool's `logs\<RUN-ID>\hashes.csv` and compare
-size, SHA-256 and MD5 of every file with `expected_hashes.csv`, print
-`hashes.csv matches expected_hashes.csv (3 files: size, SHA-256, MD5)` and exit 3 on any difference. For the
-installer (no script installed), compare the table above with `$out\logs\<RUN-ID>\hashes.csv`, or run
-`python tests\verify_chain.py <log folder>` from the source tree, which re-hashes every file of `hashes.csv` and every
-output the audit log records.
+Expected summary: **runs verified 4, excluded 0, skipped 1** (the assembly itself), **14 findings quoted**, signals
+**high 0, medium 0, low 1, info 3** with `--lang es` (E0003 `notes/acta.txt` not examined by any analysis tool; translations not
+available for the runs made in English only), exit code 0. The report is `<CASE>\runs\rv-report\<RUN-ID>\reports\
+expert-report.es.html` (and `.pdf`), marked as a draft. `run.ps1` / `run.sh` also check that `expert-report.json`
+is listed with its SHA-256 in the audit log and that `verify-log` and `verify-case` pass. The evidence the sample
+case was built from is in `examples\sample\evidence\`, with digests computed independently in
+`examples\sample\expected_hashes.csv`.
 <!-- /forge:domain -->
 
 Keep the console output and the run folder as the record of this verification.

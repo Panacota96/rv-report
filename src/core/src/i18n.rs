@@ -114,6 +114,24 @@ impl Catalog {
         (get("title"), get("shows"), get("does_not_prove"))
     }
 
+    /// Any string of the catalogue by dotted path (`expert.labels.case`); the path itself when absent.
+    pub fn text(&self, path: &str) -> String {
+        let mut cur = &self.data;
+        for part in path.split('.') {
+            cur = &cur[part];
+        }
+        cur.as_str().unwrap_or(path).to_string()
+    }
+
+    /// Whether the catalogue has a string at this dotted path.
+    pub fn has(&self, path: &str) -> bool {
+        let mut cur = &self.data;
+        for part in path.split('.') {
+            cur = &cur[part];
+        }
+        cur.is_string()
+    }
+
     pub fn limitation(&self, code: &str) -> String {
         self.data["limitations"][code]
             .as_str()

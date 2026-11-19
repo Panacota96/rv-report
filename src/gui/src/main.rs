@@ -28,7 +28,7 @@ fn main() -> eframe::Result {
         // Files or folders dropped on the .exe icon (or passed on the command line) are pre-loaded;
         // `--case-dir DIR` (RV Hub) presets the case folder.
         Box::new(|_cc| {
-            Ok(Box::new(rv_report_gui::app::HashInvApp::from_launch(
+            Ok(Box::new(rv_report_gui::app::ReportApp::from_launch(
                 rv_report_gui::launch::parse_launch_args(std::env::args_os().skip(1)),
             )))
         }),

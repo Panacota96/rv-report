@@ -1,0 +1,9 @@
+{
+  "description": "Executables that wrote examples/sample/case (released builds; SHA-256 of each executable).",
+  "tools": {
+    "rv-hashinv": {"version": "0.4.1", "exe_sha256": "da4e41eb77a4c2c1a488c3708a8d38f5fb146b2b2fb58289f1c1907b022c44db"},
+    "rv-pdfauth": {"version": "0.4.1", "exe_sha256": "79cf3d9e513a163ef8200273dd01bc07d8b8a786e9bc76ab4fa8354fdf1bbe10"},
+    "rv-imgauth": {"version": "0.3.1", "exe_sha256": "c0f7f1a8e6818687ff2c432e8b963af31d68b49356462805887d709b42d89ff9"},
+    "rv-timeline": {"version": "0.2.1", "exe_sha256": "b077542da3812cb3d470fe508f48a51021e47aa9a70fb21566986417400c2616"}
+  }
+}

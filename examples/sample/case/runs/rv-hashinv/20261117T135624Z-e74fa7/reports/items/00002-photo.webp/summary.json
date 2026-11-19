@@ -1,0 +1,23 @@
+{
+  "case_id": "RV-REPORT-SAMPLE",
+  "findings": [],
+  "fingerprint": {
+    "algorithm": "sha256",
+    "value": "68a1b049108b5f459446a6c6a203b363a68bd123c7d91f0cba7f538cc206238d"
+  },
+  "item": {
+    "evidence_id": "E0002",
+    "file_name": "photo.webp",
+    "index": 2
+  },
+  "run_id": "20261117T135624Z-e74fa7",
+  "schema": "rakvor.item-summary/1",
+  "status": "ok",
+  "text": {
+    "en": {
+      "next_step": "No action needed for this file.",
+      "status": "No issues found",
+      "summary": "The file was hashed and checked. The checks applied found no issues."
+    }
+  }
+}

@@ -5,6 +5,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Entries are generated from
 [Conventional Commits](https://www.conventionalcommits.org/) by release-please and reviewed by a human.
 
+## [0.3.1](https://github.com/Panacota96/rv-report/compare/v0.3.0...v0.3.1) (2026-11-24)
+
+
+### Performance Improvements
+
+* **verify:** stream the audit log instead of holding every entry ([#10](https://github.com/Panacota96/rv-report/issues/10)) ([914ec6d](https://github.com/Panacota96/rv-report/commit/914ec6d452ba2706ee19a32c45b28ce8b0a3605c))
+
 ## [0.3.0](https://github.com/Panacota96/rv-report/compare/v0.2.0...v0.3.0) (2026-11-21)
 
 

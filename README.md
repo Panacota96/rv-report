@@ -7,7 +7,7 @@
 <!-- /forge:description -->
 
 [![CI](https://github.com/Panacota96/rv-report/actions/workflows/ci.yml/badge.svg)](https://github.com/Panacota96/rv-report/actions/workflows/ci.yml)
-![License](https://img.shields.io/badge/license-Rakvor%20source--auditable-6B00FF)
+![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-6B00FF)
 ![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6)
 
 RV Report reads a Rakvor case folder, **verifies every tool run before using it** (audit chain, completion,
@@ -33,7 +33,8 @@ flowchart LR
 ## Contents
 
 - [What you get](#what-you-get) · [Install](#install) · [Quick start](#quick-start) · [Outputs](#outputs) ·
-  [Exit codes](#exit-codes) · [Documentation](#documentation) · [Project layout](#project-layout)
+  [Exit codes](#exit-codes) · [Documentation](#documentation) · [Project layout](#project-layout) ·
+  [Licence](#licence)
 
 ## What you get
 
@@ -126,4 +127,14 @@ rv-report/
 
 - How to contribute: [CONTRIBUTING.md](CONTRIBUTING.md) · Changes: [CHANGELOG.md](CHANGELOG.md)
 - Report a vulnerability privately: [SECURITY.md](SECURITY.md)
-- Rakvor Source-Auditable Licence ([LICENSE](LICENSE), draft pending legal review): used locally by Rakvor; customers, courts and their experts may inspect and rebuild the source for audit; no redistribution. Third-party notices: [NOTICE](NOTICE).
+- Licence: see [Licence](#licence). Third-party notices: [NOTICE](NOTICE).
+
+## Licence
+
+Source-available, non-commercial: [PolyForm Noncommercial 1.0.0](LICENSE). Anyone may use, study, change and share
+RV Report for non-commercial purposes. Credit is required in every use: "RV Report by Rakvor", and keep the
+`Required Notice:` line of [LICENSE](LICENSE). Commercial use (selling it, paid services, use in a for-profit
+business's paid work) needs a written licence from Rakvor: see [COMMERCIAL.md](COMMERCIAL.md). Rakvor keeps all
+commercial rights as the copyright owner. Rakvor's licensing texts ([COMMERCIAL.md](COMMERCIAL.md),
+[NOTICE](NOTICE), this section) are drafts, to be verified by counsel (Colombia, France), and are not legal advice.
+Third-party components keep their own licences: [NOTICE](NOTICE).

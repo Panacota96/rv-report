@@ -42,6 +42,7 @@ Source: "{#SourceDir}\target\release\rv-report.exe"; DestDir: "{app}"; Flags: ig
 Source: "{#SourceDir}\target\release\rv-report-gui.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourceDir}\README.md"; DestDir: "{app}"
 Source: "{#SourceDir}\LICENSE"; DestDir: "{app}"
+Source: "{#SourceDir}\COMMERCIAL.md"; DestDir: "{app}"
 Source: "{#SourceDir}\NOTICE"; DestDir: "{app}"
 Source: "{#SourceDir}\CHANGELOG.md"; DestDir: "{app}"
 Source: "{#SourceDir}\docs\*"; DestDir: "{app}\docs"; Flags: recursesubdirs
